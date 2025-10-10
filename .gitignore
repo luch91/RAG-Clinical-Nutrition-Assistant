@@ -6,3 +6,4 @@ machine_learning/models/
 data/
 logs/
 vectorstore/
+cache/
