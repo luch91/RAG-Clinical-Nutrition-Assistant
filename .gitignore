@@ -1,0 +1,8 @@
+.env
+/RAG_Nutrition_Chatbot.egg-info
+rag_env/
+__pycache__/
+machine_learning/models/
+data/
+logs/
+vectorstore/

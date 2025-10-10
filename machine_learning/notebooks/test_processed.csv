@@ -1,0 +1,821 @@
+id,query,label,complexity,recommended_llm,needs_followup,distractor_label,biomarkers,is_high_risk,has_biomarker
+2555,Recommend dietary changes for reducing phytate intake in athletes.,recommendation,2,Mistral,False,,['phytate'],False,True
+282,Diet plan for type 2 diabetes with HbA1c 8.5% and on metformin,therapy,5,Mistral,False,,['hba1c'],True,True
+667,How does vitamin D3 compare between fortified milk and egg yolks?,comparison,3,TinyLlama,True,,['vitamin d'],False,True
+487,How much magnesium should someone with muscle cramps consume daily?,recommendation,4,Mistral,True,,['magnesium'],False,True
+830,What carbohydrate intake is ideal for people with type 1 diabetes?,recommendation,4,Mistral,True,,[],False,False
+2349,Assess the phytate concentrations in wheat bread and maize flour based on the Food Composition Table.,comparison,5,TinyLlama,False,recommendation,['phytate'],False,True
+2190,What is the role of phytates in human biochemistry?,general,4,TinyLlama,False,,['phytate'],False,True
+1640,Describe the biochemical mechanisms of zinc absorption.,general,4,Mistral,False,,['zinc'],False,True
+2894,How does calcium affect metabolic pathways in the human body?,general,1,Mistral,True,,['calcium'],False,True
+2221,What is the role of phytates in human biochemistry?,general,4,TinyLlama,False,,['phytate'],False,True
+961,Nutrition management recommendations for rheumatoid arthritis with TNF inhibitor treatment,therapy,5,Mistral,False,,[],True,False
+722,Which provides better choline bioavailability: boiled egg or palm nut soup?,comparison,2,TinyLlama,True,,[],False,False
+3428,Describe the biochemical mechanisms of iron absorption.,general,2,Mistral,False,,['iron'],False,True
+837,What daily magnesium intake is recommended for people with muscle spasms?,recommendation,4,Mistral,True,,['magnesium'],False,True
+323,Nutrition management for cystic fibrosis with pancreatic insufficiency,therapy,5,Mistral,False,,[],True,False
+196,How much zinc should a child with diarrhea consume daily?,recommendation,5,Mistral,True,,['zinc'],False,True
+1521,How should a patient with iron-deficiency anemia adjust their diet to improve magnesium absorption?,therapy,2,Mistral,False,,"['iron', 'magnesium']",False,True
+286,Nutrition plan for CKD stage 4 with phosphorus 5.2 mg/dL,therapy,5,Mistral,False,,['phosphorus'],True,True
+2380,What contains more protein digestibility: millet porridge or sorghum?,comparison,2,TinyLlama,True,therapy,['protein'],False,True
+2157,Propose a therapy combining dietary and supplement interventions for iron-deficiency anemia.,therapy,4,TinyLlama,True,,['iron'],True,True
+758,What carbohydrate intake is ideal for children with reactive hypoglycemia?,recommendation,4,Mistral,True,,[],False,False
+1073,What protein intake is recommended for children with marasmus?,recommendation,5,Mistral,True,,['protein'],False,True
+888,Diet therapy recommendations for ulcerative colitis in remission with calprotectin 120 µg/g,therapy,5,Mistral,False,,[],True,False
+91,What's the recommended daily chromium intake for someone with metabolic syndrome?,recommendation,4,Mistral,True,,[],False,False
+1165,Can I eat eggs every day without health concerns?,general,2,TinyLlama,True,recommendation,[],False,False
+963,Nutrition therapy recommendations for hypertension with sodium level of 150 mmol/L,therapy,5,Mistral,False,,['sodium'],True,True
+597,How much chromium is in a cup of broccoli?,general,2,TinyLlama,False,recommendation,[],False,False
+757,What daily selenium intake is recommended for people with thyroid issues?,recommendation,4,Mistral,True,,[],False,False
+1965,Suggest foods from the Food Composition Table rich in magnesium for adolescents.,recommendation,2,TinyLlama,True,,['magnesium'],False,True
+2291,Explain the relationship between the Food Composition Table and dietary assessment.,general,5,Mistral,True,,[],False,False
+3003,What contains greater protein digestibility: lentils or maize flour?,comparison,2,Mistral,True,,['protein'],False,True
+2676,Create a therapeutic diet for iron-deficiency anemia based on the Food Composition Table.,therapy,4,Mistral,True,,['iron'],True,True
+1879,How do the biochemical impacts of oxalate differ from protein in pediatric diets?,comparison,1,Mistral,False,,['protein'],False,True
+11,Compare iron bioavailability in raw vs sprouted lentils,comparison,4,Mistral,True,,['iron'],False,True
+2535,Recommend a supplementation strategy for improving zinc status in malnutrition.,recommendation,4,TinyLlama,True,,['zinc'],False,True
+2014,Suggest foods from the Food Composition Table rich in vitamin B12 for pregnant women.,recommendation,2,TinyLlama,True,,[],False,False
+2987,Suggest foods from the Food Composition Table rich in calcium for children under 5.,recommendation,1,TinyLlama,False,general,['calcium'],False,True
+2998,Compare the effects of zinc gluconate and fish oil on calcium absorption.,comparison,1,TinyLlama,False,therapy,"['calcium', 'zinc']",False,True
+2701,Propose a therapy combining dietary and supplement interventions for celiac disease.,therapy,3,TinyLlama,True,,[],False,False
+692,Which has more beta-carotene: fresh or cooked carrots?,comparison,2,TinyLlama,True,,[],False,False
+3583,How can clinical dietitians use phytate composition data in patient care?,general,3,TinyLlama,False,comparison,['phytate'],False,True
+1000,"Can you tell me what's in avocado — vitamins,  minerals,  etc.?",general,2,TinyLlama,False,,[],False,False
+1203,Which has higher protein digestibility: lentils or maize flour?,comparison,2,Mistral,True,,['protein'],False,True
+3536,Outline a clinical nutrition plan for managing osteoporosis with low-phytate foods.,therapy,4,Mistral,True,comparison,['phytate'],True,True
+2920,Compare the effects of ferrous sulfate and folic acid on calcium absorption.,comparison,3,TinyLlama,True,recommendation,['calcium'],False,True
+922,Diet plan recommendations for MSUD with valine level of 400 µmol/L,therapy,5,Mistral,False,,[],True,False
+76,"Which traditional preparation lowers phytate most: ogi,  akamu,  or kenkey?",comparison,4,Mistral,True,,['phytate'],False,True
+1718,How should a patient with kidney stones adjust their diet to improve iron absorption?,therapy,1,TinyLlama,True,general,['iron'],False,True
+125,What's the ideal protein intake for a child with PKU?,recommendation,5,Mistral,True,,['protein'],False,True
+2440,Compare ketogenic vs low-carb for iron bioavailability in patients with anemia.,comparison,2,Mistral,True,,['iron'],False,True
+200,What's the recommended daily calorie intake for weight gain in Nigeria?,recommendation,4,Mistral,True,,[],False,False
+2547,Suggest foods from the Food Composition Table rich in vitamin B12 for children under 5.,recommendation,5,Mistral,True,,[],False,False
+2170,How should a patient with celiac disease adjust their nutritional plan to improve magnesium absorption?,therapy,4,Mistral,False,,['magnesium'],True,True
+3516,Create a therapeutic nutritional plan for type 2 diabetes based on the Food Composition Table.,therapy,2,TinyLlama,True,comparison,[],False,False
+2176,How does iron affect metabolic pathways in the human body?,general,1,TinyLlama,True,,['iron'],False,True
+2669,Outline a clinical nutrition plan for managing kidney stones with low-phytate foods.,therapy,4,TinyLlama,True,,['phytate'],True,True
+1528,Propose a therapy combining dietary and supplement interventions for kidney stones.,therapy,5,TinyLlama,False,,[],True,False
+425,Can I eat popcorn if I have diverticulosis?,general,2,TinyLlama,True,therapy,[],False,False
+232,Diet plan for type 2 diabetes with CKD stage 3 (eGFR 45 mL/min),therapy,5,Mistral,False,,[],True,False
+1458,How should a patient with celiac disease adjust their diet to improve zinc absorption?,therapy,3,Mistral,False,,['zinc'],False,True
+2551,Suggest plant-based alternatives high in zinc for iron-deficiency anemia.,recommendation,5,Mistral,True,,"['iron', 'zinc']",False,True
+1556,Outline a clinical nutrition plan for managing iron-deficiency anemia with low-phytate foods.,therapy,1,Mistral,True,,"['iron', 'phytate']",False,True
+2719,Propose a therapy combining dietary and supplement interventions for iron-deficiency anemia.,therapy,2,Mistral,False,,['iron'],False,True
+1205,Compare the phytate levels in lentils and maize flour based on the Food Composition Table.,comparison,2,Mistral,True,,['phytate'],False,True
+1308,Compare the phytate levels in brown rice and oats based on the Food Composition Table.,comparison,5,Mistral,True,,['phytate'],False,True
+1649,What is the role of phytates in human biochemistry?,general,5,TinyLlama,True,,['phytate'],False,True
+3251,How should a patient with kidney stones adjust their nutritional plan to improve calcium absorption?,therapy,4,TinyLlama,False,,['calcium'],True,True
+334,Nutrition plan for CKD stage 4 with phosphorus 5.2 mg/dL,therapy,5,Mistral,False,,['phosphorus'],True,True
+2098,Design a dietary intervention for improving zinc status in osteoporosis.,therapy,4,TinyLlama,False,,['zinc'],True,True
+1424,What is the best way to enhance calcium absorption for adolescents?,recommendation,4,TinyLlama,True,,['calcium'],False,True
+2655,Create a therapeutic diet for celiac disease based on the Food Composition Table.,therapy,1,TinyLlama,True,,[],False,False
+2830,Describe the biochemical mechanisms of iron absorption.,general,3,TinyLlama,True,,['iron'],False,True
+1318,Which has higher protein digestibility: brown rice or maize flour?,comparison,1,Mistral,True,,['protein'],False,True
+2505,Compare the phytate levels in wheat bread and maize flour based on the Food Composition Table.,comparison,5,Mistral,False,,['phytate'],False,True
+3389,What is the role of phytates in human biochemistry?,general,3,Mistral,False,,['phytate'],False,True
+3488,How does vitamin D affect metabolic pathways in the human body?,general,5,TinyLlama,True,,['vitamin d'],False,True
+2539,Recommend a supplementation strategy for improving vitamin B12 status in malnutrition.,recommendation,4,TinyLlama,True,,[],False,False
+317,Nutrition plan for osteopenia with vitamin D 18 ng/mL,therapy,5,Mistral,False,,['vitamin d'],True,True
+2462,Compare the phytate levels in lentils and quinoa based on the Food Composition Table.,comparison,5,Mistral,True,,['phytate'],False,True
+485,How much vitamin D should someone with CKD stage 3 consume daily?,recommendation,5,Mistral,True,,['vitamin d'],False,True
+37,Compare protein quality: boiled vs roasted groundnuts,comparison,3,TinyLlama,True,,['protein'],False,True
+133,What's the ideal fat intake for someone with pancreatic insufficiency?,recommendation,5,Mistral,True,,[],False,False
+2398,Contrast the effects of zinc gluconate and fish oil on calcium absorption.,comparison,1,TinyLlama,False,therapy,"['calcium', 'zinc']",False,True
+1496,Propose a therapy combining dietary and supplement interventions for kidney stones.,therapy,2,Mistral,True,,[],False,False
+169,What's the recommended daily potassium intake for someone with hypertension?,recommendation,4,Mistral,True,,['potassium'],False,True
+2489,Compare low-phytate vs vegan for iron bioavailability in patients with anemia.,comparison,5,Mistral,False,,"['iron', 'phytate']",False,True
+968,What foods should I eat if I have MCAD deficiency with carnitine level of 15 µmol/L?,therapy,5,Mistral,False,,[],True,False
+3510,Explain the relationship between the Food Composition Table and dietary assessment.,general,1,TinyLlama,False,recommendation,[],False,False
+3427,How does iron affect metabolic pathways in the human body?,general,2,TinyLlama,False,,['iron'],False,True
+1831,Evaluate the effects of zinc gluconate and folic acid on calcium absorption.,comparison,5,TinyLlama,False,,"['calcium', 'zinc']",False,True
+2721,How should a patient with iron-deficiency anemia adjust their diet to improve magnesium absorption?,therapy,2,Mistral,False,,"['iron', 'magnesium']",False,True
+2187,What is the role of phytates in human biochemistry?,general,3,TinyLlama,True,,['phytate'],False,True
+1505,Propose a therapy combining dietary and supplement interventions for iron-deficiency anemia.,therapy,5,Mistral,False,,['iron'],True,True
+345,Nutrition management for rheumatoid arthritis with tocilizumab treatment,therapy,5,Mistral,False,,[],True,False
+2297,What is the role of phytates in human biochemistry?,general,2,TinyLlama,True,,['phytate'],False,True
+2722,Create a therapeutic diet for osteoporosis based on the Food Composition Table.,therapy,3,Mistral,False,,[],False,False
+1972,Suggest a supplementation strategy for improving vitamin B12 status in malnutrition.,recommendation,3,Mistral,True,,[],False,False
+2404,Compare the phytate levels in cassava flour and oats based on the Food Composition Table.,comparison,5,TinyLlama,False,,['phytate'],False,True
+3364,Design a dietary intervention for improving magnesium status in type 2 diabetes.,therapy,5,TinyLlama,False,,['magnesium'],True,True
+1428,What is the best way to enhance calcium absorption for adolescents?,recommendation,3,Mistral,True,,['calcium'],False,True
+1320,Which has higher protein digestibility: millet porridge or maize flour?,comparison,5,TinyLlama,False,,['protein'],False,True
+768,What's the suggested daily potassium intake for people with hypokalemia?,recommendation,5,Mistral,True,,['potassium'],False,True
+3365,Design a dietary intervention for improving calcium status in iron-deficiency anemia.,therapy,4,Mistral,True,,"['calcium', 'iron']",True,True
+1057,What daily vitamin D intake should dark-skinned people in Nigeria take?,recommendation,4,Mistral,True,,['vitamin d'],False,True
+1620,How can clinical dietitians use phytate composition data in patient care?,general,5,Mistral,True,,['phytate'],False,True
+1166,How does the sugar content in fruit juice compare to soda?,comparison,3,Mistral,True,therapy,[],False,False
+181,How much selenium should someone with Keshan disease consume daily?,recommendation,5,Mistral,True,,[],False,False
+649,How does calcium absorption compare between traditional and commercial yogurts?,comparison,4,Mistral,True,,['calcium'],False,True
+851,What daily selenium intake is recommended for people with Keshan disease?,recommendation,5,Mistral,True,,[],False,False
+61,Which African legume has highest methionine: bambara nut or pigeon pea?,comparison,3,TinyLlama,True,,[],False,False
+2182,How does calcium affect metabolic pathways in the human body?,general,1,TinyLlama,True,,['calcium'],False,True
+409,Is it safe to follow a vegan diet during pregnancy?,therapy,4,Mistral,True,general,[],True,False
+3586,How does zinc affect metabolic pathways in the human body?,general,5,Mistral,True,comparison,['zinc'],False,True
+3430,Describe the biochemical mechanisms of iron absorption.,general,3,TinyLlama,True,,['iron'],False,True
+1614,What is the role of phytates in human biochemistry?,general,2,Mistral,True,,['phytate'],False,True
+3305,Propose a therapy combining dietary and supplement interventions for iron-deficiency anemia.,therapy,5,Mistral,False,,['iron'],True,True
+2677,How should a patient with iron-deficiency anemia adjust their diet to improve calcium absorption?,therapy,2,Mistral,False,,"['calcium', 'iron']",False,True
+130,How much vitamin C should a child with malnutrition consume daily?,recommendation,5,Mistral,True,,['vitamin c'],False,True
+179,How much vitamin D should a child with rickets consume daily?,recommendation,5,Mistral,True,,['vitamin d'],False,True
+166,How much vitamin D should someone with osteoporosis consume daily?,recommendation,4,Mistral,True,,['vitamin d'],False,True
+231,How much zinc should a 3-year-old with stunted growth consume daily?,recommendation,5,Mistral,True,,['zinc'],False,True
+126,How much zinc should a child with diarrhea consume daily?,recommendation,5,Mistral,True,,['zinc'],False,True
+621,How does vitamin B12 content compare between fortified and unfortified plant milks?,comparison,3,TinyLlama,True,,[],False,False
+1828,Assess the effects of vitamin D and vitamin K2 on calcium absorption.,comparison,3,TinyLlama,True,,"['calcium', 'vitamin d', 'vitamin k']",False,True
+555,Can I eat grapefruit while taking statins?,therapy,5,Mistral,True,general,[],True,False
+882,Diet plan recommendations for type 2 diabetes with HbA1c 8.5% and on metformin,therapy,5,Mistral,False,,['hba1c'],True,True
+435,How much vitamin C is in fresh vs frozen spinach?,general,3,Mistral,False,,['vitamin c'],False,True
+273,Nutrition management for anorexia nervosa with refeeding syndrome risk,therapy,5,Mistral,False,,[],True,False
+2866,How does calcium affect metabolic pathways in the human body?,general,5,TinyLlama,True,,['calcium'],False,True
+1060,What's the suggested daily sodium limit for people with hypertension?,recommendation,3,Mistral,True,,['sodium'],False,True
+284,What should I eat with type 1 diabetes and celiac disease comorbidity?,therapy,5,Mistral,False,,[],True,False
+1585,How does iron affect metabolic pathways in the human body?,general,5,Mistral,True,,['iron'],False,True
+2355,Propose a therapy combining dietary and supplement interventions for type 2 diabetes.,therapy,3,TinyLlama,False,comparison,[],False,False
+1825,Assess the effects of zinc gluconate and vitamin K2 on calcium absorption.,comparison,3,TinyLlama,False,,"['calcium', 'vitamin k', 'zinc']",False,True
+1270,Which has higher protein digestibility: brown rice or sorghum?,comparison,2,Mistral,False,,['protein'],False,True
+1655,What is the role of phytates in human biochemistry?,general,3,TinyLlama,True,,['phytate'],False,True
+246,Nutrition plan for NAFLD with NASH confirmed by biopsy,therapy,5,Mistral,False,,[],True,False
+776,What's the suggested daily calorie intake for catch-up growth in Nigeria?,recommendation,5,Mistral,True,,[],False,False
+226,What's the ideal fat intake for someone with pancreatic insufficiency?,recommendation,5,Mistral,True,,[],False,False
+787,What daily iron intake is recommended for pregnant women in Nigeria?,recommendation,4,Mistral,True,,['iron'],False,True
+1820,How do the biochemical impacts of fiber differ from calcium in pediatric diets?,comparison,2,TinyLlama,False,,"['calcium', 'fiber']",False,True
+2810,How does iron affect metabolic pathways in the human body?,general,4,Mistral,True,,['iron'],False,True
+2875,Explain the relationship between the Food Composition Table and dietary assessment.,general,4,TinyLlama,False,,[],False,False
+1366,Recommend a supplementation strategy for improving magnesium status in malnutrition.,recommendation,1,TinyLlama,False,,['magnesium'],False,True
+2283,Explain the relationship between the Food Composition Table and dietary assessment.,general,1,TinyLlama,True,,[],False,False
+112,Which has higher lycopene: fresh tomatoes or tomato paste?,comparison,2,TinyLlama,True,,[],False,False
+242,What's the recommended daily vitamin A intake for a child with night blindness?,recommendation,5,Mistral,True,,['vitamin a'],False,True
+2280,Describe the biochemical mechanisms of vitamin D absorption.,general,4,TinyLlama,False,,['vitamin d'],False,True
+1144,What is the best diet for managing PCOS symptoms?,therapy,4,Mistral,True,recommendation,[],True,False
+3223,Suggest dietary changes for reducing phytate intake in athletes.,recommendation,2,TinyLlama,False,,['phytate'],False,True
+1361,What is the best way to enhance magnesium absorption for pregnant women?,recommendation,2,Mistral,False,,['magnesium'],False,True
+1728,How can clinical dietitians use phytate composition data in patient care?,general,4,Mistral,True,recommendation,['phytate'],False,True
+2304,Propose a therapy combining dietary and supplement interventions for osteoporosis.,therapy,1,TinyLlama,False,general,[],False,False
+824,What's the suggested daily calorie intake for athletes in hot climates?,recommendation,4,Mistral,True,,[],False,False
+2650,Suggest foods from the Food Composition Table rich in zinc for athletes.,recommendation,1,Mistral,False,,['zinc'],False,True
+44,Which has higher tryptophan: unfermented vs fermented soy?,comparison,3,TinyLlama,True,,[],False,False
+1136,How does the protein quality of plant sources compare to animal sources?,comparison,4,Mistral,True,therapy,['protein'],False,True
+2835,Explain the relationship between the Food Composition Table and dietary assessment.,general,1,TinyLlama,True,,[],False,False
+70,Is palm oil or shea butter better for vitamin K2 absorption?,comparison,3,TinyLlama,True,,['vitamin k'],False,True
+2414,Compare vegetarian vs vegan for iron bioavailability in patients with anemia.,comparison,5,TinyLlama,True,,['iron'],False,True
+718,Which is better for vitamin E absorption: palm oil or shea butter?,comparison,2,TinyLlama,True,,[],False,False
+3476,What is the role of phytates in human biochemistry?,general,2,TinyLlama,True,,['phytate'],False,True
+570,How much magnesium is in a handful of almonds?,general,2,TinyLlama,False,recommendation,['magnesium'],False,True
+388,What to eat with cystic fibrosis and pancreatic enzyme replacement therapy?,therapy,5,Mistral,False,,[],True,False
+2240,Describe the biochemical mechanisms of zinc absorption.,general,4,Mistral,False,,['zinc'],False,True
+429,What is the nutrient composition of traditional Nigerian egusi soup?,general,3,Mistral,False,,[],False,False
+2825,How does iron affect metabolic pathways in the human body?,general,3,TinyLlama,True,,['iron'],False,True
+2485,Compare vegetarian vs low-carb for iron bioavailability in patients with anemia.,comparison,1,TinyLlama,False,,['iron'],False,True
+2901,Compare the effects of vitamin D and fish oil on calcium absorption.,comparison,3,Mistral,False,recommendation,"['calcium', 'vitamin d']",False,True
+1107,What foods should I eat if I have high blood pressure?,therapy,2,TinyLlama,True,recommendation,[],False,False
+2540,Suggest plant-based alternatives high in calcium for iron-deficiency anemia.,recommendation,4,Mistral,True,,"['calcium', 'iron']",False,True
+3464,Explain the relationship between the Food Composition Table and dietary assessment.,general,3,TinyLlama,False,,[],False,False
+1398,Recommend a supplementation strategy for improving calcium status in osteoporosis.,recommendation,2,Mistral,True,,['calcium'],False,True
+2191,How does calcium affect metabolic pathways in the human body?,general,5,Mistral,True,,['calcium'],False,True
+2720,Propose a therapy combining dietary and supplement interventions for iron-deficiency anemia.,therapy,2,Mistral,True,,['iron'],False,True
+2439,Compare the effects of ferrous sulfate and potassium chloride on calcium absorption.,comparison,4,TinyLlama,False,,"['calcium', 'potassium']",False,True
+3220,Advise dietary changes for reducing phytate intake in athletes.,recommendation,1,Mistral,False,,['phytate'],False,True
+49,"Which traditional preparation lowers phytate most: ogi, akamu, or kenkey?",comparison,4,Mistral,True,,['phytate'],False,True
+56,Compare magnesium bioavailability in raw vs roasted pumpkin seeds,comparison,4,Mistral,True,,['magnesium'],False,True
+876,What carbohydrate intake is ideal for people with reactive hypoglycemia?,recommendation,4,Mistral,True,,[],False,False
+3546,Suggest foods from the Food Composition Table rich in vitamin B12 for children under 5.,recommendation,3,TinyLlama,True,general,[],False,False
+297,Nutrition management for anorexia nervosa with BMI 15.2,therapy,5,Mistral,False,,[],True,False
+1335,Recommend a supplementation strategy for improving zinc status in malnutrition.,recommendation,4,TinyLlama,True,,['zinc'],False,True
+461,How much vitamin B12 should a vegan consume daily?,recommendation,3,Mistral,True,,[],False,False
+2968,How does vitamin D affect metabolic pathways in the human body?,general,2,Mistral,False,comparison,['vitamin d'],False,True
+1929,Propose a supplementation strategy for improving vitamin B12 status in chronic kidney disease.,recommendation,3,Mistral,True,,[],False,False
+170,How much folate should someone with elevated homocysteine consume daily?,recommendation,5,Mistral,True,,[],False,False
+2334,Design a dietary intervention for improving magnesium status in iron-deficiency anemia.,therapy,5,Mistral,False,comparison,"['iron', 'magnesium']",True,True
+724,Which has more tryptophan: unfermented or fermented pigeon pea?,comparison,3,TinyLlama,True,,[],False,False
+3184,What is the best way to enhance calcium absorption for adolescents?,recommendation,4,TinyLlama,False,,['calcium'],False,True
+2211,What is the role of phytates in human biochemistry?,general,1,TinyLlama,True,,['phytate'],False,True
+1251,Compare low-phytate vs DASH for iron bioavailability in patients with anemia.,comparison,1,Mistral,True,,"['iron', 'phytate']",False,True
+436,What is the iron content of traditional Ghanaian groundnut soup?,general,3,Mistral,False,,['iron'],False,True
+1128,What foods are high in potassium content?,general,2,TinyLlama,False,recommendation,['potassium'],False,True
+140,How much iron should a menstruating woman in Ghana consume daily?,recommendation,4,Mistral,True,,['iron'],False,True
+154,How much protein should a child with marasmus consume daily?,recommendation,5,Mistral,True,,['protein'],False,True
+1213,How do the biochemical impacts of zinc differ from vitamin C in pediatric diets?,comparison,1,TinyLlama,False,,"['vitamin c', 'zinc']",False,True
+184,How much vitamin E should someone with hemolytic anemia consume daily?,recommendation,5,Mistral,True,,[],False,False
+1453,How should a patient with type 2 diabetes adjust their diet to improve iron absorption?,therapy,3,Mistral,True,,['iron'],False,True
+576,Compare the protein content in tofu and chicken,comparison,3,Mistral,True,therapy,['protein'],False,True
+1979,Suggest plant-based alternatives high in calcium for osteoporosis.,recommendation,2,Mistral,True,,['calcium'],False,True
+2986,How does zinc affect metabolic pathways in the human body?,general,5,Mistral,True,comparison,['zinc'],False,True
+2078,Outline a clinical nutrition plan for managing iron-deficiency anemia with low-phytate foods.,therapy,5,TinyLlama,True,,"['iron', 'phytate']",True,True
+1007,Can you explain how the urea cycle works?,general,5,Mistral,False,,['urea'],False,True
+924,Diet therapy recommendations for hypertension with potassium level of 3.2 mmol/L,therapy,5,Mistral,False,,['potassium'],True,True
+22,Is boiled egg or palm nut soup better for choline intake?,comparison,2,TinyLlama,True,,[],False,False
+64,How much selenium should someone with thyroid issues consume daily?,recommendation,4,Mistral,True,,[],False,False
+3589,How do the biochemical impacts of zinc differ from vitamin C in pediatric diets?,comparison,2,TinyLlama,True,general,"['vitamin c', 'zinc']",False,True
+2518,Which has higher protein digestibility: brown rice or maize flour?,comparison,1,Mistral,True,,['protein'],False,True
+1752,Compare ketogenic vs omnivorous for iron bioavailability in patients with anemia.,comparison,2,Mistral,False,recommendation,['iron'],False,True
+2545,Recommend a supplementation strategy for improving zinc status in iron-deficiency anemia.,recommendation,3,Mistral,True,,"['iron', 'zinc']",False,True
+75,What's the recommended daily potassium intake for someone with hypokalemia?,recommendation,5,Mistral,True,,['potassium'],False,True
+448,How much galactose-1-phosphate should a child with galactosemia maintain?,recommendation,5,Mistral,True,,[],False,False
+1377,Recommend a supplementation strategy for improving magnesium status in chronic kidney disease.,recommendation,5,Mistral,True,,['magnesium'],False,True
+1051,What daily zinc intake is recommended for a 3-year-old child?,recommendation,4,Mistral,True,,['zinc'],False,True
+896,Diet plan recommendations for cystic fibrosis with fecal elastase 80 µg/g,therapy,5,Mistral,False,,[],True,False
+2728,Propose a therapy combining dietary and supplement interventions for kidney stones.,therapy,5,TinyLlama,False,,[],True,False
+2796,How does vitamin D affect metabolic pathways in the human body?,general,2,Mistral,False,,['vitamin d'],False,True
+216,Diet plan for cystic fibrosis with fecal elastase 80 µg/g,therapy,5,Mistral,False,,[],True,False
+482,What are the symptoms of elevated phenylalanine in PKU?,general,4,Mistral,False,,[],False,False
+2109,Propose a therapy combining dietary and supplement interventions for iron-deficiency anemia.,therapy,1,Mistral,True,,['iron'],False,True
+2086,Create a therapeutic meal plan for iron-deficiency anemia based on the Food Composition Table.,therapy,3,TinyLlama,False,,['iron'],False,True
+619,How does iron content compare between fresh and canned spinach?,comparison,2,TinyLlama,True,,['iron'],False,True
+2570,What is the best way to enhance vitamin B12 absorption for children under 5?,recommendation,4,TinyLlama,True,,[],False,False
+3169,What is the best way to enhance magnesium absorption for adolescents?,recommendation,1,Mistral,False,,['magnesium'],False,True
+2713,Outline a clinical nutrition plan for managing type 2 diabetes with low-phytate foods.,therapy,3,Mistral,False,,['phytate'],False,True
+391,What is the best diet for fatty liver disease?,therapy,4,Mistral,True,recommendation,[],True,False
+1338,Recommend a supplementation strategy for improving zinc status in stunted growth.,recommendation,5,Mistral,False,,['zinc'],False,True
+1966,Suggest a supplementation strategy for improving magnesium status in malnutrition.,recommendation,1,TinyLlama,False,,['magnesium'],False,True
+2045,Suggest foods from the Food Composition Table rich in calcium for adolescents.,recommendation,5,Mistral,False,,['calcium'],False,True
+3550,What is the role of phytates in human biochemistry?,general,5,TinyLlama,False,therapy,['phytate'],False,True
+945,Nutrition management recommendations for rheumatoid arthritis with tocilizumab treatment,therapy,5,Mistral,False,,[],True,False
+2490,Compare high-fiber vs vegan for iron bioavailability in patients with anemia.,comparison,3,TinyLlama,False,,"['fiber', 'iron']",False,True
+83,What's the recommended daily calorie intake for catch-up growth in Nigeria?,recommendation,5,Mistral,True,,[],False,False
+3463,Explain the relationship between the Food Composition Table and dietary assessment.,general,5,Mistral,True,,[],False,False
+1342,Suggest plant-based alternatives high in magnesium for iron-deficiency anemia.,recommendation,2,Mistral,False,,"['iron', 'magnesium']",False,True
+2651,How should a patient with kidney stones adjust their diet to improve calcium absorption?,therapy,4,TinyLlama,False,,['calcium'],True,True
+2519,Compare vegetarian vs low-carb for iron bioavailability in patients with anemia.,comparison,4,Mistral,True,,['iron'],False,True
+687,How does vitamin D3 compare between fortified milk and fatty fish?,comparison,3,TinyLlama,True,,['vitamin d'],False,True
+194,What's the ideal protein intake for a child with MSUD?,recommendation,5,Mistral,True,,['protein'],False,True
+952,What foods should I eat if I have propionic acidemia with carnitine level of 10 µmol/L?,therapy,5,Mistral,False,,[],True,False
+1714,Create a therapeutic diet for iron-deficiency anemia based on the Food Composition Table.,therapy,5,Mistral,True,general,['iron'],True,True
+752,What's the suggested daily calorie intake for weight loss in Nigeria?,recommendation,4,Mistral,True,,[],False,False
+2779,Explain the relationship between the Food Composition Table and dietary assessment.,general,3,TinyLlama,False,,[],False,False
+1701,Compare the effects of vitamin D and fish oil on calcium absorption.,comparison,3,Mistral,False,recommendation,"['calcium', 'vitamin d']",False,True
+441,Compare vitamin K levels in raw kale versus fermented soy products,comparison,3,TinyLlama,True,,['vitamin k'],False,True
+4,What foods should I eat if I have CKD stage 3 with creatinine 1.8 mg/dL?,therapy,5,Mistral,False,,['creatinine'],True,True
+694,"For glycemic control,  is roasted plantain better than boiled cassava?",comparison,3,TinyLlama,True,,[],False,False
+1300,How do the biochemical impacts of phytate differ from vitamin C in pediatric diets?,comparison,3,TinyLlama,True,,"['phytate', 'vitamin c']",False,True
+3188,Suggest foods from the Food Composition Table rich in iron for elderly patients.,recommendation,4,TinyLlama,True,,['iron'],False,True
+5,Explain how vitamin K helps with blood clotting,general,4,Mistral,False,,['vitamin k'],False,True
+2627,Recommend a supplementation strategy for improving iron status in iron-deficiency anemia.,recommendation,4,Mistral,True,,['iron'],False,True
+2960,Recommend dietary changes for reducing phytate intake in athletes.,recommendation,3,Mistral,True,therapy,['phytate'],False,True
+2685,Propose a therapy combining dietary and supplement interventions for type 2 diabetes.,therapy,4,TinyLlama,False,,[],True,False
+1274,Which has higher protein digestibility: millet porridge or maize flour?,comparison,4,TinyLlama,False,,['protein'],False,True
+1234,Which has higher protein digestibility: brown rice or yam flour?,comparison,2,TinyLlama,True,,['protein'],False,True
+343,Compare the protein content of chicken and beef per 100g,comparison,2,TinyLlama,False,recommendation,['protein'],False,True
+3366,Create a therapeutic meal plan for osteoporosis based on the Food Composition Table.,therapy,1,TinyLlama,False,,[],False,False
+1550,Outline a clinical nutrition plan for managing iron-deficiency anemia with low-phytate foods.,therapy,4,TinyLlama,True,,"['iron', 'phytate']",True,True
+652,Which has more lycopene: fresh or cooked tomatoes?,comparison,2,TinyLlama,True,,[],False,False
+1287,How do the biochemical impacts of fiber differ from vitamin C in pediatric diets?,comparison,2,Mistral,False,,"['fiber', 'vitamin c']",False,True
+578,What is the best diet for managing menopause symptoms?,therapy,4,Mistral,True,recommendation,[],True,False
+2689,Create a therapeutic diet for iron-deficiency anemia based on the Food Composition Table.,therapy,4,Mistral,False,,['iron'],True,True
+3027,Evaluate the effects of magnesium citrate and potassium chloride on calcium absorption.,comparison,3,TinyLlama,False,,"['calcium', 'magnesium', 'potassium']",False,True
+1217,Compare the phytate levels in brown rice and oats based on the Food Composition Table.,comparison,2,Mistral,False,,['phytate'],False,True
+1919,Evaluate vegetarian vs low-carb for iron bioavailability in patients with anemia.,comparison,4,Mistral,True,,['iron'],False,True
+1623,Explain the relationship between the Food Composition Table and dietary assessment.,general,5,Mistral,False,,[],False,False
+3233,Suggest foods from the Food Composition Table rich in magnesium for adolescents.,recommendation,5,Mistral,True,,['magnesium'],False,True
+265,Nutrition management for rheumatoid arthritis with tocilizumab treatment,therapy,5,Mistral,False,,[],True,False
+472,What's the recommended daily calorie intake for weight loss in Nigeria?,recommendation,4,Mistral,True,,[],False,False
+1480,Outline a clinical nutrition plan for managing celiac disease with low-phytate foods.,therapy,5,TinyLlama,False,,['phytate'],True,True
+3440,Describe the biochemical mechanisms of zinc absorption.,general,4,Mistral,False,,['zinc'],False,True
+568,What foods should I eat for healthy skin?,recommendation,3,Mistral,True,therapy,[],False,False
+355,Can I eat eggs if I have high cholesterol?,therapy,3,Mistral,True,general,['cholesterol'],False,True
+1516,Outline a clinical nutrition plan for managing iron-deficiency anemia with low-phytate foods.,therapy,1,TinyLlama,True,,"['iron', 'phytate']",False,True
+2852,How does magnesium affect metabolic pathways in the human body?,general,2,TinyLlama,True,,['magnesium'],False,True
+2913,Compare the effects of vitamin D and ascorbic acid on calcium absorption.,comparison,2,TinyLlama,False,general,"['calcium', 'vitamin d']",False,True
+2965,How can clinical dietitians use phytate composition data in patient care?,general,4,Mistral,False,therapy,['phytate'],False,True
+3459,Explain the relationship between the Food Composition Table and dietary assessment.,general,4,TinyLlama,False,,[],False,False
+501,What are the nutritional benefits of eating only bananas for a month?,general,2,TinyLlama,True,recommendation,[],False,False
+2889,How does zinc affect metabolic pathways in the human body?,general,1,TinyLlama,True,,['zinc'],False,True
+2688,Outline a clinical nutrition plan for managing celiac disease with low-phytate foods.,therapy,3,Mistral,True,,['phytate'],False,True
+648,Which African legume has the highest methionine: bambara nut or pigeon pea?,comparison,3,TinyLlama,True,,[],False,False
+1665,What is the role of phytates in human biochemistry?,general,4,Mistral,False,,['phytate'],False,True
+862,What's the suggested daily potassium intake for people with hypertension?,recommendation,4,Mistral,True,,['potassium'],False,True
+308,What is the role of zinc in immune function?,general,4,Mistral,False,,['zinc'],False,True
+1746,Suggest foods from the Food Composition Table rich in vitamin B12 for children under 5.,recommendation,3,TinyLlama,True,general,[],False,False
+3306,How should a patient with kidney stones adjust their nutritional plan to improve vitamin D absorption?,therapy,5,TinyLlama,False,,['vitamin d'],True,True
+399,Nutrient composition of 100g of boiled bambara nut,general,2,TinyLlama,False,,[],False,False
+2608,Suggest plant-based alternatives high in calcium for osteoporosis.,recommendation,4,Mistral,False,,['calcium'],False,True
+3219,Suggest foods from the Food Composition Table rich in magnesium for pregnant women.,recommendation,2,Mistral,True,,['magnesium'],False,True
+209,How much zinc should a 4-year-old with impaired immunity consume daily?,recommendation,5,Mistral,True,,['zinc'],False,True
+213,How much vitamin D should someone with sarcopenia consume daily?,recommendation,4,Mistral,True,,['vitamin d'],False,True
+1364,Recommend a supplementation strategy for improving iron status in chronic kidney disease.,recommendation,3,TinyLlama,True,,['iron'],False,True
+223,How much vitamin C should a child with malnutrition consume daily?,recommendation,5,Mistral,True,,['vitamin c'],False,True
+3025,Assess the effects of zinc gluconate and vitamin K2 on calcium absorption.,comparison,3,TinyLlama,False,,"['calcium', 'vitamin k', 'zinc']",False,True
+1520,Propose a therapy combining dietary and supplement interventions for iron-deficiency anemia.,therapy,2,Mistral,True,,['iron'],False,True
+2528,What is the best way to enhance calcium absorption for elderly patients?,recommendation,1,Mistral,True,,['calcium'],False,True
+303,Give me the amino acid breakdown of soybean,general,3,Mistral,False,,[],False,False
+3118,What contains greater protein digestibility: brown rice or maize flour?,comparison,1,Mistral,True,,['protein'],False,True
+2845,How can clinical dietitians use phytate composition data in patient care?,general,3,TinyLlama,True,,['phytate'],False,True
+2679,Design a dietary intervention for improving calcium status in iron-deficiency anemia.,therapy,5,TinyLlama,False,,"['calcium', 'iron']",True,True
+2554,Recommend dietary changes for reducing phytate intake in athletes.,recommendation,5,Mistral,True,,['phytate'],False,True
+2360,Advise dietary changes for reducing phytate intake in athletes.,recommendation,3,Mistral,True,therapy,['phytate'],False,True
+1551,Create a therapeutic diet for osteoporosis based on the Food Composition Table.,therapy,1,Mistral,True,,[],False,False
+308,Nutrition plan for Marfan syndrome with aortic root dilation,therapy,5,Mistral,False,,[],True,False
+2121,How should a patient with iron-deficiency anemia adjust their meal plan to improve magnesium absorption?,therapy,2,Mistral,False,,"['iron', 'magnesium']",False,True
+964,What foods should I eat with type 1 diabetes and celiac disease comorbidity?,therapy,5,Mistral,False,,[],True,False
+1054,What protein intake is ideal for a 70kg Nigerian bodybuilder?,recommendation,4,Mistral,True,,['protein'],False,True
+1839,Contrast the effects of ferrous sulfate and potassium chloride on calcium absorption.,comparison,4,TinyLlama,False,,"['calcium', 'potassium']",False,True
+1626,Explain the relationship between the Food Composition Table and dietary assessment.,general,4,Mistral,True,,[],False,False
+1792,Recommend a supplementation strategy for improving vitamin B12 status in malnutrition.,recommendation,2,Mistral,False,comparison,[],False,False
+2737,Outline a clinical nutrition plan for managing osteoporosis with low-phytate foods.,therapy,3,TinyLlama,False,,['phytate'],False,True
+129,Compare calcium absorption: traditional vs commercial yogurt,comparison,4,Mistral,True,,['calcium'],False,True
+2993,Recommend dietary changes for reducing phytate intake in pregnant women.,recommendation,4,TinyLlama,True,general,['phytate'],False,True
+259,Nutrition therapy for MSUD with isoleucine 300 µmol/L,therapy,5,Mistral,False,,[],True,False
+3174,Suggest foods from the Food Composition Table rich in iron for elderly patients.,recommendation,5,Mistral,False,,['iron'],False,True
+1907,What possesses greater protein digestibility: cassava flour or yam flour?,comparison,2,Mistral,True,,['protein'],False,True
+903,What foods should I eat if I have gluten ataxia with positive anti-gliadin antibodies?,therapy,5,Mistral,False,,[],True,False
+2783,Describe the biochemical mechanisms of iron absorption.,general,1,TinyLlama,True,,['iron'],False,True
+1830,Contrast the phytate concentrations in brown rice and yam flour based on the Food Composition Table.,comparison,2,Mistral,False,,['phytate'],False,True
+510,How many calories are in a Big Mac?,general,1,TinyLlama,False,recommendation,[],False,False
+356,What to eat with cystic fibrosis and pancreatic enzyme replacement therapy?,therapy,5,Mistral,False,,[],True,False
+1088,What's the suggested daily potassium intake for people with hypokalemia?,recommendation,5,Mistral,True,,['potassium'],False,True
+358,Nutrition plan for NAFLD with metabolic syndrome,therapy,5,Mistral,False,,[],True,False
+1590,What is the role of phytates in human biochemistry?,general,4,TinyLlama,False,,['phytate'],False,True
+2666,Outline a clinical nutrition plan for managing iron-deficiency anemia with low-phytate foods.,therapy,2,TinyLlama,True,,"['iron', 'phytate']",False,True
+32,What's the ideal calcium intake for a postmenopausal woman?,recommendation,3,Mistral,True,,['calcium'],False,True
+2598,Recommend a supplementation strategy for improving calcium status in osteoporosis.,recommendation,2,Mistral,True,,['calcium'],False,True
+290,Diet plan for PKU with tyrosine 30 µmol/L,therapy,5,Mistral,False,,[],True,False
+620,Which has less oxalate: raw amaranth or cooked jute leaves?,comparison,3,TinyLlama,True,,[],False,False
+2763,Outline a clinical nutrition plan for managing type 2 diabetes with low-phytate foods.,therapy,5,Mistral,True,,['phytate'],True,True
+98,Is palm oil or shea butter better for vitamin E absorption?,comparison,2,TinyLlama,True,,[],False,False
+2483,Which has higher protein digestibility: brown rice or sorghum?,comparison,4,Mistral,False,,['protein'],False,True
+3019,"Among them, option possesses greater protein digestibility: millet porridge or yam flour?",comparison,3,TinyLlama,True,,['protein'],False,True
+160,What's the recommended daily chromium intake for someone with insulin resistance?,recommendation,4,Mistral,True,,[],False,False
+395,Nutrition therapy for hypertension with sodium 150 mmol/L,therapy,5,Mistral,False,,['sodium'],True,True
+101,Compare vitamin B12 in fortified nutritional yeast vs animal sources,comparison,3,TinyLlama,True,,[],False,False
+268,What's the ideal iron intake for a child with thalassemia?,recommendation,5,Mistral,True,,['iron'],False,True
+2019,Suggest foods from the Food Composition Table rich in magnesium for pregnant women.,recommendation,2,Mistral,True,,['magnesium'],False,True
+921,What foods should I eat if I have chylomicron retention disease with vitamin E level of 3 µg/mL?,therapy,5,Mistral,False,,[],True,False
+2803,How does iron affect metabolic pathways in the human body?,general,2,TinyLlama,True,,['iron'],False,True
+2148,Create a therapeutic nutritional plan for osteoporosis based on the Food Composition Table.,therapy,3,Mistral,False,,[],False,False
+2911,Create a therapeutic diet for type 2 diabetes based on the Food Composition Table.,therapy,4,TinyLlama,True,comparison,[],True,False
+530,How much sugar is in a can of soda?,general,1,TinyLlama,False,recommendation,[],False,False
+269,How much vitamin C should a child with scurvy consume daily?,recommendation,5,Mistral,True,,['vitamin c'],False,True
+3114,What contains greater protein digestibility: cassava flour or yam flour?,comparison,1,Mistral,False,,['protein'],False,True
+349,Diet management for IBD with vitamin B12 deficiency (200 pg/mL),therapy,5,Mistral,False,,[],True,False
+527,How much salt is in a teaspoon?,general,1,TinyLlama,False,recommendation,[],False,False
+3534,Design a dietary intervention for improving magnesium status in iron-deficiency anemia.,therapy,5,Mistral,False,comparison,"['iron', 'magnesium']",True,True
+3089,Assess low-phytate vs vegan for iron bioavailability in patients with anemia.,comparison,5,Mistral,False,,"['iron', 'phytate']",False,True
+3579,Suggest a supplementation strategy for improving zinc status in malnutrition.,recommendation,3,TinyLlama,False,general,['zinc'],False,True
+743,What daily magnesium intake is recommended for people with migraines?,recommendation,4,Mistral,True,,['magnesium'],False,True
+13,Compare vitamin C retention in sun-dried vs smoked tomatoes,comparison,3,TinyLlama,True,,['vitamin c'],False,True
+2309,Describe the biochemical mechanisms of magnesium absorption.,general,3,TinyLlama,True,comparison,['magnesium'],False,True
+1425,Suggest foods from the Food Composition Table rich in calcium for elderly patients.,recommendation,1,Mistral,False,,['calcium'],False,True
+7,What's the recommended daily fiber intake for an adult with constipation?,recommendation,3,Mistral,True,,['fiber'],False,True
+1010,What is the chemical structure of vitamin B12?,general,4,Mistral,False,,[],False,False
+309,How does the urea cycle work?,general,5,Mistral,False,,['urea'],False,True
+2486,Compare the phytate levels in millet porridge and maize flour based on the Food Composition Table.,comparison,5,TinyLlama,True,,['phytate'],False,True
+3310,How should a patient with kidney stones adjust their meal plan to improve magnesium absorption?,therapy,5,TinyLlama,False,,['magnesium'],True,True
+1208,How do the biochemical impacts of fiber differ from magnesium in pediatric diets?,comparison,2,Mistral,False,,"['fiber', 'magnesium']",False,True
+2557,Recommend dietary changes for reducing phytate intake in children under 5.,recommendation,3,Mistral,False,,['phytate'],False,True
+2482,Which has higher protein digestibility: brown rice or maize flour?,comparison,2,Mistral,True,,['protein'],False,True
+148,How much zinc should a child with acrodermatitis enteropathica consume daily?,recommendation,5,Mistral,True,,['zinc'],False,True
+2817,How can clinical dietitians use phytate composition data in patient care?,general,4,Mistral,True,,['phytate'],False,True
+828,What's the suggested daily iodine intake for infants?,recommendation,4,Mistral,True,,[],False,False
+3141,Suggest plant-based alternatives high in calcium for iron-deficiency anemia.,recommendation,2,Mistral,False,,"['calcium', 'iron']",False,True
+2293,How does magnesium affect metabolic pathways in the human body?,general,5,Mistral,False,,['magnesium'],False,True
+815,What daily magnesium intake is recommended for people with migraines?,recommendation,4,Mistral,True,,['magnesium'],False,True
+2617,What is the best way to enhance zinc absorption for elderly patients?,recommendation,3,Mistral,True,,['zinc'],False,True
+2749,How should a patient with kidney stones adjust their diet to improve calcium absorption?,therapy,5,Mistral,False,,['calcium'],True,True
+2443,How do the biochemical impacts of phytate differ from protein in pediatric diets?,comparison,1,TinyLlama,True,,"['phytate', 'protein']",False,True
+3308,Create a therapeutic nutritional plan for kidney stones based on the Food Composition Table.,therapy,5,Mistral,False,,[],True,False
+1702,Design a dietary intervention for improving calcium status in celiac disease.,therapy,5,TinyLlama,True,comparison,['calcium'],True,True
+463,How much magnesium should someone with migraines consume daily?,recommendation,4,Mistral,True,,['magnesium'],False,True
+432,What are the mineral contents of palm oil?,general,3,Mistral,False,,[],False,False
+1518,Propose a therapy combining dietary and supplement interventions for type 2 diabetes.,therapy,2,TinyLlama,False,,[],False,False
+1857,"Out of these, option contains more protein digestibility: cassava flour or sorghum?",comparison,2,Mistral,False,,['protein'],False,True
+3523,Explain the relationship between the Food Composition Table and dietary assessment.,general,1,TinyLlama,True,comparison,[],False,False
+2883,Explain the relationship between the Food Composition Table and dietary assessment.,general,1,TinyLlama,True,,[],False,False
+1276,How do the biochemical impacts of zinc differ from protein in pediatric diets?,comparison,5,TinyLlama,False,,"['protein', 'zinc']",False,True
+3558,Create a therapeutic meal plan for type 2 diabetes based on the Food Composition Table.,therapy,3,Mistral,True,recommendation,[],False,False
+406,What is the role of zinc in immune function?,general,4,Mistral,False,,['zinc'],False,True
+1548,Create a therapeutic diet for osteoporosis based on the Food Composition Table.,therapy,3,Mistral,False,,[],False,False
+1495,Design a dietary intervention for improving iron status in osteoporosis.,therapy,3,Mistral,True,,['iron'],False,True
+3109,"In your view, which option shows more protein digestibility: millet porridge or yam flour?",comparison,5,TinyLlama,True,,['protein'],False,True
+1761,How should a patient with kidney stones adjust their diet to improve vitamin D absorption?,therapy,1,Mistral,True,recommendation,['vitamin d'],False,True
+2530,Recommend a supplementation strategy for improving vitamin B12 status in osteoporosis.,recommendation,3,Mistral,False,,[],False,False
+213,Dietary management for IBS-D with positive lactose breath test,therapy,5,Mistral,False,,[],True,False
+3514,Create a therapeutic meal plan for iron-deficiency anemia based on the Food Composition Table.,therapy,5,Mistral,True,general,['iron'],True,True
+450,Which has higher lysine: bambara nut or cowpea?,comparison,2,TinyLlama,True,,[],False,False
+1493,Create a therapeutic diet for type 2 diabetes based on the Food Composition Table.,therapy,3,Mistral,False,,[],False,False
+2039,Advise a supplementation strategy for improving zinc status in malnutrition.,recommendation,4,TinyLlama,True,,['zinc'],False,True
+1513,Outline a clinical nutrition plan for managing type 2 diabetes with low-phytate foods.,therapy,3,Mistral,False,,['phytate'],False,True
+2412,Compare ketogenic vs omnivorous for iron bioavailability in patients with anemia.,comparison,1,Mistral,True,,['iron'],False,True
+80,Which has lower oxalate: raw amaranth or cooked jute leaves?,comparison,3,TinyLlama,True,,[],False,False
+1112,How does the vitamin C content in oranges compare to lemons?,comparison,2,TinyLlama,False,recommendation,['vitamin c'],False,True
+802,What fat intake is ideal for people with short bowel syndrome?,recommendation,5,Mistral,True,,[],False,False
+2496,Compare the phytate levels in wheat bread and oats based on the Food Composition Table.,comparison,5,TinyLlama,False,,['phytate'],False,True
+1627,How does iron affect metabolic pathways in the human body?,general,2,TinyLlama,False,,['iron'],False,True
+291,Diet plan for type 1 diabetes with frequent hypoglycemia episodes,therapy,5,Mistral,False,,[],True,False
+1829,Assess the effects of magnesium citrate and potassium chloride on calcium absorption.,comparison,5,Mistral,False,,"['calcium', 'magnesium', 'potassium']",False,True
+2527,Suggest plant-based alternatives high in vitamin B12 for osteoporosis.,recommendation,3,Mistral,False,,[],False,False
+796,What's the suggested daily vitamin A intake for children with xerophthalmia?,recommendation,5,Mistral,True,,['vitamin a'],False,True
+1818,How do the biochemical impacts of zinc differ from vitamin C in pediatric diets?,comparison,2,TinyLlama,True,,"['vitamin c', 'zinc']",False,True
+3156,Suggest foods from the Food Composition Table rich in iron for children under 5.,recommendation,1,Mistral,True,,['iron'],False,True
+753,What protein intake is recommended for children with marasmus?,recommendation,5,Mistral,True,,['protein'],False,True
+1950,Suggest foods from the Food Composition Table rich in magnesium for athletes.,recommendation,5,Mistral,True,,['magnesium'],False,True
+313,How does iron get absorbed in the gut?,general,4,Mistral,False,,['iron'],False,True
+2909,Describe the biochemical mechanisms of magnesium absorption.,general,3,TinyLlama,True,comparison,['magnesium'],False,True
+188,What's the recommended daily fiber intake for someone with IBS-C?,recommendation,3,Mistral,True,,['fiber'],False,True
+2042,Suggest dietary changes for reducing phytate intake in pregnant women.,recommendation,1,TinyLlama,True,,['phytate'],False,True
+954,Diet plan recommendations for PKU with phenylalanine level of 500 µmol/L,therapy,5,Mistral,False,,[],True,False
+2389,How do the biochemical impacts of zinc differ from vitamin C in pediatric diets?,comparison,2,TinyLlama,True,general,"['vitamin c', 'zinc']",False,True
+271,How much protein should a child with marasmus consume daily?,recommendation,5,Mistral,True,,['protein'],False,True
+408,What are the biochemical functions of magnesium?,general,4,Mistral,False,,['magnesium'],False,True
+3466,How does calcium affect metabolic pathways in the human body?,general,5,TinyLlama,True,,['calcium'],False,True
+2801,How does zinc affect metabolic pathways in the human body?,general,3,Mistral,False,,['zinc'],False,True
+2833,What is the role of phytates in human biochemistry?,general,4,TinyLlama,False,,['phytate'],False,True
+2322,Explain the relationship between the Food Composition Table and dietary assessment.,general,5,Mistral,True,comparison,[],False,False
+3207,Suggest dietary changes for reducing phytate intake in children under 5.,recommendation,5,Mistral,False,,['phytate'],False,True
+1056,What's the suggested daily water intake for people in Ghanaian climate?,recommendation,3,Mistral,True,,[],False,False
+2242,How does vitamin D affect metabolic pathways in the human body?,general,3,TinyLlama,True,,['vitamin d'],False,True
+2001,What is the best way to enhance calcium absorption for adolescents?,recommendation,3,Mistral,False,,['calcium'],False,True
+377,Nutrition management for rheumatoid arthritis with tocilizumab treatment,therapy,5,Mistral,False,,[],True,False
+1737,Compare the phytate levels in lentils and sorghum based on the Food Composition Table.,comparison,1,TinyLlama,False,therapy,['phytate'],False,True
+525,Can I eat avocado if I'm trying to lose weight?,recommendation,2,TinyLlama,True,therapy,[],False,False
+814,What calcium intake is ideal for children with osteogenesis imperfecta?,recommendation,5,Mistral,True,,['calcium'],False,True
+3010,How do the biochemical impacts of fiber differ from iron in pediatric diets?,comparison,4,TinyLlama,False,,"['fiber', 'iron']",False,True
+2684,Design a dietary intervention for improving vitamin D status in osteoporosis.,therapy,2,Mistral,False,,['vitamin d'],False,True
+1417,What is the best way to enhance zinc absorption for elderly patients?,recommendation,3,Mistral,True,,['zinc'],False,True
+2558,Recommend a supplementation strategy for improving zinc status in stunted growth.,recommendation,3,TinyLlama,False,,['zinc'],False,True
+967,Diet therapy recommendations for autoimmune hepatitis with ALT 120 U/L,therapy,5,Mistral,False,,[],True,False
+205,How much selenium should someone with Kashin-Beck disease consume daily?,recommendation,5,Mistral,True,,[],False,False
+1731,How should a patient with kidney stones adjust their diet to improve magnesium absorption?,therapy,4,TinyLlama,False,comparison,['magnesium'],True,True
+183,What's the ideal carbohydrate intake for someone with reactive hypoglycemia?,recommendation,4,Mistral,True,,[],False,False
+518,What is the difference between saturated and unsaturated fats?,general,3,Mistral,False,comparison,[],False,False
+3208,Suggest plant-based alternatives high in calcium for osteoporosis.,recommendation,4,Mistral,False,,['calcium'],False,True
+2591,Suggest plant-based alternatives high in magnesium for stunted growth.,recommendation,4,TinyLlama,True,,['magnesium'],False,True
+2088,Outline a clinical nutrition plan for managing celiac disease with low-phytate foods.,therapy,3,Mistral,True,,['phytate'],False,True
+499,How does creatine/creatinine ratio help diagnose creatine metabolism disorders?,general,5,Mistral,False,,['creatinine'],False,True
+3049,How do the biochemical impacts of fiber differ from iron in pediatric diets?,comparison,4,TinyLlama,True,,"['fiber', 'iron']",False,True
+1933,Suggest a supplementation strategy for improving zinc status in osteoporosis.,recommendation,3,Mistral,True,,['zinc'],False,True
+1568,How should a patient with type 2 diabetes adjust their diet to improve vitamin D absorption?,therapy,1,TinyLlama,True,,['vitamin d'],False,True
+2673,Propose a therapy combining dietary and supplement interventions for iron-deficiency anemia.,therapy,4,Mistral,True,,['iron'],True,True
+337,How much vitamin C is in fresh vs frozen spinach?,general,3,Mistral,False,,['vitamin c'],False,True
+362,Compare the iron content in spinach and red meat,comparison,3,Mistral,True,therapy,['iron'],False,True
+2228,Describe the biochemical mechanisms of iron absorption.,general,2,Mistral,False,,['iron'],False,True
+1343,Recommend dietary changes for reducing phytate intake in elderly patients.,recommendation,5,Mistral,True,,['phytate'],False,True
+2314,Create a therapeutic meal plan for iron-deficiency anemia based on the Food Composition Table.,therapy,5,Mistral,True,general,['iron'],True,True
+630,Which is better for vitamin K2 absorption: palm oil or shea butter?,comparison,3,TinyLlama,True,,['vitamin k'],False,True
+793,What daily folate intake is recommended for people with elevated homocysteine?,recommendation,5,Mistral,True,,[],False,False
+1732,Propose a therapy combining dietary and supplement interventions for type 2 diabetes.,therapy,1,TinyLlama,True,general,[],False,False
+387,Nutrition therapy for MSUD with leucine 700 µmol/L,therapy,5,Mistral,False,,[],True,False
+3500,How does magnesium affect metabolic pathways in the human body?,general,3,Mistral,True,,['magnesium'],False,True
+2480,Compare ketogenic vs omnivorous for iron bioavailability in patients with anemia.,comparison,2,Mistral,False,,['iron'],False,True
+2202,How can clinical dietitians use phytate composition data in patient care?,general,3,Mistral,False,,['phytate'],False,True
+1305,Compare the phytate levels in wheat bread and maize flour based on the Food Composition Table.,comparison,5,Mistral,False,,['phytate'],False,True
+1571,Outline a clinical nutrition plan for managing kidney stones with low-phytate foods.,therapy,5,TinyLlama,False,,['phytate'],True,True
+565,Can I eat eggs every day?,general,2,TinyLlama,True,recommendation,[],False,False
+2856,How can clinical dietitians use phytate composition data in patient care?,general,5,Mistral,False,,['phytate'],False,True
+142,How much vitamin D should someone with CKD stage 2 consume daily?,recommendation,5,Mistral,True,,['vitamin d'],False,True
+3495,How can clinical dietitians use phytate composition data in patient care?,general,2,TinyLlama,True,,['phytate'],False,True
+173,What's the recommended daily vitamin A intake for a child with xerophthalmia?,recommendation,5,Mistral,True,,['vitamin a'],False,True
+216,What's the recommended daily potassium intake for someone with hypokalemia?,recommendation,5,Mistral,True,,['potassium'],False,True
+2752,Create a therapeutic diet for celiac disease based on the Food Composition Table.,therapy,3,TinyLlama,False,,[],False,False
+2047,Advise a supplementation strategy for improving vitamin B12 status in malnutrition.,recommendation,2,Mistral,False,,[],False,False
+588,What foods are high in vitamin B12?,general,2,TinyLlama,False,therapy,[],False,False
+1030,How much phytate is in 100g of fermented maize?,general,3,Mistral,False,,['phytate'],False,True
+300,What should I eat with type 2 diabetes and SGLT2 inhibitor treatment?,therapy,5,Mistral,False,,[],True,False
+252,What's the ideal carbohydrate intake for a child with glycogen storage disease type I?,recommendation,5,Mistral,True,,[],False,False
+420,What is the role of glutathione in the body?,general,5,Mistral,False,,[],False,False
+1384,What is the best way to enhance calcium absorption for adolescents?,recommendation,4,TinyLlama,False,,['calcium'],False,True
+847,What protein intake is recommended for children with marasmus?,recommendation,5,Mistral,True,,['protein'],False,True
+3344,How should a patient with celiac disease adjust their meal plan to improve vitamin D absorption?,therapy,4,Mistral,True,,['vitamin d'],True,True
+1307,Which has higher protein digestibility: cassava flour or yam flour?,comparison,2,Mistral,True,,['protein'],False,True
+2307,Design a dietary intervention for improving zinc status in kidney stones.,therapy,1,Mistral,True,recommendation,['zinc'],False,True
+3333,Design a dietary intervention for improving zinc status in iron-deficiency anemia.,therapy,2,Mistral,True,,"['iron', 'zinc']",False,True
+709,How does calcium absorption compare between traditional and commercial cheese?,comparison,4,Mistral,True,,['calcium'],False,True
+2433,How do the biochemical impacts of fiber differ from iron in pediatric diets?,comparison,3,TinyLlama,True,,"['fiber', 'iron']",False,True
+492,What's the recommended daily vitamin A intake for a child with measles?,recommendation,5,Mistral,True,,['vitamin a'],False,True
+1291,How do the biochemical impacts of polyphenol differ from calcium in pediatric diets?,comparison,1,Mistral,True,,['calcium'],False,True
+1944,What is the best way to enhance calcium absorption for pregnant women?,recommendation,1,Mistral,True,,['calcium'],False,True
+1622,How does vitamin D affect metabolic pathways in the human body?,general,2,TinyLlama,False,,['vitamin d'],False,True
+3038,Assess the phytate concentrations in millet porridge and sorghum based on the Food Composition Table.,comparison,3,Mistral,False,,['phytate'],False,True
+1560,Propose a therapy combining dietary and supplement interventions for celiac disease.,therapy,2,Mistral,False,,[],False,False
+940,What foods should I eat with cystic fibrosis and CFRD (cystic fibrosis-related diabetes)?,therapy,5,Mistral,False,,[],True,False
+3435,Explain the relationship between the Food Composition Table and dietary assessment.,general,1,TinyLlama,True,,[],False,False
+287,Nutrition plan for NAFLD with ALT 65 U/L and BMI 32,therapy,5,Mistral,False,,[],True,False
+953,Nutrition management recommendations for anorexia nervosa with refeeding syndrome risk,therapy,5,Mistral,False,,[],True,False
+236,What's the ideal calcium intake for a child with hypophosphatemic rickets?,recommendation,5,Mistral,True,,['calcium'],False,True
+2715,Propose a therapy combining dietary and supplement interventions for osteoporosis.,therapy,1,Mistral,True,,[],False,False
+1097,What protein intake is recommended for children with protein-energy malnutrition?,recommendation,5,Mistral,True,,['protein'],False,True
+3335,Design a dietary intervention for improving zinc status in kidney stones.,therapy,5,TinyLlama,False,,['zinc'],True,True
+495,How much vitamin C should a child with malnutrition consume daily?,recommendation,5,Mistral,True,,['vitamin c'],False,True
+3202,What is the best way to enhance calcium absorption for pregnant women?,recommendation,1,Mistral,False,,['calcium'],False,True
+2877,What is the role of phytates in human biochemistry?,general,1,Mistral,False,,['phytate'],False,True
+3520,Examine the effects of ferrous sulfate and folic acid on calcium absorption.,comparison,3,TinyLlama,True,recommendation,['calcium'],False,True
+3551,Suggest plant-based alternatives high in iron for chronic kidney disease.,recommendation,4,Mistral,True,therapy,['iron'],False,True
+2724,Design a dietary intervention for improving magnesium status in osteoporosis.,therapy,2,Mistral,True,,['magnesium'],False,True
+358,What is the difference between saturated and unsaturated fats?,general,3,Mistral,False,comparison,[],False,False
+1121,What are the symptoms of vitamin D deficiency?,general,2,TinyLlama,False,therapy,['vitamin d'],False,True
+3508,What possesses elevated protein digestibility: wheat bread or sorghum?,comparison,2,TinyLlama,False,recommendation,['protein'],False,True
+3031,Evaluate the effects of zinc gluconate and folic acid on calcium absorption.,comparison,5,TinyLlama,False,,"['calcium', 'zinc']",False,True
+1633,What is the role of phytates in human biochemistry?,general,4,TinyLlama,False,,['phytate'],False,True
+3282,Outline a clinical nutrition plan for managing iron-deficiency anemia with low-phytate foods.,therapy,2,TinyLlama,False,,"['iron', 'phytate']",False,True
+3293,Create a therapeutic meal plan for type 2 diabetes based on the Food Composition Table.,therapy,3,Mistral,False,,[],False,False
+3455,What is the role of phytates in human biochemistry?,general,3,TinyLlama,True,,['phytate'],False,True
+1995,Suggest dietary changes for reducing phytate intake in elderly patients.,recommendation,5,TinyLlama,False,,['phytate'],False,True
+1735,Recommend dietary changes for reducing phytate intake in elderly patients.,recommendation,1,Mistral,False,therapy,['phytate'],False,True
+3224,What is the best way to enhance calcium absorption for adolescents?,recommendation,4,TinyLlama,True,,['calcium'],False,True
+370,How much sugar is in a can of soda?,general,1,TinyLlama,False,recommendation,[],False,False
+2760,Propose a therapy combining dietary and supplement interventions for celiac disease.,therapy,2,Mistral,False,,[],False,False
+3135,Suggest a supplementation strategy for improving zinc status in malnutrition.,recommendation,4,TinyLlama,True,,['zinc'],False,True
+1419,Suggest foods from the Food Composition Table rich in magnesium for pregnant women.,recommendation,2,Mistral,True,,['magnesium'],False,True
+2031,Suggest plant-based alternatives high in iron for malnutrition.,recommendation,1,TinyLlama,True,,['iron'],False,True
+572,Compare the iron absorption from plant vs animal sources,comparison,4,Mistral,True,therapy,['iron'],False,True
+2646,Suggest foods from the Food Composition Table rich in zinc for athletes.,recommendation,2,Mistral,False,,['zinc'],False,True
+3538,How should a patient with kidney stones adjust their nutritional plan to improve magnesium absorption?,therapy,3,Mistral,True,recommendation,['magnesium'],False,True
+2,Which has lower phytate: unfermented ogi or sourdough bread?,comparison,4,Mistral,True,,['phytate'],False,True
+1805,Assess the phytate concentrations in lentils and maize flour based on the Food Composition Table.,comparison,2,Mistral,True,,['phytate'],False,True
+1388,Suggest foods from the Food Composition Table rich in iron for elderly patients.,recommendation,4,TinyLlama,True,,['iron'],False,True
+41,What's the recommended daily calorie intake for weight loss in Nigeria?,recommendation,4,Mistral,True,,[],False,False
+1038,What is the calcium content of traditional African fermented milk?,general,3,Mistral,False,,['calcium'],False,True
+1282,Which has higher protein digestibility: brown rice or maize flour?,comparison,2,Mistral,True,,['protein'],False,True
+3434,Describe the biochemical mechanisms of zinc absorption.,general,2,Mistral,True,,['zinc'],False,True
+2962,How should a patient with iron-deficiency anemia adjust their diet to improve iron absorption?,therapy,5,TinyLlama,True,comparison,['iron'],True,True
+2615,Suggest plant-based alternatives high in zinc for iron-deficiency anemia.,recommendation,1,Mistral,False,,"['iron', 'zinc']",False,True
+33,Compare iron content in traditional Nigerian vs Ghanaian soups,comparison,3,TinyLlama,True,,['iron'],False,True
+3395,Explain the relationship between the Food Composition Table and dietary assessment.,general,4,Mistral,True,,[],False,False
+2493,Compare low-phytate vs vegan for iron bioavailability in patients with anemia.,comparison,4,Mistral,True,,"['iron', 'phytate']",False,True
+981,Diet management recommendations for IBD with vitamin B12 deficiency (200 pg/mL),therapy,5,Mistral,False,,[],True,False
+40,Which has lower oxalate: raw amaranth or cooked jute leaves?,comparison,3,TinyLlama,True,,[],False,False
+2898,How does calcium affect metabolic pathways in the human body?,general,5,Mistral,False,,['calcium'],False,True
+3270,How should a patient with celiac disease adjust their meal plan to improve magnesium absorption?,therapy,3,TinyLlama,False,,['magnesium'],False,True
+1026,How does the body synthesize collagen?,general,4,Mistral,False,,[],False,False
+982,Nutrition plan recommendations for CKD stage 3 with potassium level of 5.8 mg/dL,therapy,5,Mistral,False,,['potassium'],True,True
+1243,How do the biochemical impacts of phytate differ from protein in pediatric diets?,comparison,1,TinyLlama,True,,"['phytate', 'protein']",False,True
+1180,How much vitamin E is in a tablespoon of extra virgin olive oil?,general,2,TinyLlama,False,recommendation,[],False,False
+47,Compare vitamin D3: fortified milk vs egg yolks,comparison,3,TinyLlama,True,,['vitamin d'],False,True
+50,Compare protein quality: boiled vs roasted groundnuts,comparison,3,TinyLlama,True,,['protein'],False,True
+3334,Propose a therapy combining dietary and supplement interventions for kidney stones.,therapy,5,TinyLlama,True,,[],True,False
+1838,Assess the phytate concentrations in millet porridge and sorghum based on the Food Composition Table.,comparison,3,Mistral,False,,['phytate'],False,True
+503,Compare the protein content of chicken and beef per 100g,comparison,2,TinyLlama,False,recommendation,['protein'],False,True
+2456,Which has higher protein digestibility: cassava flour or oats?,comparison,5,Mistral,False,,['protein'],False,True
+181,What's the recommended daily iodine intake for breastfeeding women?,recommendation,4,Mistral,True,,[],False,False
+2890,How can clinical dietitians use phytate composition data in patient care?,general,3,TinyLlama,False,,['phytate'],False,True
+2710,How should a patient with kidney stones adjust their diet to improve magnesium absorption?,therapy,5,TinyLlama,False,,['magnesium'],True,True
+1271,Which has higher protein digestibility: brown rice or yam flour?,comparison,4,TinyLlama,True,,['protein'],False,True
+3311,Design a dietary intervention for improving vitamin D status in osteoporosis.,therapy,5,TinyLlama,False,,['vitamin d'],True,True
+3563,Suggest foods from the Food Composition Table rich in iron for elderly patients.,recommendation,4,TinyLlama,True,general,['iron'],False,True
+2508,Compare the phytate levels in brown rice and oats based on the Food Composition Table.,comparison,5,Mistral,True,,['phytate'],False,True
+1207,Compare the effects of zinc gluconate and folic acid on calcium absorption.,comparison,2,Mistral,True,,"['calcium', 'zinc']",False,True
+1842,Evaluate the phytate concentrations in wheat bread and yam flour based on the Food Composition Table.,comparison,4,Mistral,False,,['phytate'],False,True
+2452,Compare the effects of magnesium citrate and vitamin K2 on calcium absorption.,comparison,1,TinyLlama,True,,"['calcium', 'magnesium', 'vitamin k']",False,True
+262,Nutrition plan for NAFLD with T2DM and obesity (BMI 38),therapy,5,Mistral,False,,[],True,False
+41,Compare vitamin B12 in fortified vs unfortified plant milks,comparison,3,TinyLlama,True,,[],False,False
+2842,How does vitamin D affect metabolic pathways in the human body?,general,3,TinyLlama,True,,['vitamin d'],False,True
+622,Which is better for choline intake: boiled egg or palm nut soup?,comparison,2,TinyLlama,True,,[],False,False
+238,What should I eat with hyperthyroidism and on methimazole treatment?,therapy,5,Mistral,False,,[],True,False
+469,How much vitamin K should someone on warfarin maintain daily?,recommendation,5,Mistral,True,,['vitamin k'],False,True
+2413,How do the biochemical impacts of zinc differ from vitamin C in pediatric diets?,comparison,1,TinyLlama,False,,"['vitamin c', 'zinc']",False,True
+3411,What is the role of phytates in human biochemistry?,general,1,TinyLlama,True,,['phytate'],False,True
+2393,Advise dietary changes for reducing phytate intake in pregnant women.,recommendation,4,TinyLlama,True,general,['phytate'],False,True
+873,What daily vitamin D intake is recommended for children with hypocalcemic seizures?,recommendation,5,Mistral,True,,['vitamin d'],False,True
+1956,Suggest foods from the Food Composition Table rich in iron for children under 5.,recommendation,1,Mistral,True,,['iron'],False,True
+106,How much vitamin C should a child with scurvy consume daily?,recommendation,5,Mistral,True,,['vitamin c'],False,True
+562,Compare the calorie content in beer vs wine,comparison,2,TinyLlama,False,recommendation,[],False,False
+211,How much iron should a vegetarian consume daily?,recommendation,3,Mistral,True,,['iron'],False,True
+34,What's the recommended daily potassium intake for someone on diuretics?,recommendation,4,Mistral,True,,['potassium'],False,True
+452,What's the recommended daily fiber intake for an adult with constipation?,recommendation,3,Mistral,True,,['fiber'],False,True
+2131,How should a patient with kidney stones adjust their nutritional plan to improve vitamin D absorption?,therapy,4,Mistral,False,,['vitamin d'],True,True
+3060,"Out of these, option possesses elevated protein digestibility: brown rice or oats?",comparison,3,Mistral,False,,['protein'],False,True
+3373,How should a patient with celiac disease adjust their meal plan to improve vitamin D absorption?,therapy,5,TinyLlama,False,,['vitamin d'],True,True
+2714,Create a therapeutic diet for kidney stones based on the Food Composition Table.,therapy,3,Mistral,True,,[],False,False
+63,Compare magnesium bioavailability: raw vs roasted pumpkin seeds,comparison,4,Mistral,True,,['magnesium'],False,True
+321,How does carnitine shuttle work for fatty acid oxidation?,general,5,Mistral,False,,[],False,False
+3034,"In your view, which option possesses elevated protein digestibility: brown rice or yam flour?",comparison,2,TinyLlama,True,,['protein'],False,True
+674,"For blood sugar control,  is roasted yam better than boiled yam?",comparison,3,TinyLlama,True,,[],False,False
+3592,Advise a supplementation strategy for improving vitamin B12 status in malnutrition.,recommendation,2,Mistral,False,comparison,[],False,False
+2706,How should a patient with kidney stones adjust their diet to improve vitamin D absorption?,therapy,5,TinyLlama,False,,['vitamin d'],True,True
+1650,How can clinical dietitians use phytate composition data in patient care?,general,1,Mistral,True,,['phytate'],False,True
+783,What daily vitamin E intake is recommended for people with ataxia?,recommendation,5,Mistral,True,,[],False,False
+631,"How does phytate reduction compare between soaking,  sprouting,  and fermenting cowpeas?",comparison,4,Mistral,True,,['phytate'],False,True
+3291,Propose a therapy combining dietary and supplement interventions for iron-deficiency anemia.,therapy,4,Mistral,True,,['iron'],True,True
+3096,Evaluate the phytate amounts in wheat bread and oats based on the Food Composition Table.,comparison,5,TinyLlama,False,,['phytate'],False,True
+1687,Describe the biochemical mechanisms of zinc absorption.,general,1,Mistral,False,,['zinc'],False,True
+422,Compare the glycemic index of sweet potatoes vs white potatoes,comparison,3,Mistral,True,therapy,[],False,False
+2999,Design a dietary intervention for improving vitamin D status in kidney stones.,therapy,3,Mistral,False,general,['vitamin d'],False,True
+2804,How does iron affect metabolic pathways in the human body?,general,2,Mistral,False,,['iron'],False,True
+192,How much magnesium should someone with migraines consume daily?,recommendation,4,Mistral,True,,['magnesium'],False,True
+1796,Outline a clinical nutrition plan for managing kidney stones with low-phytate foods.,therapy,4,Mistral,False,comparison,['phytate'],True,True
+1942,Suggest plant-based alternatives high in magnesium for iron-deficiency anemia.,recommendation,2,Mistral,False,,"['iron', 'magnesium']",False,True
+2387,Suggest foods from the Food Composition Table rich in calcium for children under 5.,recommendation,1,TinyLlama,False,general,['calcium'],False,True
+159,How much vitamin E should someone with NAFLD consume daily?,recommendation,4,Mistral,True,,[],False,False
+2317,Suggest dietary changes for reducing phytate intake in adolescents.,recommendation,3,TinyLlama,False,comparison,['phytate'],False,True
+3299,Design a dietary intervention for improving calcium status in kidney stones.,therapy,4,Mistral,True,,['calcium'],True,True
+3390,What is the role of phytates in human biochemistry?,general,4,TinyLlama,False,,['phytate'],False,True
+2808,Explain the relationship between the Food Composition Table and dietary assessment.,general,1,TinyLlama,False,,[],False,False
+2362,How should a patient with iron-deficiency anemia adjust their meal plan to improve iron absorption?,therapy,5,TinyLlama,True,comparison,['iron'],True,True
+396,Compare the potassium content in bananas and potatoes,comparison,3,Mistral,True,therapy,['potassium'],False,True
+1532,Propose a therapy combining dietary and supplement interventions for osteoporosis.,therapy,1,TinyLlama,True,,[],False,False
+76,How much folate should someone with MTHFR mutation consume daily?,recommendation,5,Mistral,True,,[],False,False
+1788,Outline a clinical nutrition plan for managing osteoporosis with low-phytate foods.,therapy,2,TinyLlama,False,recommendation,['phytate'],False,True
+1990,Suggest foods from the Food Composition Table rich in vitamin B12 for athletes.,recommendation,2,TinyLlama,False,,[],False,False
+329,Nutrition management for rheumatoid arthritis with TNF inhibitor treatment,therapy,5,Mistral,False,,[],True,False
+1275,Compare the phytate levels in millet porridge and maize flour based on the Food Composition Table.,comparison,4,Mistral,True,,['phytate'],False,True
+1498,Design a dietary intervention for improving zinc status in osteoporosis.,therapy,4,TinyLlama,False,,['zinc'],True,True
+2438,Compare the phytate levels in millet porridge and sorghum based on the Food Composition Table.,comparison,3,Mistral,False,,['phytate'],False,True
+1564,Design a dietary intervention for improving magnesium status in type 2 diabetes.,therapy,5,TinyLlama,False,,['magnesium'],True,True
+3244,Advise dietary changes for reducing phytate intake in elderly patients.,recommendation,5,TinyLlama,True,,['phytate'],False,True
+149,How much vitamin K should someone on warfarin maintain daily?,recommendation,5,Mistral,True,,['vitamin k'],False,True
+3357,Propose a therapy combining dietary and supplement interventions for iron-deficiency anemia.,therapy,4,TinyLlama,True,,['iron'],True,True
+338,Diet plan for PKU with tyrosine 30 µmol/L,therapy,5,Mistral,False,,[],True,False
+792,What's the suggested daily potassium intake for people with hypertension?,recommendation,4,Mistral,True,,['potassium'],False,True
+2610,Suggest foods from the Food Composition Table rich in calcium for athletes.,recommendation,4,Mistral,False,,['calcium'],False,True
+3183,Suggest dietary changes for reducing phytate intake in pregnant women.,recommendation,2,Mistral,True,,['phytate'],False,True
+1544,How should a patient with celiac disease adjust their diet to improve vitamin D absorption?,therapy,4,Mistral,True,,['vitamin d'],True,True
+3231,Suggest plant-based alternatives high in iron for malnutrition.,recommendation,1,TinyLlama,True,,['iron'],False,True
+1912,Examine the phytate amounts in wheat bread and oats based on the Food Composition Table.,comparison,3,TinyLlama,False,,['phytate'],False,True
+2081,How should a patient with celiac disease adjust their meal plan to improve vitamin D absorption?,therapy,2,TinyLlama,False,,['vitamin d'],False,True
+1677,What is the role of phytates in human biochemistry?,general,1,Mistral,False,,['phytate'],False,True
+3179,Suggest plant-based alternatives high in calcium for osteoporosis.,recommendation,2,Mistral,True,,['calcium'],False,True
+1098,What fat intake is ideal for people with chylomicron retention disease?,recommendation,5,Mistral,True,,[],False,False
+223,What should I eat if I have gluten ataxia with positive anti-gliadin antibodies?,therapy,5,Mistral,False,,[],True,False
+1509,Propose a therapy combining dietary and supplement interventions for iron-deficiency anemia.,therapy,1,Mistral,True,,['iron'],False,True
+3529,How do the biochemical impacts of phytate differ from protein in pediatric diets?,comparison,5,Mistral,False,recommendation,"['phytate', 'protein']",False,True
+29,Compare calcium absorption from traditional vs commercial yogurts,comparison,4,Mistral,True,,['calcium'],False,True
+1826,"Out of these, option shows more protein digestibility: wheat bread or maize flour?",comparison,5,TinyLlama,True,,['protein'],False,True
+2552,Suggest plant-based alternatives high in vitamin B12 for malnutrition.,recommendation,5,TinyLlama,False,,[],False,False
+159,What's the ideal carbohydrate intake for a child with glycogen storage disease type I?,recommendation,5,Mistral,True,,[],False,False
+3317,How should a patient with type 2 diabetes adjust their nutritional plan to improve magnesium absorption?,therapy,2,Mistral,False,,['magnesium'],False,True
+379,Is honey better than sugar for diabetics?,therapy,3,Mistral,True,general,[],False,False
+1229,Compare the effects of magnesium citrate and potassium chloride on calcium absorption.,comparison,5,Mistral,False,,"['calcium', 'magnesium', 'potassium']",False,True
+1723,Explain the relationship between the Food Composition Table and dietary assessment.,general,1,TinyLlama,True,comparison,[],False,False
+1811,"Out of these, option contains elevated protein digestibility: lentils or yam flour?",comparison,3,Mistral,True,,['protein'],False,True
+609,Boiled yam versus roasted plantain—which has lower glycemic index?,comparison,3,TinyLlama,True,,[],False,False
+2871,How can clinical dietitians use phytate composition data in patient care?,general,2,TinyLlama,True,,['phytate'],False,True
+63,Is palm oil or shea butter better for vitamin K2 absorption?,comparison,3,TinyLlama,True,,['vitamin k'],False,True
+3543,Suggest plant-based alternatives high in zinc for iron-deficiency anemia.,recommendation,5,Mistral,False,therapy,"['iron', 'zinc']",False,True
+2827,How does iron affect metabolic pathways in the human body?,general,2,TinyLlama,False,,['iron'],False,True
+3222,Suggest foods from the Food Composition Table rich in calcium for pregnant women.,recommendation,4,Mistral,True,,['calcium'],False,True
+3042,Evaluate the phytate concentrations in wheat bread and yam flour based on the Food Composition Table.,comparison,4,Mistral,False,,['phytate'],False,True
+68,How much zinc should a 5-year-old with stunted growth consume daily?,recommendation,5,Mistral,True,,['zinc'],False,True
+998,Nutrition plan recommendations for CKD stage 4 with phosphorus level of 5.2 mg/dL,therapy,5,Mistral,False,,['phosphorus'],True,True
+2477,Which has higher protein digestibility: cassava flour or oats?,comparison,1,Mistral,True,,['protein'],False,True
+3571,Suggest foods from the Food Composition Table rich in calcium for adolescents.,recommendation,2,TinyLlama,False,comparison,['calcium'],False,True
+146,How much folate should someone with MTHFR C677T genotype consume daily?,recommendation,5,Mistral,True,,[],False,False
+2400,What is the best way to enhance vitamin B12 absorption for adolescents?,recommendation,3,Mistral,False,comparison,[],False,False
+1970,What is the best way to enhance vitamin B12 absorption for children under 5?,recommendation,4,TinyLlama,True,,[],False,False
+2941,How does magnesium affect metabolic pathways in the human body?,general,3,TinyLlama,False,comparison,['magnesium'],False,True
+246,What's the recommended daily calorie intake for weight maintenance in Nigeria?,recommendation,4,Mistral,True,,[],False,False
+2416,Compare Mediterranean vs paleo for iron bioavailability in patients with anemia.,comparison,1,TinyLlama,True,,['iron'],False,True
+1651,Explain the relationship between the Food Composition Table and dietary assessment.,general,1,TinyLlama,False,,[],False,False
+874,What's the suggested daily iodine intake for breastfeeding women?,recommendation,4,Mistral,True,,[],False,False
+279,How much zinc should a 4-year-old with impaired immunity consume daily?,recommendation,5,Mistral,True,,['zinc'],False,True
+1201,Compare the phytate levels in brown rice and maize flour based on the Food Composition Table.,comparison,5,Mistral,True,,['phytate'],False,True
+1660,Describe the biochemical mechanisms of magnesium absorption.,general,2,TinyLlama,True,,['magnesium'],False,True
+1314,Which has higher protein digestibility: cassava flour or yam flour?,comparison,1,Mistral,False,,['protein'],False,True
+2308,What possesses elevated protein digestibility: wheat bread or sorghum?,comparison,2,TinyLlama,False,recommendation,['protein'],False,True
+1076,What's the suggested daily iodine intake in iodine-deficient regions?,recommendation,4,Mistral,True,,[],False,False
+311,Explain the Krebs cycle in simple terms,general,4,Mistral,False,,[],False,False
+3433,What is the role of phytates in human biochemistry?,general,4,TinyLlama,False,,['phytate'],False,True
+1087,What daily magnesium intake is recommended for people with muscle cramps?,recommendation,4,Mistral,True,,['magnesium'],False,True
+1157,How much iron is in a 3-ounce serving of cooked beef?,general,2,TinyLlama,False,recommendation,['iron'],False,True
+911,Nutrition management recommendations for NAFLD with fibrosis stage 2 on FibroScan,therapy,5,Mistral,False,,[],True,False
+1911,Contrast the effects of zinc gluconate and ascorbic acid on calcium absorption.,comparison,2,TinyLlama,False,,"['calcium', 'zinc']",False,True
+885,"My patient has gout with uric acid level of 9.2 mg/dL,  what diet therapy should I prescribe?",therapy,5,Mistral,False,,[],True,False
+2584,What is the best way to enhance calcium absorption for adolescents?,recommendation,4,TinyLlama,False,,['calcium'],False,True
+1149,Is it healthy to skip breakfast regularly?,general,2,TinyLlama,True,recommendation,[],False,False
+2593,Recommend dietary changes for reducing phytate intake in athletes.,recommendation,4,Mistral,True,,['phytate'],False,True
+3271,Create a therapeutic nutritional plan for iron-deficiency anemia based on the Food Composition Table.,therapy,5,TinyLlama,True,,['iron'],True,True
+3033,How do the biochemical impacts of fiber differ from iron in pediatric diets?,comparison,3,TinyLlama,True,,"['fiber', 'iron']",False,True
+2052,Create a therapeutic nutritional plan for celiac disease based on the Food Composition Table.,therapy,4,Mistral,True,,[],True,False
+493,How does lactate elevation indicate mitochondrial dysfunction?,general,4,Mistral,False,,[],False,False
+655,How does zinc level compare between fresh and dried crayfish?,comparison,3,TinyLlama,True,,['zinc'],False,True
+1601,How does zinc affect metabolic pathways in the human body?,general,3,Mistral,False,,['zinc'],False,True
+3441,How does zinc affect metabolic pathways in the human body?,general,1,Mistral,True,,['zinc'],False,True
+221,How much vitamin K should someone with liver disease consume daily?,recommendation,5,Mistral,True,,['vitamin k'],False,True
+439,Compare the iron content of palm oil and shea butter,comparison,2,TinyLlama,True,,['iron'],False,True
+2642,Recommend dietary changes for reducing phytate intake in pregnant women.,recommendation,1,TinyLlama,True,,['phytate'],False,True
+3363,Outline a clinical nutrition plan for managing type 2 diabetes with low-phytate foods.,therapy,5,Mistral,True,,['phytate'],True,True
+811,What daily iron intake is recommended for vegetarians?,recommendation,3,Mistral,True,,['iron'],False,True
+2200,What is the role of phytates in human biochemistry?,general,5,TinyLlama,False,,['phytate'],False,True
+1160,How much calcium is in a cup of plain yogurt?,general,2,TinyLlama,False,recommendation,['calcium'],False,True
+1452,Create a therapeutic diet for celiac disease based on the Food Composition Table.,therapy,4,Mistral,True,,[],True,False
+3002,Assess the phytate concentrations in brown rice and quinoa based on the Food Composition Table.,comparison,5,Mistral,True,,['phytate'],False,True
+360,How many carbohydrates should a diabetic eat per meal?,recommendation,4,Mistral,True,therapy,[],False,False
+199,What's the ideal iron intake for someone with hemochromatosis?,recommendation,5,Mistral,True,,['iron'],False,True
+3452,How does magnesium affect metabolic pathways in the human body?,general,2,TinyLlama,True,,['magnesium'],False,True
+108,Which African legume has highest methionine: cowpea or pigeon pea?,comparison,3,TinyLlama,True,,[],False,False
+564,What is the best diet for high cholesterol?,therapy,3,Mistral,True,recommendation,['cholesterol'],False,True
+2542,Suggest plant-based alternatives high in magnesium for iron-deficiency anemia.,recommendation,2,Mistral,False,,"['iron', 'magnesium']",False,True
+1024,What is the role of vitamin A in vision?,general,4,Mistral,False,,['vitamin a'],False,True
+1800,What is the best way to enhance vitamin B12 absorption for adolescents?,recommendation,3,Mistral,False,comparison,[],False,False
+983,Diet therapy recommendations for autoimmune hepatitis with bilirubin level of 2.5 mg/dL,therapy,5,Mistral,False,,['bilirubin'],True,True
+2735,Design a dietary intervention for improving zinc status in kidney stones.,therapy,5,TinyLlama,False,,['zinc'],True,True
+2415,Which has higher protein digestibility: lentils or quinoa?,comparison,2,Mistral,False,,['protein'],False,True
+2776,How does iron affect metabolic pathways in the human body?,general,1,TinyLlama,True,,['iron'],False,True
+2619,Suggest foods from the Food Composition Table rich in magnesium for pregnant women.,recommendation,2,Mistral,True,,['magnesium'],False,True
+1120,How many carbohydrates should a diabetic eat per meal?,recommendation,4,Mistral,True,therapy,[],False,False
+2588,Suggest foods from the Food Composition Table rich in iron for elderly patients.,recommendation,4,TinyLlama,True,,['iron'],False,True
+3001,Examine the phytate concentrations in brown rice and maize flour based on the Food Composition Table.,comparison,5,Mistral,True,,['phytate'],False,True
+1628,Describe the biochemical mechanisms of iron absorption.,general,2,Mistral,False,,['iron'],False,True
+462,How much leucine should someone with MSUD maintain?,recommendation,5,Mistral,True,,[],False,False
+1787,Suggest foods from the Food Composition Table rich in calcium for children under 5.,recommendation,1,TinyLlama,False,general,['calcium'],False,True
+2879,What is the role of phytates in human biochemistry?,general,3,Mistral,True,,['phytate'],False,True
+3375,Outline a clinical nutrition plan for managing osteoporosis with low-phytate foods.,therapy,5,TinyLlama,False,,['phytate'],True,True
+3457,Explain the relationship between the Food Composition Table and dietary assessment.,general,1,TinyLlama,False,,[],False,False
+31,Compare iron bioavailability in raw vs sprouted lentils,comparison,4,Mistral,True,,['iron'],False,True
+3146,What is the best way to enhance vitamin B12 absorption for elderly patients?,recommendation,1,TinyLlama,False,,[],False,False
+254,What's the recommended daily chromium intake for someone with metabolic syndrome?,recommendation,4,Mistral,True,,[],False,False
+2751,Create a therapeutic diet for osteoporosis based on the Food Composition Table.,therapy,1,Mistral,True,,[],False,False
+434,What is the amino acid profile of cowpea?,general,3,Mistral,False,,[],False,False
+2441,Compare the phytate levels in millet porridge and sorghum based on the Food Composition Table.,comparison,2,TinyLlama,True,,['phytate'],False,True
+229,How much selenium should someone with thyroiditis consume daily?,recommendation,4,Mistral,True,,[],False,False
+191,What's the ideal calcium intake for a child with osteogenesis imperfecta?,recommendation,5,Mistral,True,,['calcium'],False,True
+1527,How should a patient with type 2 diabetes adjust their diet to improve magnesium absorption?,therapy,4,Mistral,True,,['magnesium'],True,True
+1129,Is it safe to follow a keto diet with kidney disease?,therapy,4,Mistral,True,general,[],True,False
+519,Is coconut oil healthier than olive oil?,comparison,3,Mistral,True,therapy,[],False,False
+135,How much iron should a menstruating woman consume daily?,recommendation,3,Mistral,True,,['iron'],False,True
+2145,Outline a clinical nutrition plan for managing osteoporosis with low-phytate foods.,therapy,3,Mistral,False,,['phytate'],False,True
+1503,Create a therapeutic diet for osteoporosis based on the Food Composition Table.,therapy,1,Mistral,False,,[],False,False
+1733,How can clinical dietitians use phytate composition data in patient care?,general,4,Mistral,True,comparison,['phytate'],False,True
+1680,Describe the biochemical mechanisms of vitamin D absorption.,general,4,TinyLlama,False,,['vitamin d'],False,True
+3023,How do the biochemical impacts of phytate differ from vitamin C in pediatric diets?,comparison,1,Mistral,True,,"['phytate', 'vitamin c']",False,True
+2447,How do the biochemical impacts of fiber differ from magnesium in pediatric diets?,comparison,2,Mistral,False,,"['fiber', 'magnesium']",False,True
+1324,Compare the phytate levels in brown rice and maize flour based on the Food Composition Table.,comparison,4,Mistral,True,,['phytate'],False,True
+1292,Compare the phytate levels in millet porridge and maize flour based on the Food Composition Table.,comparison,5,Mistral,True,,['phytate'],False,True
+996,What foods should I eat with type 1 diabetes and celiac disease comorbidity?,therapy,5,Mistral,False,,[],True,False
+1994,Advise dietary changes for reducing phytate intake in elderly patients.,recommendation,3,Mistral,False,,['phytate'],False,True
+1409,Recommend a supplementation strategy for improving magnesium status in osteoporosis.,recommendation,2,Mistral,False,,['magnesium'],False,True
+938,Diet plan recommendations for PKU with tyrosine level of 30 µmol/L,therapy,5,Mistral,False,,[],True,False
+79,What's the recommended daily vitamin A intake for a child with measles?,recommendation,5,Mistral,True,,['vitamin a'],False,True
+1592,How can clinical dietitians use phytate composition data in patient care?,general,5,Mistral,True,,['phytate'],False,True
+2301,Assess the effects of vitamin D and fish oil on calcium absorption.,comparison,3,Mistral,False,recommendation,"['calcium', 'vitamin d']",False,True
+2083,How should a patient with kidney stones adjust their meal plan to improve magnesium absorption?,therapy,4,Mistral,True,,['magnesium'],True,True
+28,Compare protein quality of cowpea vs bambara nut,comparison,3,TinyLlama,True,,['protein'],False,True
+281,Nutrition management for rheumatoid arthritis with TNF inhibitor treatment,therapy,5,Mistral,False,,[],True,False
+3572,Assess high-fiber vs low-carb for iron bioavailability in patients with anemia.,comparison,2,TinyLlama,False,recommendation,"['fiber', 'iron']",False,True
+1652,How does magnesium affect metabolic pathways in the human body?,general,2,TinyLlama,True,,['magnesium'],False,True
+2671,Create a therapeutic diet for iron-deficiency anemia based on the Food Composition Table.,therapy,5,TinyLlama,True,,['iron'],True,True
+1865,How do the biochemical impacts of fiber differ from iron in pediatric diets?,comparison,5,TinyLlama,True,,"['fiber', 'iron']",False,True
+1821,Examine the effects of magnesium citrate and fish oil on calcium absorption.,comparison,4,Mistral,True,,"['calcium', 'magnesium']",False,True
+327,Explain the biochemical basis of kwashiorkor,general,5,Mistral,False,,[],False,False
+716,Which traditional preparation—kenkey or banku—lowers phytate most?,comparison,4,Mistral,True,,['phytate'],False,True
+39,What's the ideal iron intake for a vegetarian athlete?,recommendation,4,Mistral,True,,['iron'],False,True
+4,Which has lower phytate: unfermented ogi or sourdough bread?,comparison,4,Mistral,True,,['phytate'],False,True
+340,What is the calcium content of traditional African fermented milk?,general,3,Mistral,False,,['calcium'],False,True
+2723,How should a patient with osteoporosis adjust their diet to improve magnesium absorption?,therapy,4,TinyLlama,False,,['magnesium'],True,True
+2979,Recommend a supplementation strategy for improving zinc status in malnutrition.,recommendation,3,TinyLlama,False,general,['zinc'],False,True
+2709,Propose a therapy combining dietary and supplement interventions for iron-deficiency anemia.,therapy,1,Mistral,True,,['iron'],False,True
+1290,Compare high-fiber vs vegan for iron bioavailability in patients with anemia.,comparison,3,TinyLlama,False,,"['fiber', 'iron']",False,True
+1827,Evaluate the effects of magnesium citrate and potassium chloride on calcium absorption.,comparison,3,TinyLlama,False,,"['calcium', 'magnesium', 'potassium']",False,True
+944,What foods should I eat if I have celiac disease and concurrent SIBO?,therapy,5,Mistral,False,,[],True,False
+1694,How does calcium affect metabolic pathways in the human body?,general,1,Mistral,True,,['calcium'],False,True
+48,Which African legume has highest methionine: bambara nut or pigeon pea?,comparison,3,TinyLlama,True,,[],False,False
+1709,Describe the biochemical mechanisms of magnesium absorption.,general,3,TinyLlama,True,comparison,['magnesium'],False,True
+1769,Recommend a supplementation strategy for improving iron status in malnutrition.,recommendation,2,TinyLlama,True,general,['iron'],False,True
+1760,Recommend dietary changes for reducing phytate intake in athletes.,recommendation,3,Mistral,True,therapy,['phytate'],False,True
+1053,What daily vitamin C intake is recommended for smokers?,recommendation,3,Mistral,True,,['vitamin c'],False,True
+102,Is boiled egg or palm nut soup better for choline bioavailability?,comparison,2,TinyLlama,True,,[],False,False
+27,Compare vitamin D3 in fortified milk vs egg yolks,comparison,3,TinyLlama,True,,['vitamin d'],False,True
+481,Compare the amino acid profiles in different inborn errors of metabolism,comparison,5,Mistral,True,,[],False,False
+1455,Create a therapeutic diet for celiac disease based on the Food Composition Table.,therapy,1,TinyLlama,True,,[],False,False
+1173,How much water should I drink during physical exercise?,recommendation,3,Mistral,True,therapy,[],False,False
+1143,How much zinc should I take when I have a cold?,recommendation,4,Mistral,True,therapy,['zinc'],False,True
+1405,Suggest foods from the Food Composition Table rich in vitamin B12 for pregnant women.,recommendation,2,TinyLlama,False,,[],False,False
+219,How much zinc should a child with diarrhea consume daily?,recommendation,5,Mistral,True,,['zinc'],False,True
+72,Which has higher lycopene: fresh vs cooked tomatoes?,comparison,2,TinyLlama,True,,[],False,False
+3416,What is the role of phytates in human biochemistry?,general,5,Mistral,False,,['phytate'],False,True
+3492,What is the role of phytates in human biochemistry?,general,3,Mistral,False,,['phytate'],False,True
+2020,Advise dietary changes for reducing phytate intake in athletes.,recommendation,1,Mistral,False,,['phytate'],False,True
+205,"My patient has gout with uric acid 9.2 mg/dL, what diet therapy should I prescribe?",therapy,5,Mistral,False,,[],True,False
+1331,Suggest foods from the Food Composition Table rich in iron for adolescents.,recommendation,5,Mistral,False,,['iron'],False,True
+2592,What is the best way to enhance magnesium absorption for adolescents?,recommendation,2,Mistral,True,,['magnesium'],False,True
+1877,"Out of these, option shows elevated protein digestibility: cassava flour or oats?",comparison,1,Mistral,True,,['protein'],False,True
+788,What's the suggested daily fiber intake for people with IBS-C?,recommendation,3,Mistral,True,,['fiber'],False,True
+3145,Advise a supplementation strategy for improving zinc status in iron-deficiency anemia.,recommendation,3,Mistral,True,,"['iron', 'zinc']",False,True
+2461,Which has higher protein digestibility: lentils or maize flour?,comparison,1,TinyLlama,False,,['protein'],False,True
+2152,Create a therapeutic nutritional plan for celiac disease based on the Food Composition Table.,therapy,3,TinyLlama,False,,[],False,False
+263,How much folate should someone with elevated homocysteine consume daily?,recommendation,5,Mistral,True,,[],False,False
+253,How much vitamin E should someone with ataxia-telangiectasia consume daily?,recommendation,5,Mistral,True,,[],False,False
+261,How much magnesium should someone with insulin resistance consume daily?,recommendation,4,Mistral,True,,['magnesium'],False,True
+1172,How does iron absorption compare between plant and animal sources?,comparison,4,Mistral,True,therapy,['iron'],False,True
+369,Nutrition management for anorexia nervosa with hypokalemia (K+ 2.8 mmol/L),therapy,5,Mistral,False,,[],True,False
+1360,Recommend a supplementation strategy for improving magnesium status in chronic kidney disease.,recommendation,3,Mistral,True,,['magnesium'],False,True
+2069,Outline a clinical nutrition plan for managing kidney stones with low-phytate foods.,therapy,4,TinyLlama,True,,['phytate'],True,True
+522,Compare the iron content in spinach and red meat,comparison,3,Mistral,True,therapy,['iron'],False,True
+2973,How do the biochemical impacts of fiber differ from magnesium in pediatric diets?,comparison,5,Mistral,False,general,"['fiber', 'magnesium']",False,True
+103,Compare magnesium bioavailability in raw vs roasted melon seeds,comparison,4,Mistral,True,,['magnesium'],False,True
+1277,Which has higher protein digestibility: cassava flour or oats?,comparison,1,Mistral,True,,['protein'],False,True
+2037,What is the best way to enhance calcium absorption for pregnant women?,recommendation,2,TinyLlama,False,,['calcium'],False,True
+1222,Which has higher protein digestibility: brown rice or quinoa?,comparison,4,Mistral,True,,['protein'],False,True
+809,What daily zinc intake is recommended for a 4-year-old with impaired immunity?,recommendation,5,Mistral,True,,['zinc'],False,True
+2107,How should a patient with kidney stones adjust their meal plan to improve iron absorption?,therapy,1,TinyLlama,False,,['iron'],False,True
+2930,How do the biochemical impacts of phytate differ from protein in pediatric diets?,comparison,3,TinyLlama,True,general,"['phytate', 'protein']",False,True
+222,What's the ideal iron intake for someone with hemochromatosis?,recommendation,5,Mistral,True,,['iron'],False,True
+2694,Create a therapeutic diet for iron-deficiency anemia based on the Food Composition Table.,therapy,4,Mistral,False,,['iron'],True,True
+3403,How does iron affect metabolic pathways in the human body?,general,2,TinyLlama,True,,['iron'],False,True
+1468,Outline a clinical nutrition plan for managing kidney stones with low-phytate foods.,therapy,4,Mistral,True,,['phytate'],True,True
+6,Is palm oil or shea butter better for vitamin E absorption?,comparison,2,TinyLlama,True,,[],False,False
+3483,Explain the relationship between the Food Composition Table and dietary assessment.,general,1,TinyLlama,True,,[],False,False
+2185,How does iron affect metabolic pathways in the human body?,general,5,Mistral,True,,['iron'],False,True
+3272,Create a therapeutic meal plan for kidney stones based on the Food Composition Table.,therapy,3,Mistral,False,,[],False,False
+2100,Propose a therapy combining dietary and supplement interventions for celiac disease.,therapy,4,TinyLlama,False,,[],True,False
+3212,Suggest a supplementation strategy for improving calcium status in iron-deficiency anemia.,recommendation,3,TinyLlama,False,,"['calcium', 'iron']",False,True
+1471,Create a therapeutic diet for iron-deficiency anemia based on the Food Composition Table.,therapy,5,TinyLlama,True,,['iron'],True,True
+3438,Explain the relationship between the Food Composition Table and dietary assessment.,general,2,Mistral,False,,[],False,False
+2864,Explain the relationship between the Food Composition Table and dietary assessment.,general,3,TinyLlama,False,,[],False,False
+2945,How does zinc affect metabolic pathways in the human body?,general,5,Mistral,False,recommendation,['zinc'],False,True
+1778,Describe the biochemical mechanisms of zinc absorption.,general,5,Mistral,False,comparison,['zinc'],False,True
+2239,Explain the relationship between the Food Composition Table and dietary assessment.,general,5,Mistral,True,,[],False,False
+2683,How should a patient with kidney stones adjust their diet to improve magnesium absorption?,therapy,4,Mistral,True,,['magnesium'],True,True
+2851,Explain the relationship between the Food Composition Table and dietary assessment.,general,1,TinyLlama,False,,[],False,False
+2258,Describe the biochemical mechanisms of vitamin D absorption.,general,4,TinyLlama,True,,['vitamin d'],False,True
+230,What's the ideal carbohydrate intake for someone with type 1 diabetes?,recommendation,4,Mistral,True,,[],False,False
+2075,Propose a therapy combining dietary and supplement interventions for osteoporosis.,therapy,4,TinyLlama,True,,[],True,False
+2199,What is the role of phytates in human biochemistry?,general,1,TinyLlama,False,,['phytate'],False,True
