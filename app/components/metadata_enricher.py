@@ -13,6 +13,86 @@ from langchain.schema import Document
 
 
 # ============================================================================
+# DRI (2006) - Dietary Reference Intakes - Section Tags
+# ============================================================================
+
+DRI_CONDITION_TAGS = {
+    "intro": ["dri_basics", "reference_values", "nutrition_standards"],
+    "part1_intro": ["dri_framework", "ear", "rda", "ai", "ul"],
+    "part1_apply": ["dri_application", "clinical_use", "assessment", "planning"],
+    "part2_intro": ["macronutrients", "physical_activity", "healthful_diets"],
+    "energy": ["energy_requirements", "calories", "eer", "tee", "physical_activity_level"],
+    "physical_activity": ["exercise", "activity_level", "energy_expenditure"],
+    "carbohydrates": ["carbohydrates", "sugars", "starches", "glucose_metabolism"],
+    "fiber": ["dietary_fiber", "gut_health", "bowel_function"],
+    "fat": ["dietary_fat", "fatty_acids", "essential_fatty_acids", "omega3", "omega6"],
+    "cholesterol": ["cholesterol", "cardiovascular_health"],
+    "protein": ["protein", "amino_acids", "nitrogen_balance", "protein_quality"],
+    "water": ["water", "hydration", "fluid_requirements"],
+    # Vitamins
+    "vitamin_a": ["vitamin_a", "retinol", "vision", "immune_function"],
+    "vitamin_b6": ["vitamin_b6", "pyridoxine", "amino_acid_metabolism"],
+    "vitamin_b12": ["vitamin_b12", "cobalamin", "anemia", "neurological_function"],
+    "biotin": ["biotin", "b_vitamins", "metabolism"],
+    "vitamin_c": ["vitamin_c", "ascorbic_acid", "antioxidant", "iron_absorption"],
+    "carotenoids": ["carotenoids", "beta_carotene", "provitamin_a"],
+    "choline": ["choline", "brain_development", "liver_function"],
+    "vitamin_d": ["vitamin_d", "calcium_absorption", "bone_health", "rickets"],
+    "vitamin_e": ["vitamin_e", "tocopherol", "antioxidant"],
+    "folate": ["folate", "folic_acid", "neural_tube_defects", "anemia"],
+    "vitamin_k": ["vitamin_k", "blood_clotting", "bone_health"],
+    "niacin": ["niacin", "b3", "pellagra"],
+    "pantothenic_acid": ["pantothenic_acid", "b5", "coenzyme_a"],
+    "riboflavin": ["riboflavin", "b2", "energy_metabolism"],
+    "thiamin": ["thiamin", "b1", "beriberi", "nervous_system"],
+    # Minerals
+    "calcium": ["calcium", "bone_health", "teeth", "osteoporosis"],
+    "chromium": ["chromium", "glucose_metabolism", "insulin"],
+    "copper": ["copper", "iron_metabolism", "connective_tissue"],
+    "fluoride": ["fluoride", "dental_health", "tooth_decay"],
+    "iodine": ["iodine", "thyroid", "mental_development"],
+    "iron": ["iron", "anemia", "hemoglobin", "cognitive_development"],
+    "magnesium": ["magnesium", "bone_health", "muscle_function", "nervous_system"],
+    "manganese": ["manganese", "bone_formation", "metabolism"],
+    "molybdenum": ["molybdenum", "enzyme_function"],
+    "phosphorus": ["phosphorus", "bone_health", "energy_metabolism"],
+    "potassium": ["potassium", "blood_pressure", "cardiovascular", "electrolyte"],
+    "selenium": ["selenium", "antioxidant", "thyroid_function"],
+    "sodium_chloride": ["sodium", "chloride", "blood_pressure", "hypertension", "electrolyte"],
+    "sulfate": ["sulfate", "sulfur", "protein_structure"],
+    "zinc": ["zinc", "immune_function", "growth", "wound_healing"],
+    "trace_minerals": ["arsenic", "boron", "nickel", "silicon", "vanadium"],
+    # Appendixes
+    "appendix_e": ["amino_acids", "indispensable_aa", "iem_requirements", "protein_quality"],
+    "appendix_f": ["conversions", "units", "measurement"],
+    "appendix_g": ["iron_intake", "population_requirements"],
+    "appendix_h": ["ear_statistics", "requirement_variation"],
+    "appendix_i": ["intake_variation", "assessment_methodology"],
+}
+
+DRI_AGE_RELEVANCE = {
+    # All DRI sections apply to all ages (pediatric-specific values included)
+    **{section: ["all_ages", "pediatric"] for section in DRI_CONDITION_TAGS.keys()}
+}
+
+DRI_THERAPY_AREA = {
+    "energy": ["preterm", "cf", "ckd"],
+    "protein": ["iem", "preterm", "ckd"],
+    "appendix_e": "iem",  # Amino acid requirements critical for PKU/MSUD
+    "zinc": ["cf", "gi_disorders"],
+    "iron": ["preterm", "ckd"],
+    "calcium": ["ckd", "epilepsy"],  # CKD mineral-bone disease, epilepsy AED effects
+    "phosphorus": ["ckd"],
+    "potassium": ["ckd"],
+    "sodium_chloride": ["cf", "ckd"],
+    "vitamin_d": ["ckd", "epilepsy"],
+    "vitamin_k": ["epilepsy"],  # AED interactions
+    "folate": ["epilepsy"],  # AED interactions
+    "carbohydrates": ["t1d", "epilepsy"],  # T1D carb counting, ketogenic diet
+    "fat": ["cf", "epilepsy"],  # CF fat malabsorption, ketogenic diet
+}
+
+# ============================================================================
 # SHAW (2020) - Clinical Paediatric Dietetics - Chapter Tags
 # ============================================================================
 
@@ -220,78 +300,78 @@ DRUG_NUTRIENT_AGE_RELEVANCE = {
 # ============================================================================
 
 BIOCHEM_CONDITION_TAGS = {
-    1.1: ["carbohydrate_structure", "monosaccharides", "polysaccharides"],
-    1.2: ["glycolysis", "glucose_metabolism"],
-    1.3: ["gluconeogenesis", "glucose_synthesis"],
-    1.4: ["glycogen_metabolism", "glycogenolysis", "glycogen_storage"],
-    1.5: ["pentose_phosphate_pathway", "nadph", "ribose"],
-    1.6: ["fructose_metabolism", "galactose_metabolism"],
+    "1.1": ["carbohydrate_structure", "monosaccharides", "polysaccharides"],
+    "1.2": ["glycolysis", "glucose_metabolism"],
+    "1.3": ["gluconeogenesis", "glucose_synthesis"],
+    "1.4": ["glycogen_metabolism", "glycogenolysis", "glycogen_storage"],
+    "1.5": ["pentose_phosphate_pathway", "nadph", "ribose"],
+    "1.6": ["fructose_metabolism", "galactose_metabolism"],
 
-    2.1: ["citric_acid_cycle", "tca_cycle", "krebs_cycle"],
-    2.2: ["electron_transport_chain", "oxidative_phosphorylation", "atp_synthesis"],
-    2.3: ["mitochondrial_disorders"],
+    "2.1": ["citric_acid_cycle", "tca_cycle", "krebs_cycle"],
+    "2.2": ["electron_transport_chain", "oxidative_phosphorylation", "atp_synthesis"],
+    "2.3": ["mitochondrial_disorders"],
 
-    3.1: ["amino_acid_structure", "protein_structure"],
-    3.2: ["protein_digestion", "amino_acid_absorption"],
-    3.3: ["amino_acid_metabolism", "transamination", "deamination"],
-    3.4: ["urea_cycle", "ammonia_detoxification", "ucd"],
-    3.5: ["amino_acid_disorders", "pku", "msud", "homocystinuria"],
-    3.6: ["protein_synthesis", "translation"],
+    "3.1": ["amino_acid_structure", "protein_structure"],
+    "3.2": ["protein_digestion", "amino_acid_absorption"],
+    "3.3": ["amino_acid_metabolism", "transamination", "deamination"],
+    "3.4": ["urea_cycle", "ammonia_detoxification", "ucd"],
+    "3.5": ["amino_acid_disorders", "pku", "msud", "homocystinuria"],
+    "3.6": ["protein_synthesis", "translation"],
 
-    4.1: ["purine_metabolism", "nucleotide_synthesis"],
-    4.2: ["pyrimidine_metabolism"],
-    4.3: ["nucleotide_disorders", "gout", "lesch_nyhan"],
+    "4.1": ["purine_metabolism", "nucleotide_synthesis"],
+    "4.2": ["pyrimidine_metabolism"],
+    "4.3": ["nucleotide_disorders", "gout", "lesch_nyhan"],
 
-    5.1: ["lipid_structure", "fatty_acids", "triglycerides"],
-    5.2: ["lipid_digestion", "fat_absorption", "chylomicrons"],
-    5.3: ["lipoprotein_metabolism", "cholesterol", "ldl", "hdl"],
-    5.4: ["fatty_acid_synthesis", "lipogenesis"],
-    5.5: ["fatty_acid_oxidation", "beta_oxidation"],
-    5.6: ["ketone_body_metabolism", "ketogenesis", "ketolysis"],
-    5.7: ["cholesterol_synthesis", "steroid_hormones"],
-    5.8: ["lipid_disorders", "hyperlipidemia", "fatty_acid_oxidation_disorders"],
+    "5.1": ["lipid_structure", "fatty_acids", "triglycerides"],
+    "5.2": ["lipid_digestion", "fat_absorption", "chylomicrons"],
+    "5.3": ["lipoprotein_metabolism", "cholesterol", "ldl", "hdl"],
+    "5.4": ["fatty_acid_synthesis", "lipogenesis"],
+    "5.5": ["fatty_acid_oxidation", "beta_oxidation"],
+    "5.6": ["ketone_body_metabolism", "ketogenesis", "ketolysis"],
+    "5.7": ["cholesterol_synthesis", "steroid_hormones"],
+    "5.8": ["lipid_disorders", "hyperlipidemia", "fatty_acid_oxidation_disorders"],
 
-    6.1: ["hormone_overview", "endocrine_system"],
-    6.2: ["insulin", "glucagon", "blood_glucose_regulation"],
-    6.3: ["thyroid_hormones", "t3", "t4"],
-    6.4: ["growth_hormone", "igf1"],
-    6.5: ["cortisol", "stress_hormones"],
+    "6.1": ["hormone_overview", "endocrine_system"],
+    "6.2": ["insulin", "glucagon", "blood_glucose_regulation"],
+    "6.3": ["thyroid_hormones", "t3", "t4"],
+    "6.4": ["growth_hormone", "igf1"],
+    "6.5": ["cortisol", "stress_hormones"],
 
-    7.1: ["vitamin_overview"],
-    7.2: ["fat_soluble_vitamins", "vitamin_a", "vitamin_d", "vitamin_e", "vitamin_k"],
-    7.3: ["water_soluble_vitamins", "b_vitamins", "vitamin_c"],
-    7.4: ["vitamin_deficiency", "scurvy", "beriberi", "pellagra"],
+    "7.1": ["vitamin_overview"],
+    "7.2": ["fat_soluble_vitamins", "vitamin_a", "vitamin_d", "vitamin_e", "vitamin_k"],
+    "7.3": ["water_soluble_vitamins", "b_vitamins", "vitamin_c"],
+    "7.4": ["vitamin_deficiency", "scurvy", "beriberi", "pellagra"],
 
-    8.1: ["mineral_overview", "electrolytes"],
-    8.2: ["calcium_metabolism", "phosphorus", "bone_health"],
-    8.3: ["iron_metabolism", "heme_synthesis"],
-    8.4: ["trace_minerals", "zinc", "copper", "selenium"],
+    "8.1": ["mineral_overview", "electrolytes"],
+    "8.2": ["calcium_metabolism", "phosphorus", "bone_health"],
+    "8.3": ["iron_metabolism", "heme_synthesis"],
+    "8.4": ["trace_minerals", "zinc", "copper", "selenium"],
 
-    9.1: ["dna_structure", "replication"],
-    9.2: ["rna_transcription", "gene_expression"],
-    9.3: ["genetic_mutations", "inherited_disorders"],
+    "9.1": ["dna_structure", "replication"],
+    "9.2": ["rna_transcription", "gene_expression"],
+    "9.3": ["genetic_mutations", "inherited_disorders"],
 
-    10.1: ["metabolic_integration", "fed_state"],
-    10.2: ["fasting_state", "starvation"],
-    10.3: ["exercise_metabolism"],
+    "10.1": ["metabolic_integration", "fed_state"],
+    "10.2": ["fasting_state", "starvation"],
+    "10.3": ["exercise_metabolism"],
 
-    11.1: ["diabetes_mellitus", "hyperglycemia", "t1d", "t2d"],
-    11.2: ["metabolic_acidosis", "ketoacidosis", "dka"],
-    11.3: ["metabolic_alkalosis"],
+    "11.1": ["diabetes_mellitus", "hyperglycemia", "t1d", "t2d"],
+    "11.2": ["metabolic_acidosis", "ketoacidosis", "dka"],
+    "11.3": ["metabolic_alkalosis"],
 }
 
 # Map biochemistry sections to therapy areas
 BIOCHEM_THERAPY_AREA = {
-    1.4: "iem",  # Glycogen storage diseases
-    1.6: "iem",  # Fructose/galactose disorders
-    2.3: "iem",  # Mitochondrial disorders
-    3.4: "iem",  # Urea cycle disorders
-    3.5: "iem",  # Amino acid disorders (PKU, MSUD)
-    5.6: "epilepsy",  # Ketone body metabolism (ketogenic diet)
-    5.8: "iem",  # Fatty acid oxidation disorders
-    6.2: "t1d",  # Insulin/glucagon
-    11.1: "t1d",  # Diabetes mellitus
-    11.2: "t1d",  # Ketoacidosis
+    "1.4": "iem",  # Glycogen storage diseases
+    "1.6": "iem",  # Fructose/galactose disorders
+    "2.3": "iem",  # Mitochondrial disorders
+    "3.4": "iem",  # Urea cycle disorders
+    "3.5": "iem",  # Amino acid disorders (PKU, MSUD)
+    "5.6": "epilepsy",  # Ketone body metabolism (ketogenic diet)
+    "5.8": "iem",  # Fatty acid oxidation disorders
+    "6.2": "t1d",  # Insulin/glucagon
+    "11.1": "t1d",  # Diabetes mellitus
+    "11.2": "t1d",  # Ketoacidosis
 }
 
 BIOCHEM_AGE_RELEVANCE = {
@@ -309,7 +389,7 @@ def enrich_chapter_metadata(doc: Document, doc_type: str) -> Document:
 
     Args:
         doc: Document object from chapter_extractor.py
-        doc_type: One of "shaw_2020", "preterm_2013", "drug_nutrient", "biochemistry"
+        doc_type: One of "dri", "shaw_2020", "preterm_2013", "drug_nutrient", "biochemistry"
 
     Returns:
         Document with enriched metadata
@@ -323,7 +403,18 @@ def enrich_chapter_metadata(doc: Document, doc_type: str) -> Document:
     drug_classes: List[str] = []
     therapy_area: List[str] = []
 
-    if doc_type == "shaw_2020":
+    if doc_type == "dri":
+        # DRI uses string keys like "vitamin_a" for chapter_num
+        condition_tags = DRI_CONDITION_TAGS.get(chapter_num, [])
+        age_relevance = DRI_AGE_RELEVANCE.get(chapter_num, [])
+        therapy = DRI_THERAPY_AREA.get(chapter_num)
+        if therapy:
+            if isinstance(therapy, list):
+                therapy_area = therapy
+            else:
+                therapy_area = [therapy]
+
+    elif doc_type == "shaw_2020":
         condition_tags = SHAW_CONDITION_TAGS.get(chapter_num, [])
         age_relevance = SHAW_AGE_RELEVANCE.get(chapter_num, [])
         therapy = SHAW_THERAPY_AREA.get(chapter_num)
@@ -370,7 +461,7 @@ def enrich_documents(documents: List[Document], doc_type: str) -> List[Document]
 
     Args:
         documents: List of Document objects from chapter_extractor
-        doc_type: One of "shaw_2020", "preterm_2013", "drug_nutrient", "biochemistry"
+        doc_type: One of "dri", "shaw_2020", "preterm_2013", "drug_nutrient", "biochemistry"
 
     Returns:
         List of enriched Document objects
@@ -401,7 +492,9 @@ def get_relevant_chapters_for_condition(condition: str, doc_type: str = "shaw_20
     condition = condition.lower()
     relevant_chapters = []
 
-    if doc_type == "shaw_2020":
+    if doc_type == "dri":
+        tag_map = DRI_CONDITION_TAGS
+    elif doc_type == "shaw_2020":
         tag_map = SHAW_CONDITION_TAGS
     elif doc_type == "preterm_2013":
         tag_map = PRETERM_CONDITION_TAGS

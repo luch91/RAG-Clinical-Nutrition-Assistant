@@ -16,6 +16,62 @@ logger = get_logger(__name__)
 # TABLE OF CONTENTS DEFINITIONS
 # ==============================================================================
 
+# Dietary Reference Intakes (DRI) - The Essential Guide to Nutrient Requirements
+# NOTE: Extract only pages 1-500 (Introduction through nutrients; exclude appendixes after p500)
+DRI_TOC = {
+    "intro": {"title": "Introduction", "pages": (1, 4)},
+    "part1_intro": {"title": "Introduction to the Dietary Reference Intakes", "pages": (5, 18)},
+    "part1_apply": {"title": "Applying the Dietary Reference Intakes", "pages": (19, 68)},
+    "part2_intro": {"title": "Macronutrients, Healthful Diets, and Physical Activity", "pages": (70, 81)},
+    "energy": {"title": "Energy", "pages": (82, 93)},
+    "physical_activity": {"title": "Physical Activity", "pages": (94, 101)},
+    "carbohydrates": {"title": "Dietary Carbohydrates: Sugars and Starches", "pages": (102, 109)},
+    "fiber": {"title": "Fiber", "pages": (110, 121)},
+    "fat": {"title": "Dietary Fat: Total Fat and Fatty Acids", "pages": (122, 139)},
+    "cholesterol": {"title": "Cholesterol", "pages": (140, 143)},
+    "protein": {"title": "Protein and Amino Acids", "pages": (144, 155)},
+    "water": {"title": "Water", "pages": (156, 166)},
+    # Vitamins
+    "vitamin_a": {"title": "Vitamin A", "pages": (170, 181)},
+    "vitamin_b6": {"title": "Vitamin B6", "pages": (182, 187)},
+    "vitamin_b12": {"title": "Vitamin B12", "pages": (188, 195)},
+    "biotin": {"title": "Biotin", "pages": (196, 201)},
+    "vitamin_c": {"title": "Vitamin C", "pages": (202, 210)},
+    "carotenoids": {"title": "Carotenoids", "pages": (211, 217)},
+    "choline": {"title": "Choline", "pages": (218, 223)},
+    "vitamin_d": {"title": "Vitamin D", "pages": (224, 233)},
+    "vitamin_e": {"title": "Vitamin E", "pages": (234, 243)},
+    "folate": {"title": "Folate", "pages": (244, 253)},
+    "vitamin_k": {"title": "Vitamin K", "pages": (254, 261)},
+    "niacin": {"title": "Niacin", "pages": (262, 269)},
+    "pantothenic_acid": {"title": "Pantothenic Acid", "pages": (270, 273)},
+    "riboflavin": {"title": "Riboflavin", "pages": (274, 279)},
+    "thiamin": {"title": "Thiamin", "pages": (280, 285)},
+    # Minerals
+    "calcium": {"title": "Calcium", "pages": (286, 295)},
+    "chromium": {"title": "Chromium", "pages": (296, 303)},
+    "copper": {"title": "Copper", "pages": (304, 311)},
+    "fluoride": {"title": "Fluoride", "pages": (312, 319)},
+    "iodine": {"title": "Iodine", "pages": (320, 327)},
+    "iron": {"title": "Iron", "pages": (328, 339)},
+    "magnesium": {"title": "Magnesium", "pages": (340, 349)},
+    "manganese": {"title": "Manganese", "pages": (350, 355)},
+    "molybdenum": {"title": "Molybdenum", "pages": (356, 361)},
+    "phosphorus": {"title": "Phosphorus", "pages": (362, 369)},
+    "potassium": {"title": "Potassium", "pages": (370, 379)},
+    "selenium": {"title": "Selenium", "pages": (380, 385)},
+    "sodium_chloride": {"title": "Sodium and Chloride", "pages": (386, 396)},
+    "sulfate": {"title": "Sulfate", "pages": (397, 401)},
+    "zinc": {"title": "Zinc", "pages": (402, 413)},
+    "trace_minerals": {"title": "Arsenic, Boron, Nickel, Silicon, and Vanadium", "pages": (414, 422)},
+    # Appendixes (selective - only up to page 500)
+    "appendix_e": {"title": "DRI Values for Indispensable Amino Acids by Life Stage", "pages": (459, 465)},
+    "appendix_f": {"title": "Conversions", "pages": (466, 473)},
+    "appendix_g": {"title": "Iron Intakes and Estimated Percentiles", "pages": (474, 484)},
+    "appendix_h": {"title": "Standard Deviation of Requirements for Nutrients with EAR", "pages": (485, 486)},
+    "appendix_i": {"title": "Estimates of Within-Subject Variation in Intake", "pages": (487, 500)},
+}
+
 # Shaw (2020) - Clinical Paediatric Dietetics
 SHAW_TOC = {
     1: {"title": "Principles of Paediatric Dietetics", "pages": (1, 17), "authors": ["Vanessa Shaw", "Helen McCarthy"]},
@@ -110,44 +166,44 @@ DRUG_NUTRIENT_TOC = {
 BIOCHEM_TOC = {
     1: {"title": "Introduction: Life Is Made of Molecules!", "pages": (3, 22), "section_num": "1"},
     2: {"title": "The Chemistry and Physics of Life", "pages": (23, 48), "section_num": "2"},
-    2.1: {"title": "The Basics of Chemistry in Cells and Tissues", "pages": (27, 47), "section_num": "2.1"},
+    "2.1": {"title": "The Basics of Chemistry in Cells and Tissues", "pages": (27, 47), "section_num": "2.1"},
     3: {"title": "The Families of Biological Molecules", "pages": (49, 128), "section_num": "3"},
-    3.1: {"title": "Lipids and Organization of Supramolecular Assemblies", "pages": (50, 70), "section_num": "3.1"},
-    3.3: {"title": "Amino Acids and Their Polymers: Peptides and Proteins", "pages": (95, 128), "section_num": "3.3"},
-    3.3.2: {"title": "Structure and Function in Proteins", "pages": (106, 119), "section_num": "3.3.2"},
-    3.3.4: {"title": "Enzymes", "pages": (119, 128), "section_num": "3.3.4"},
+    "3.1": {"title": "Lipids and Organization of Supramolecular Assemblies", "pages": (50, 70), "section_num": "3.1"},
+    "3.3": {"title": "Amino Acids and Their Polymers: Peptides and Proteins", "pages": (95, 128), "section_num": "3.3"},
+    "3.3.2": {"title": "Structure and Function in Proteins", "pages": (106, 119), "section_num": "3.3.2"},
+    "3.3.4": {"title": "Enzymes", "pages": (119, 128), "section_num": "3.3.4"},
     4: {"title": "Introduction to Metabolism", "pages": (131, 156), "section_num": "4"},
     5: {"title": "The Regulation of Metabolisms", "pages": (157, 184), "section_num": "5"},
-    5.2: {"title": "Inhibition and Activation of Enzymes by Ligands", "pages": (163, 171), "section_num": "5.2"},
+    "5.2": {"title": "Inhibition and Activation of Enzymes by Ligands", "pages": (163, 171), "section_num": "5.2"},
     6: {"title": "Energy Conservation in Metabolism: The Mechanisms of ATP Synthesis", "pages": (185, 220), "section_num": "6"},
-    6.1: {"title": "Fermentation: The Anaerobic Pathway for ATP Synthesis", "pages": (186, 194), "section_num": "6.1"},
-    6.2: {"title": "Oxidative Phosphorylation: The Main Mechanism of ATP Synthesis", "pages": (194, 220), "section_num": "6.2"},
-    6.2.3: {"title": "The Electron Transport System", "pages": (203, 216), "section_num": "6.2.3"},
-    6.2.4: {"title": "The ATP Synthesis Through Oxidative Phosphorylation", "pages": (212, 220), "section_num": "6.2.4"},
+    "6.1": {"title": "Fermentation: The Anaerobic Pathway for ATP Synthesis", "pages": (186, 194), "section_num": "6.1"},
+    "6.2": {"title": "Oxidative Phosphorylation: The Main Mechanism of ATP Synthesis", "pages": (194, 220), "section_num": "6.2"},
+    "6.2.3": {"title": "The Electron Transport System", "pages": (203, 216), "section_num": "6.2.3"},
+    "6.2.4": {"title": "The ATP Synthesis Through Oxidative Phosphorylation", "pages": (212, 220), "section_num": "6.2.4"},
     7: {"title": "Catabolism of the Major Biomolecules", "pages": (223, 257), "section_num": "7"},
-    7.2: {"title": "Tricarboxylic Acid Cycle", "pages": (227, 236), "section_num": "7.2"},
-    7.3: {"title": "Catabolism of Carbohydrates", "pages": (233, 237), "section_num": "7.3"},
-    7.4: {"title": "Catabolism of Lipids", "pages": (237, 257), "section_num": "7.4"},
-    7.4.1: {"title": "TAG Mobilization and Fatty Acid Transport", "pages": (238, 240), "section_num": "7.4.1"},
-    7.4.6: {"title": "Fatty Acid Conversion to Ketone Bodies", "pages": (246, 248), "section_num": "7.4.6"},
-    7.5: {"title": "Catabolism of Amino Acids", "pages": (248, 257), "section_num": "7.5"},
-    7.5.2: {"title": "Amino Acid Metabolism in the Liver", "pages": (249, 255), "section_num": "7.5.2"},
+    "7.2": {"title": "Tricarboxylic Acid Cycle", "pages": (227, 236), "section_num": "7.2"},
+    "7.3": {"title": "Catabolism of Carbohydrates", "pages": (233, 237), "section_num": "7.3"},
+    "7.4": {"title": "Catabolism of Lipids", "pages": (237, 257), "section_num": "7.4"},
+    "7.4.1": {"title": "TAG Mobilization and Fatty Acid Transport", "pages": (238, 240), "section_num": "7.4.1"},
+    "7.4.6": {"title": "Fatty Acid Conversion to Ketone Bodies", "pages": (246, 248), "section_num": "7.4.6"},
+    "7.5": {"title": "Catabolism of Amino Acids", "pages": (248, 257), "section_num": "7.5"},
+    "7.5.2": {"title": "Amino Acid Metabolism in the Liver", "pages": (249, 255), "section_num": "7.5.2"},
     8: {"title": "Metabolic Responses to Hyperglycemia", "pages": (259, 304), "section_num": "8"},
-    8.2: {"title": "Biosynthesis of Glycogen", "pages": (266, 276), "section_num": "8.2"},
-    8.3: {"title": "Biosynthesis of Lipids", "pages": (276, 294), "section_num": "8.3"},
-    8.4: {"title": "Hormonal Responses to Hyperglycemia: Role of Insulin", "pages": (295, 304), "section_num": "8.4"},
-    8.4.2: {"title": "Mechanisms of Insulin Action", "pages": (297, 301), "section_num": "8.4.2"},
+    "8.2": {"title": "Biosynthesis of Glycogen", "pages": (266, 276), "section_num": "8.2"},
+    "8.3": {"title": "Biosynthesis of Lipids", "pages": (276, 294), "section_num": "8.3"},
+    "8.4": {"title": "Hormonal Responses to Hyperglycemia: Role of Insulin", "pages": (295, 304), "section_num": "8.4"},
+    "8.4.2": {"title": "Mechanisms of Insulin Action", "pages": (297, 301), "section_num": "8.4.2"},
     9: {"title": "Regulation and Integration of Metabolism During Hypoglycemia", "pages": (305, 340), "section_num": "9"},
-    9.2: {"title": "Glycogen Degradation in the Liver", "pages": (312, 319), "section_num": "9.2"},
-    9.3: {"title": "Gluconeogenesis", "pages": (319, 330), "section_num": "9.3"},
-    9.3.1: {"title": "Gluconeogenesis Reactions", "pages": (320, 327), "section_num": "9.3.1"},
-    9.4: {"title": "Hormonal Responses to Hypoglycemia", "pages": (330, 340), "section_num": "9.4"},
-    9.4.2: {"title": "Glucocorticoids: Mechanism of Action", "pages": (335, 340), "section_num": "9.4.2"},
+    "9.2": {"title": "Glycogen Degradation in the Liver", "pages": (312, 319), "section_num": "9.2"},
+    "9.3": {"title": "Gluconeogenesis", "pages": (319, 330), "section_num": "9.3"},
+    "9.3.1": {"title": "Gluconeogenesis Reactions", "pages": (320, 327), "section_num": "9.3.1"},
+    "9.4": {"title": "Hormonal Responses to Hypoglycemia", "pages": (330, 340), "section_num": "9.4"},
+    "9.4.2": {"title": "Glucocorticoids: Mechanism of Action", "pages": (335, 340), "section_num": "9.4.2"},
     10: {"title": "Regulation and Integration of Metabolism During Physical Activity", "pages": (341, 374), "section_num": "10"},
-    10.1: {"title": "Muscle Contraction", "pages": (342, 356), "section_num": "10.1"},
-    10.4: {"title": "Muscle Cell Metabolism During Physical Activity", "pages": (356, 374), "section_num": "10.4"},
+    "10.1": {"title": "Muscle Contraction", "pages": (342, 356), "section_num": "10.1"},
+    "10.4": {"title": "Muscle Cell Metabolism During Physical Activity", "pages": (356, 374), "section_num": "10.4"},
     11: {"title": "Control of Body Weight and the Modern Metabolic Diseases", "pages": (375, 409), "section_num": "11"},
-    11.3: {"title": "Obesity and the Metabolic Syndrome", "pages": (401, 409), "section_num": "11.3"},
+    "11.3": {"title": "Obesity and the Metabolic Syndrome", "pages": (401, 409), "section_num": "11.3"},
 }
 
 # ==============================================================================
@@ -167,6 +223,7 @@ def extract_chapters_from_pdf(file_path: str, doc_type: str) -> List[Document]:
     """
     # Select appropriate TOC
     toc_map = {
+        "dri": ("DRI2006", "Dietary Reference Intakes: Essential Guide to Nutrient Requirements", DRI_TOC),
         "shaw_2020": ("Shaw2020", "Clinical Paediatric Dietetics, 5th ed.", SHAW_TOC),
         "preterm_2013": ("PretermNeonate2013", "Nutrition for the Preterm Neonate: A Clinical Perspective", PRETERM_TOC),
         "drug_nutrient": ("DrugNutrient2024", "Handbook of Drug-Nutrient Interactions, 3rd ed.", DRUG_NUTRIENT_TOC),
@@ -223,6 +280,8 @@ def extract_chapters_from_pdf(file_path: str, doc_type: str) -> List[Document]:
         chunk_type = "chapter"
         if isinstance(chapter_num, float):
             chunk_type = "section"
+        elif isinstance(chapter_num, str):
+            chunk_type = "section"  # DRI uses string keys like "vitamin_a"
         elif doc_type == "shaw_2020" and chapter_num == 31:
             chunk_type = "protocol"  # Emergency regimens
 
@@ -256,12 +315,13 @@ def get_toc_for_document(doc_type: str) -> Dict[Any, Dict[str, Any]]:
     Useful for debugging and introspection.
 
     Args:
-        doc_type: One of ["shaw_2020", "preterm_2013", "drug_nutrient", "biochemistry"]
+        doc_type: One of ["dri", "shaw_2020", "preterm_2013", "drug_nutrient", "biochemistry"]
 
     Returns:
         Dictionary mapping chapter numbers to chapter info
     """
     toc_map = {
+        "dri": DRI_TOC,
         "shaw_2020": SHAW_TOC,
         "preterm_2013": PRETERM_TOC,
         "drug_nutrient": DRUG_NUTRIENT_TOC,

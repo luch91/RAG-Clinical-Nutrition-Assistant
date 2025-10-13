@@ -129,14 +129,21 @@ def detect_document_type(filename: str) -> str:
     Detect document type from filename for chapter-aware extraction.
 
     Returns:
-        - "shaw_2020": Clinical Paediatric Dietetics
-        - "preterm_2013": Nutrition for the Preterm Neonate
-        - "drug_nutrient": Handbook of Drug-Nutrient Interactions
-        - "biochemistry": Integrative Human Biochemistry
-        - "fct": Food Composition Table (use character-based chunking)
-        - "unknown": Other documents (use character-based chunking)
+        - "dri": Dietary Reference Intakes (chapter-aware)
+        - "shaw_2020": Clinical Paediatric Dietetics (chapter-aware)
+        - "preterm_2013": Nutrition for the Preterm Neonate (chapter-aware)
+        - "drug_nutrient": Handbook of Drug-Nutrient Interactions (chapter-aware)
+        - "biochemistry": Integrative Human Biochemistry (chapter-aware)
+        - "who_nutrients": WHO Vitamins and Minerals Requirements (character-based)
+        - "food_density": FAO/INFOODS Food Density Database (character-based)
+        - "fct": Food Composition Table (character-based)
+        - "unknown": Other documents (character-based)
     """
     filename_lower = filename.lower()
+
+    # Dietary Reference Intakes (DRI)
+    if any(keyword in filename_lower for keyword in ["dietary reference intake", "dri", "essential guide to nutrient"]):
+        return "dri"
 
     # Clinical Paediatric Dietetics (Shaw 2020)
     if any(keyword in filename_lower for keyword in ["shaw", "clinical paediatric dietetics", "paediatric dietetics"]):
@@ -154,8 +161,16 @@ def detect_document_type(filename: str) -> str:
     if any(keyword in filename_lower for keyword in ["biochemistry", "integrative human", "biochem"]):
         return "biochemistry"
 
+    # WHO Vitamins and Minerals Requirements
+    if any(keyword in filename_lower for keyword in ["vitamin", "mineral"]) and any(kw in filename_lower for kw in ["requirement", "who", "fao"]):
+        return "who_nutrients"
+
+    # FAO/INFOODS Food Density Database
+    if any(keyword in filename_lower for keyword in ["density", "infoods"]) and "database" in filename_lower:
+        return "food_density"
+
     # Food Composition Tables (various countries)
-    fct_keywords = ["fct", "food composition", "kenya", "tanzania", "india", "korea",
+    fct_keywords = ["fct", "food composition table", "west africa", "nigeria", "senegal", "mali", "ghana", "cote d'ivoire", "burkina faso", "food composition", "kenya", "south africa", "tanzania", "india", "korea",
                     "canada", "lesotho", "malawi", "zimbabwe", "usda", "nutritive value"]
     if any(keyword in filename_lower for keyword in fct_keywords):
         return "fct"
@@ -190,8 +205,8 @@ def load_pdf_files(file_paths: List[str] = None) -> List[Document]:
         doc_type = detect_document_type(filename)
         logger.info(f"🔍 Detected document type: {doc_type}")
 
-        # Route to chapter-aware extraction for clinical texts
-        if doc_type in ["shaw_2020", "preterm_2013", "drug_nutrient", "biochemistry"]:
+        # Route to chapter-aware extraction for clinical texts and DRI
+        if doc_type in ["dri", "shaw_2020", "preterm_2013", "drug_nutrient", "biochemistry"]:
             try:
                 logger.info(f"📚 Using chapter-aware extraction for {filename}")
                 chapter_docs = extract_chapters_from_pdf(file_path, doc_type)
@@ -328,7 +343,7 @@ def create_text_chunks(documents: List[Document], chunk_size=None, chunk_overlap
 
     # Apply character-based chunking to page documents (FCTs, unknown)
     if page_docs:
-        logger.info(f"✂️ Creating text chunks for {len(page_docs)} page-based documents (size: {chunk_size}, overlap: {chunk_overlap})")
+        logger.info(f"Creating text chunks for {len(page_docs)} page-based documents (size: {chunk_size}, overlap: {chunk_overlap})")
         try:
             splitter = RecursiveCharacterTextSplitter(
                 chunk_size=chunk_size,
@@ -338,7 +353,7 @@ def create_text_chunks(documents: List[Document], chunk_size=None, chunk_overlap
             )
             page_chunks = splitter.split_documents(page_docs)
             chunks.extend(page_chunks)
-            logger.info(f"✂️ Created {len(page_chunks)} chunks from page-based documents")
+            logger.info(f"Created {len(page_chunks)} chunks from page-based documents")
         except Exception as e:
             logger.error(f"❌ Failed to create text chunks: {str(e)}")
 
