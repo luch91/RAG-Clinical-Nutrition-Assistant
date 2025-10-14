@@ -1,0 +1,501 @@
+row,query,label,complexity,recommended_llm,needs_followup,distractor_label,biomarkers,is_high_risk,query_length
+1,Medical nutrition therapy for a 6-month-old preterm infant (36 wks PMA) with faltering weight in Nigeria,therapy,5,Mistral,False,recommendation,[],True,16
+2,Recommend high-energy weaning foods for a 9-month-old ex-preterm baby in Kenya,recommendation,4,Mistral,True,therapy,[],True,12
+3,Compare energy density of fortified akamu vs commercial weanimix for preterm infants in Ghana,comparison,4,Mistral,True,recommendation,[],False,14
+4,How does catch-up growth affect protein needs in preterm infants?,general,3,Mistral,False,therapy,['protein'],False,10
+5,What vitamin D and calcium doses are recommended post-discharge for preterm infants in India?,recommendation,4,Mistral,True,therapy,['vitamin_d','calcium'],True,14
+6,Compare iron absorption from fortified formula vs liver puree in preterm infants in South Africa,comparison,4,Mistral,True,recommendation,['iron'],False,14
+7,Explain metabolic bone disease of prematurity and nutritional prevention,general,4,Mistral,False,therapy,['calcium','phosphate'],True,8
+8,Nutrition support for a 4-month-old ex-28wk preterm with bronchopulmonary dysplasia in Bangladesh,therapy,5,Mistral,False,recommendation,[],True,13
+9,Recommend appropriate portion sizes for solid foods in a 7-month-old ex-preterm in Nigeria,recommendation,3,TinyLlama,True,therapy,[],False,13
+10,Compare zinc content in breast milk vs fortified preterm formula in Ghana,comparison,3,TinyLlama,True,recommendation,['zinc'],False,11
+11,How does intrauterine growth restriction modify post-discharge nutrition needs?,general,4,Mistral,False,therapy,[],True,9
+12,Medical nutrition therapy for a 5-month-old with preterm history and poor weight gain in Kenya,therapy,5,Mistral,False,recommendation,[],True,13
+13,Recommend strategies to increase calorie density of local porridges for preterm infants in India,recommendation,4,Mistral,True,therapy,[],False,13
+14,Compare protein quality of human milk vs donor milk for preterm infants in South Africa,comparison,4,Mistral,True,recommendation,['protein'],False,12
+15,What are the risks of overfeeding preterm infants after NICU discharge?,general,3,Mistral,False,therapy,[],False,9
+16,Nutrition therapy for a 6yo with type 1 diabetes (HbA1c 8.7%) on basal-bolus in Nigeria,therapy,5,Mistral,False,recommendation,['hba1c'],True,14
+17,Recommend low-glycemic local snacks for a 7yo with T1D in Kenya,recommendation,4,Mistral,True,therapy,['glycemic_index'],True,12
+18,Compare glycemic impact of boiled yam vs roasted plantain for a child with diabetes in Ghana,comparison,4,Mistral,True,therapy,['glycemic_index'],False,13
+19,Explain carb counting principles for school-aged children with type 1 diabetes,general,3,Mistral,False,recommendation,[],False,9
+20,How much insulin-to-carb ratio is typical for a 10yo with T1D?,recommendation,4,Mistral,True,therapy,['insulin'],True,11
+21,Compare postprandial glucose response to maize porridge vs millet porridge in T1D children in India,comparison,4,Mistral,True,therapy,['glucose'],False,14
+22,What role does continuous glucose monitoring play in pediatric diabetes meal planning?,general,4,Mistral,False,recommendation,[],False,11
+23,Medical nutrition therapy for a 4yo with brittle diabetes and frequent hypoglycemia in South Africa,therapy,5,Mistral,False,recommendation,[],True,13
+24,Recommend bedtime snacks to prevent nocturnal hypoglycemia in an 8yo with T1D in Bangladesh,recommendation,4,Mistral,True,therapy,[],True,13
+25,Compare fiber content in whole wheat vs refined rice for glycemic control in T1D in Nigeria,comparison,3,TinyLlama,True,therapy,['fiber','glycemic_index'],False,14
+26,How does exercise affect carbohydrate needs in children with type 1 diabetes?,general,3,Mistral,False,recommendation,[],False,10
+27,Nutrition therapy for a 7yo with new-onset T1D and DKA recovery in Kenya,therapy,5,Mistral,False,recommendation,[],True,12
+28,Recommend culturally appropriate carbohydrate exchanges for a 6yo with T1D in Ghana,recommendation,4,Mistral,True,therapy,['carbohydrate'],False,12
+29,Compare sugar content in local fruit juices vs whole fruits for T1D children in India,comparison,3,TinyLlama,True,therapy,['sugar'],False,13
+30,What nutrients are at risk in children with poorly controlled type 1 diabetes?,general,4,Mistral,False,recommendation,['vitamin_b1','magnesium'],True,10
+31,Medical nutrition therapy for a 3yo with IgE-mediated cow’s milk allergy and eczema in Nigeria,therapy,5,Mistral,False,recommendation,[],True,14
+32,Recommend calcium-rich dairy alternatives for a 5yo with multiple food allergies in Kenya,recommendation,5,Mistral,True,therapy,['calcium'],True,13
+33,Compare protein quality of soy milk vs pea milk for a child with milk allergy in Ghana,comparison,4,Mistral,True,recommendation,['protein'],False,13
+34,What nutrients are commonly deficient in children with food protein-induced enterocolitis syndrome?,general,4,Mistral,False,therapy,[],True,12
+35,How to ensure adequate vitamin D intake in a child with multiple food allergies in India?,recommendation,4,Mistral,True,therapy,['vitamin_d'],True,13
+36,Compare allergenicity risk of baked milk vs baked egg in tolerant children in South Africa,comparison,4,Mistral,True,therapy,[],False,12
+37,Explain the role of oral food challenges in food allergy management,general,3,Mistral,False,recommendation,[],False,9
+38,Medical nutrition therapy for a 4yo with eosinophilic esophagitis and wheat allergy in Bangladesh,therapy,5,Mistral,False,recommendation,[],True,13
+39,Recommend safe first foods for a 6-month-old with suspected FPIES to rice in Nigeria,recommendation,5,Mistral,True,therapy,[],True,14
+40,Compare iron bioavailability in meat vs fortified cereals for a child with milk allergy in Kenya,comparison,4,Mistral,True,recommendation,['iron'],False,14
+41,How does food allergy impact growth in early childhood?,general,3,Mistral,False,therapy,[],True,8
+42,Nutrition therapy for a 5yo with multiple IgE-mediated food allergies and faltering weight in Ghana,therapy,5,Mistral,False,recommendation,[],True,14
+43,Recommend high-energy, allergy-safe snacks for school in India,recommendation,4,Mistral,True,therapy,[],False,9
+44,Compare zinc content in pumpkin seeds vs lentils for a child with nut allergy in South Africa,comparison,3,TinyLlama,True,recommendation,['zinc'],False,13
+45,What are safe sources of omega-3 for a child with fish allergy in Nigeria?,recommendation,4,Mistral,True,therapy,['omega_3'],False,12
+46,Medical nutrition therapy for a 6yo with cystic fibrosis (pancreatic insufficient) and weight z-score -1.8 in Kenya,therapy,5,Mistral,False,recommendation,['weight'],True,16
+47,Recommend high-energy, enzyme-compatible meals for a 4yo with CF in Nigeria,recommendation,5,Mistral,True,therapy,[],True,11
+48,Compare fat content in groundnut soup vs palm oil stew for a child with CF in Ghana,comparison,3,TinyLlama,True,therapy,['fat'],False,14
+49,How do pancreatic enzymes affect fat-soluble vitamin absorption in cystic fibrosis?,general,4,Mistral,False,therapy,['vitamin_a','vitamin_d','vitamin_e','vitamin_k'],True,12
+50,What vitamin K dose is recommended for children with cystic fibrosis in India?,recommendation,4,Mistral,True,therapy,['vitamin_k'],True,11
+51,Compare salt loss in sweat between Nigerian vs Indian children with CF,comparison,3,TinyLlama,True,therapy,['sodium'],False,12
+52,Why is vitamin K supplementation critical in cystic fibrosis?,general,3,Mistral,False,recommendation,['vitamin_k'],True,8
+53,Medical nutrition therapy for a 7yo with CF-related diabetes in South Africa,therapy,5,Mistral,False,recommendation,['hba1c'],True,10
+54,Recommend ways to increase calorie density of local meals for a child with CF in Bangladesh,recommendation,4,Mistral,True,therapy,[],False,13
+55,Compare efficacy of different pancreatic enzyme brands with local diets in Nigeria,comparison,4,Mistral,True,therapy,[],False,11
+56,How does CF affect bone mineral density in children?,general,4,Mistral,False,therapy,['calcium','vitamin_d'],True,9
+57,Nutrition therapy for a 5yo with CF and recurrent pancreatitis in Kenya,therapy,5,Mistral,False,recommendation,[],True,11
+58,Recommend fat-soluble vitamin monitoring schedule for a child with CF in Ghana,recommendation,4,Mistral,True,therapy,['vitamin_a','vitamin_d','vitamin_e','vitamin_k'],True,12
+59,Compare energy needs of CF children vs healthy peers in India,comparison,3,TinyLlama,True,therapy,[],False,10
+60,What are signs of essential fatty acid deficiency in cystic fibrosis?,general,3,Mistral,False,recommendation,['fatty_acids'],True,9
+61,Medical nutrition therapy for a 5yo with PKU (Phe 380 µmol/L) in Nigeria,therapy,5,Mistral,False,recommendation,['phenylalanine'],True,11
+62,Recommend low-phenylalanine local foods for a 7yo with PKU in Kenya,recommendation,5,Mistral,True,therapy,['phenylalanine'],True,12
+63,Compare natural protein content in cassava vs rice for a child with MSUD in Ghana,comparison,4,Mistral,True,therapy,['protein'],False,13
+64,What is the emergency regimen for galactosemia during acute illness?,general,5,Mistral,False,therapy,[],True,10
+65,How much medical formula should a 4yo with PKU consume daily in India?,recommendation,5,Mistral,True,therapy,['phenylalanine'],True,12
+66,Compare leucine content in local legumes for a child with MSUD in South Africa,comparison,4,Mistral,True,therapy,['leucine'],False,12
+67,Explain why tyrosine becomes essential in PKU,general,4,Mistral,False,recommendation,['tyrosine'],False,7
+68,Medical nutrition therapy for a 6yo with maple syrup urine disease during intercurrent illness in Nigeria,therapy,5,Mistral,False,recommendation,['leucine'],True,14
+69,Recommend emergency high-carbohydrate fluids for a child with fatty acid oxidation disorder in Kenya,recommendation,5,Mistral,True,therapy,[],True,13
+70,Compare galactose content in breast milk vs soy formula for galactosemia in Ghana,comparison,4,Mistral,True,therapy,['galactose'],False,12
+71,How is ammonia detoxified in urea cycle disorders?,general,4,Mistral,False,therapy,['ammonia'],True,7
+72,Nutrition therapy for a 3yo with ornithine transcarbamylase deficiency in India,therapy,5,Mistral,False,recommendation,['ammonia'],True,10
+73,Recommend protein restriction levels for a 5yo with citrullinemia in South Africa,recommendation,5,Mistral,True,therapy,['protein'],True,11
+74,Compare efficacy of sodium benzoate vs glycerol phenylbutyrate in UCDs,comparison,4,Mistral,True,therapy,[],False,10
+75,What are safe natural protein sources for a child with homocystinuria in Nigeria?,recommendation,5,Mistral,True,therapy,['methionine'],True,13
+76,Ketogenic diet plan for a 6yo with drug-resistant epilepsy (4:1 ratio) in Kenya,therapy,5,Mistral,False,recommendation,['weight'],True,12
+77,Recommend carnitine-rich foods for a child on valproate in Nigeria,recommendation,4,Mistral,True,therapy,['carnitine'],True,10
+78,Compare hidden carbohydrate content in local toothpaste vs syrups for ketogenic diet in Ghana,comparison,4,Mistral,True,therapy,['carbohydrate'],False,14
+79,How does the ketogenic diet affect growth in school-aged children?,general,3,Mistral,False,recommendation,[],False,9
+80,What is the minimum fat intake for a 4yo on a 3:1 ketogenic diet in India?,recommendation,5,Mistral,True,therapy,['fat'],True,13
+81,Compare seizure control outcomes with MCT oil vs classic keto in South Africa,comparison,4,Mistral,True,therapy,[],False,11
+82,Explain why selenium and carnitine are monitored in ketogenic therapy,general,4,Mistral,False,recommendation,['carnitine','selenium'],True,9
+83,Medical nutrition therapy for a 5yo with GLUT1 deficiency on ketogenic diet in Nigeria,therapy,5,Mistral,False,recommendation,[],True,11
+84,Recommend low-carb, high-fat local snacks for a child on keto in Kenya,recommendation,5,Mistral,True,therapy,['carbohydrate','fat'],True,12
+85,Compare oxalate content in spinach vs amaranth for children on long-term keto in Ghana,comparison,4,Mistral,True,therapy,['oxalate'],False,13
+86,How does topiramate affect metabolic acidosis risk in ketogenic diet?,general,4,Mistral,False,therapy,[],True,9
+87,Nutrition therapy for a 7yo with Lennox-Gastaut syndrome on clobazam and keto in India,therapy,5,Mistral,False,recommendation,[],True,12
+88,Recommend strategies to prevent constipation on ketogenic diet in South Africa,recommendation,4,Mistral,True,therapy,[],False,10
+89,Compare fluid requirements on classic vs modified Atkins diet in Nigeria,comparison,3,TinyLlama,True,therapy,[],False,10
+90,What labs should be monitored monthly in pediatric ketogenic therapy?,general,4,Mistral,False,recommendation,['carnitine','selenium','lipids'],True,9
+91,Nutrition therapy for a 7yo with CKD stage 3 (eGFR 58) in Nigeria,therapy,5,Mistral,False,recommendation,['egfr'],True,11
+92,Recommend low-potassium fruits for a 5yo with CKD in Kenya,recommendation,4,Mistral,True,therapy,['potassium'],True,10
+93,Compare phosphate additive content in packaged vs homemade ogi for a child with CKD in Ghana,comparison,4,Mistral,True,therapy,['phosphate'],False,14
+94,Why is protein restriction individualized in pediatric CKD?,general,4,Mistral,False,therapy,['protein'],False,8
+95,How much fluid should a child with CKD stage 2 consume daily?,recommendation,4,Mistral,True,therapy,[],True,11
+96,Compare sodium content in local soups for a child with CKD and hypertension in India,comparison,3,TinyLlama,True,therapy,['sodium'],False,13
+97,Explain the role of FGF23 in phosphate regulation in CKD,general,4,Mistral,False,therapy,['phosphate'],True,9
+98,Medical nutrition therapy for a 6yo with nephrotic syndrome and proteinuria in South Africa,therapy,5,Mistral,False,recommendation,['proteinuria'],True,12
+99,Recommend low-phosphorus protein sources for a 4yo with CKD in Nigeria,recommendation,5,Mistral,True,therapy,['phosphorus'],True,11
+100,Compare potassium content in plantain vs banana per child serving in Kenya,comparison,3,TinyLlama,True,recommendation,['potassium'],False,13
+101,Medical nutrition therapy for a 4yo with Crohn’s disease (fecal calprotectin 800) in Nigeria,therapy,5,Mistral,False,recommendation,['fecal_calprotectin'],True,13
+102,Recommend low-residue meals for a 6yo with IBD flare in Ghana,recommendation,5,Mistral,True,therapy,[],True,10
+103,Compare fiber content in amala vs eba for a child with stricturing Crohn’s in Kenya,comparison,4,Mistral,True,therapy,['fiber'],False,13
+104,How do PPIs affect micronutrient absorption in children with GERD?,general,4,Mistral,False,therapy,['magnesium','vitamin_b12','calcium'],True,10
+105,What are safe iron sources for a child with IBD and anemia in India?,recommendation,5,Mistral,True,therapy,['iron'],True,12
+106,Compare efficacy of exclusive enteral nutrition vs corticosteroids in pediatric Crohn’s in South Africa,comparison,4,Mistral,True,therapy,[],False,12
+107,Explain why vitamin D deficiency is common in inflammatory bowel disease,general,4,Mistral,False,recommendation,['vitamin_d'],True,9
+108,Nutrition therapy for a 5yo with eosinophilic esophagitis on six-food elimination diet in Nigeria,therapy,5,Mistral,False,recommendation,[],True,13
+109,Recommend thickened local porridges for a 3yo with GERD in Kenya,recommendation,4,Mistral,True,therapy,[],True,10
+110,Compare allergenicity of rice vs oat thickeners for infant GERD in Ghana,comparison,3,TinyLlama,True,therapy,[],False,11
+111,How does short bowel syndrome affect fluid and electrolyte needs?,general,4,Mistral,False,therapy,['sodium','potassium'],True,9
+112,Medical nutrition therapy for a 4yo with short bowel syndrome post-resection in India,therapy,5,Mistral,False,recommendation,[],True,12
+113,Recommend high-energy, low-oxalate foods for a child with enteric hyperoxaluria in South Africa,recommendation,5,Mistral,True,therapy,['oxalate'],True,12
+114,Compare fat absorption in children with ileal resection vs jejunal resection in Nigeria,comparison,4,Mistral,True,therapy,['fat'],False,12
+115,What vitamins require parenteral replacement in short bowel syndrome?,general,4,Mistral,False,recommendation,['vitamin_b12','fat_soluble_vitamins'],True,9
+116,Post-discharge nutrition plan for a 5-month-old ex-preterm infant (birth weight 1.1kg) in Ghana,therapy,5,Mistral,False,recommendation,[],True,14
+117,How much iron should a preterm infant receive after 40 weeks PMA in Kenya?,recommendation,4,Mistral,True,therapy,['iron'],True,12
+118,Compare vitamin A content in liver paste vs fortified oil for preterm infants in Nigeria,comparison,4,Mistral,True,recommendation,['vitamin_a'],False,14
+119,What are growth targets for preterm infants at 12 months corrected age?,general,3,Mistral,False,therapy,[],False,9
+120,Recommend strategies to prevent iron deficiency in ex-preterm infants in India,recommendation,4,Mistral,True,therapy,['iron'],True,11
+121,Medical nutrition therapy for a 7yo with type 1 diabetes and celiac disease in South Africa,therapy,5,Mistral,False,recommendation,['hba1c'],True,12
+122,Recommend gluten-free, low-glycemic snacks for a child with T1D in Nigeria,recommendation,4,Mistral,True,therapy,['glycemic_index'],True,11
+123,Compare glycemic index of gluten-free maize pasta vs rice pasta in Kenya,comparison,3,TinyLlama,True,therapy,['glycemic_index'],False,11
+124,How does celiac disease affect diabetes control?,general,3,Mistral,False,recommendation,[],False,6
+125,What is the risk of diabetic ketoacidosis during gastroenteritis in children?,general,4,Mistral,False,therapy,[],True,10
+126,Medical nutrition therapy for a 3yo with FPIES to oats in Ghana,therapy,5,Mistral,False,recommendation,[],True,9
+127,Recommend safe grains for a child with multiple food protein allergies in India,recommendation,5,Mistral,True,therapy,[],False,11
+128,Compare allergenic potential of quinoa vs teff in food-allergic children in South Africa,comparison,3,TinyLlama,True,recommendation,[],False,11
+129,How is oral immunotherapy monitored nutritionally?,general,4,Mistral,False,therapy,[],False,6
+130,What nutrients are at risk during elimination diets for food allergy?,general,4,Mistral,False,recommendation,['calcium','vitamin_d','protein'],True,9
+131,Nutrition therapy for a 6yo with CF and allergic bronchopulmonary aspergillosis in Nigeria,therapy,5,Mistral,False,recommendation,[],True,12
+132,Recommend anti-inflammatory foods for a child with CF and chronic lung inflammation in Kenya,recommendation,4,Mistral,True,therapy,[],False,12
+133,Compare omega-3 content in local fish vs supplements for CF in Ghana,comparison,3,TinyLlama,True,therapy,['omega_3'],False,12
+134,How does azithromycin affect gut microbiome in cystic fibrosis?,general,4,Mistral,False,therapy,[],True,8
+135,What is the role of probiotics in CF nutrition?,general,3,Mistral,False,recommendation,[],False,8
+136,Medical nutrition therapy for a 5yo with propionic acidemia during illness in India,therapy,5,Mistral,False,recommendation,['ammonia'],True,12
+137,Recommend emergency regimen for a child with methylmalonic acidemia in South Africa,recommendation,5,Mistral,True,therapy,[],True,11
+138,Compare protein tolerance in different organic acidemias in Nigeria,comparison,4,Mistral,True,therapy,['protein'],False,9
+139,How is carnitine used in organic acidemias?,general,4,Mistral,False,recommendation,['carnitine'],True,7
+140,What labs indicate metabolic decompensation in IEMs?,general,4,Mistral,False,therapy,['ammonia','lactate','glucose'],True,8
+141,Ketogenic diet for a 4yo with infantile spasms in Kenya,therapy,5,Mistral,False,recommendation,['weight'],True,8
+142,Recommend ways to mask MCT oil taste in local foods for keto in Nigeria,recommendation,4,Mistral,True,therapy,[],False,12
+143,Compare seizure freedom rates with keto vs modified Atkins in Ghana,comparison,4,Mistral,True,therapy,[],False,10
+144,How does the ketogenic diet affect bone health?,general,4,Mistral,False,recommendation,['calcium','vitamin_d'],True,8
+145,What is the role of urine ketone monitoring in pediatric keto?,general,3,Mistral,False,therapy,['ketones'],False,9
+146,Nutrition therapy for a 8yo with CKD stage 4 (eGFR 28) in India,therapy,5,Mistral,False,recommendation,['egfr'],True,10
+147,Recommend phosphate binder-compatible meals for a child with CKD in South Africa,recommendation,5,Mistral,True,therapy,['phosphate'],True,11
+148,Compare potassium content in cooked vs raw leafy greens for CKD in Nigeria,comparison,4,Mistral,True,therapy,['potassium'],False,12
+149,Why is metabolic acidosis common in advanced CKD?,general,4,Mistral,False,therapy,[],True,7
+150,What is the role of bicarbonate supplementation in pediatric CKD?,general,4,Mistral,False,recommendation,[],False,9
+151,Medical nutrition therapy for a 5yo with ulcerative colitis in remission in Kenya,therapy,4,Mistral,False,recommendation,[],True,11
+152,Recommend iron-rich, low-fiber foods for a child with IBD and anemia in Ghana,recommendation,5,Mistral,True,therapy,['iron'],True,12
+153,Compare zinc absorption in children with active vs quiescent Crohn’s in Nigeria,comparison,4,Mistral,True,therapy,['zinc'],False,12
+154,How does exclusive enteral nutrition induce remission in Crohn’s?,general,4,Mistral,False,therapy,[],True,8
+155,What are nutritional risks of long-term steroid use in IBD?,general,4,Mistral,False,recommendation,['calcium','vitamin_d'],True,9
+156,Recommend high-protein, low-residue meals for a 6yo with IBD in India,recommendation,5,Mistral,True,therapy,['protein'],True,11
+157,Medical nutrition therapy for a 3yo with GERD and neurodisability in South Africa,therapy,5,Mistral,False,recommendation,[],True,11
+158,Compare efficacy of thickened feeds vs positional management for GERD in Nigeria,comparison,3,TinyLlama,True,therapy,[],False,10
+159,How does GERD affect nutrient absorption in neurologically impaired children?,general,4,Mistral,False,therapy,[],True,10
+160,What are safe feeding strategies for a child with GERD and aspiration risk in Kenya?,recommendation,5,Mistral,True,therapy,[],True,13
+161,Compare energy needs of preterm vs term infants at 6 months corrected age in Ghana,comparison,3,TinyLlama,True,therapy,[],False,12
+162,How does bronchopulmonary dysplasia increase calorie needs in preterm infants?,general,4,Mistral,False,therapy,[],True,9
+163,Recommend fortified local foods for a 10-month-old ex-preterm in Nigeria,recommendation,4,Mistral,True,therapy,[],False,10
+164,Medical nutrition therapy for a 6-month-old with preterm history and cholestasis in India,therapy,5,Mistral,False,recommendation,['bilirubin'],True,12
+165,What is the role of medium-chain triglycerides in preterm nutrition?,general,4,Mistral,False,recommendation,['fat'],False,10
+166,Recommend carbohydrate distribution for a 9yo with T1D on pump therapy in South Africa,recommendation,4,Mistral,True,therapy,['carbohydrate'],True,12
+167,Compare insulin sensitivity between morning and evening in T1D children in Kenya,comparison,4,Mistral,True,therapy,['insulin'],False,11
+168,How does puberty affect insulin resistance in adolescents with T1D?,general,4,Mistral,False,recommendation,[],False,9
+169,Medical nutrition therapy for a 12yo with T1D and eating disorder in Nigeria,therapy,5,Mistral,False,recommendation,[],True,11
+170,Recommend strategies to manage insulin stacking in active teens with T1D in Ghana,recommendation,4,Mistral,True,therapy,[],False,12
+171,Compare allergen introduction timing for high-risk infants in India vs WHO guidelines,comparison,3,TinyLlama,True,therapy,[],False,11
+172,How effective is early peanut introduction in preventing allergy in Africa?,general,3,TinyLlama,False,recommendation,[],False,9
+173,Recommend safe weaning foods for a 5-month-old with strong family allergy history in South Africa,recommendation,4,Mistral,True,therapy,[],False,13
+174,Medical nutrition therapy for a 2yo with anaphylaxis to sesame in Nigeria,therapy,5,Mistral,False,recommendation,[],True,9
+175,Compare hidden sesame sources in local Nigerian vs Indian processed foods,comparison,4,Mistral,True,therapy,[],False,11
+176,How does food allergy affect school performance?,general,3,Mistral,False,recommendation,[],False,6
+177,Nutrition therapy for a 7yo with CF and CFRD on insulin in Kenya,therapy,5,Mistral,False,recommendation,['hba1c'],True,10
+178,Recommend high-energy, low-carb meals for a child with CF and CFRD in Ghana,recommendation,5,Mistral,True,therapy,['carbohydrate'],True,11
+179,Compare glycemic impact of local fruits in CF-related diabetes in Nigeria,comparison,4,Mistral,True,therapy,['glycemic_index'],False,10
+180,What is the role of continuous glucose monitoring in CFRD?,general,4,Mistral,False,recommendation,['glucose'],False,8
+181,How does CFRD differ from type 1 diabetes?,general,4,Mistral,False,therapy,[],False,7
+182,Medical nutrition therapy for a 4yo with tyrosinemia on nitisinone in India,therapy,5,Mistral,False,recommendation,[],True,11
+183,Recommend low-tyrosine, low-phenylalanine foods for a child with tyrosinemia in South Africa,recommendation,5,Mistral,True,therapy,['tyrosine','phenylalanine'],True,13
+184,Compare natural protein allowance in tyrosinemia vs PKU in Nigeria,comparison,4,Mistral,True,therapy,['protein'],False,10
+185,How is nitisinone monitored nutritionally?,general,4,Mistral,False,recommendation,[],False,5
+186,What are ocular risks in tyrosinemia and dietary prevention?,general,4,Mistral,False,therapy,[],True,9
+187,Ketogenic diet for a 5yo with tuberous sclerosis complex in Kenya,therapy,5,Mistral,False,recommendation,['weight'],True,9
+188,Recommend selenium-rich foods for a child on long-term keto in Nigeria,recommendation,4,Mistral,True,therapy,['selenium'],True,10
+189,Compare carnitine levels in children on valproate vs other antiepileptics in Ghana,comparison,4,Mistral,True,therapy,['carnitine'],False,12
+190,How does the ketogenic diet affect lipid profiles?,general,4,Mistral,False,recommendation,['lipids'],True,8
+191,What is the role of urine pH monitoring in keto?,general,3,Mistral,False,therapy,['ph'],False,8
+192,Nutrition therapy for a 6yo with CKD stage 2 and hypertension in India,therapy,5,Mistral,False,recommendation,['egfr','sodium'],True,11
+193,Recommend low-sodium, low-potassium snacks for a child with CKD in South Africa,recommendation,5,Mistral,True,therapy,['sodium','potassium'],True,12
+194,Compare phosphate content in local dairy alternatives for CKD in Nigeria,comparison,4,Mistral,True,therapy,['phosphate'],False,11
+195,How does anemia develop in chronic kidney disease?,general,4,Mistral,False,therapy,['iron','ferritin'],True,7
+196,What is the role of erythropoietin in CKD nutrition?,general,4,Mistral,False,recommendation,[],False,8
+197,Medical nutrition therapy for a 5yo with microscopic colitis in Kenya,therapy,4,Mistral,False,recommendation,[],True,9
+198,Recommend low-FODMAP local foods for a child with IBS in Ghana,recommendation,4,Mistral,True,therapy,[],False,10
+199,Compare lactose tolerance in children with post-infectious IBS in Nigeria,comparison,3,TinyLlama,True,therapy,['lactose'],False,10
+200,How does gut dysbiosis affect nutrition in functional GI disorders?,general,4,Mistral,False,recommendation,[],True,8
+201,What probiotics are evidence-based for pediatric IBS?,general,3,TinyLlama,False,recommendation,[],False,7
+202,Recommend high-calorie, easy-to-digest meals for a 4yo with GERD in India,recommendation,4,Mistral,True,therapy,[],False,11
+203,Medical nutrition therapy for a 3yo with Sandifer syndrome in South Africa,therapy,5,Mistral,False,recommendation,[],True,9
+204,Compare efficacy of alginate vs PPIs for infant GERD in Nigeria,comparison,3,TinyLlama,True,therapy,[],False,9
+205,How does GERD affect sleep in children?,general,3,Mistral,False,recommendation,[],False,6
+206,What are nutritional considerations for fundoplication surgery?,general,4,Mistral,False,therapy,[],True,7
+207,Compare growth patterns of preterm infants fed mother's milk vs formula in Kenya,comparison,4,Mistral,True,therapy,[],False,11
+208,How does donor human milk affect preterm gut microbiome?,general,4,Mistral,False,recommendation,[],True,8
+209,Recommend strategies to support breastfeeding in mothers of preterm infants in Ghana,recommendation,3,TinyLlama,True,therapy,[],False,11
+210,Medical nutrition therapy for a 5-month-old with preterm history and iron deficiency in Nigeria,therapy,5,Mistral,False,recommendation,['iron'],True,13
+211,What is the role of lactoferrin in preterm nutrition?,general,4,Mistral,False,recommendation,[],False,7
+212,Recommend carbohydrate counting tools for a 10yo with T1D in India,recommendation,3,TinyLlama,True,therapy,['carbohydrate'],False,9
+213,Compare insulin pump vs MDI for glycemic variability in T1D teens in South Africa,comparison,4,Mistral,True,therapy,['glucose'],False,12
+214,How does exercise timing affect hypoglycemia risk in T1D?,general,4,Mistral,False,recommendation,[],False,8
+215,Medical nutrition therapy for a 13yo with T1D and insulin resistance in Kenya,therapy,5,Mistral,False,recommendation,['hba1c'],True,11
+216,Recommend culturally appropriate meal plans for Ramadan in a child with T1D in Nigeria,recommendation,5,Mistral,True,therapy,[],True,12
+217,Compare allergen labeling laws in Nigeria vs South Africa for food-allergic children,comparison,3,TinyLlama,True,therapy,[],False,11
+218,How effective are school allergy action plans in Africa?,general,3,TinyLlama,False,recommendation,[],False,8
+219,Recommend emergency epinephrine storage strategies in hot climates for allergic children in Ghana,recommendation,4,Mistral,True,therapy,[],False,12
+220,Medical nutrition therapy for a 4yo with alpha-gal syndrome in India,therapy,5,Mistral,False,recommendation,[],True,9
+221,Compare hidden mammalian meat derivatives in local processed foods in Nigeria,comparison,4,Mistral,True,therapy,[],False,10
+222,How does alpha-gal differ from typical IgE-mediated allergy?,general,4,Mistral,False,recommendation,[],False,8
+223,Nutrition therapy for a 7yo with CF and osteopenia in South Africa,therapy,5,Mistral,False,recommendation,['vitamin_d','calcium'],True,10
+224,Recommend calcium-fortified local foods for a child with CF in Kenya,recommendation,4,Mistral,True,therapy,['calcium'],True,10
+225,Compare vitamin D absorption with different CFTR modulators in Ghana,comparison,4,Mistral,True,therapy,['vitamin_d'],False,9
+226,How do CFTR modulators affect nutritional status?,general,4,Mistral,False,recommendation,[],False,7
+227,What is the role of DEXA scanning in CF bone health?,general,4,Mistral,False,therapy,[],False,8
+228,Medical nutrition therapy for a 5yo with citrin deficiency in Nigeria,therapy,5,Mistral,False,recommendation,['ammonia'],True,9
+229,Recommend high-carbohydrate, low-protein diet for a child with citrin deficiency in India,recommendation,5,Mistral,True,therapy,['protein','carbohydrate'],True,13
+230,Compare sucrose tolerance in citrin deficiency vs healthy children in South Africa,comparison,4,Mistral,True,therapy,['sucrose'],False,10
+231,How does citrin deficiency present in older children?,general,4,Mistral,False,recommendation,[],True,7
+232,What labs are diagnostic for citrin deficiency?,general,4,Mistral,False,therapy,['ammonia','citrulline'],True,6
+233,Ketogenic diet for a 6yo with Dravet syndrome on stiripentol in Kenya,therapy,5,Mistral,False,recommendation,['weight'],True,10
+234,Recommend ways to manage stiripentol-induced appetite loss with keto in Nigeria,recommendation,5,Mistral,True,therapy,[],True,11
+235,Compare drug interactions between clobazam and ketogenic diet in Ghana,comparison,4,Mistral,True,therapy,[],False,9
+236,How does the ketogenic diet affect stiripentol levels?,general,4,Mistral,False,recommendation,[],True,8
+237,What is the role of vagus nerve stimulation alongside keto?,general,3,Mistral,False,therapy,[],False,8
+238,Nutrition therapy for a 8yo with CKD stage 3 and growth failure in India,therapy,5,Mistral,False,recommendation,['egfr','weight'],True,11
+239,Recommend growth-promoting, kidney-safe meals for a child with CKD in South Africa,recommendation,5,Mistral,True,therapy,['protein'],True,11
+240,Compare IGF-1 levels in children with CKD on different protein intakes in Nigeria,comparison,4,Mistral,True,therapy,['igf1'],False,11
+241,How does metabolic acidosis affect growth in CKD?,general,4,Mistral,False,therapy,[],True,7
+242,What is the role of ketoanalogues in pediatric CKD?,general,4,Mistral,False,recommendation,[],True,7
+243,Medical nutrition therapy for a 6yo with Crohn’s disease on infliximab in Kenya,therapy,5,Mistral,False,recommendation,['fecal_calprotectin'],True,11
+244,Recommend anti-TNF diet strategies for a child with IBD in Ghana,recommendation,4,Mistral,True,therapy,[],False,10
+245,Compare microbiome changes with exclusive enteral nutrition in Nigeria,comparison,4,Mistral,True,therapy,[],False,8
+246,How does infliximab affect nutrient absorption?,general,4,Mistral,False,recommendation,[],False,6
+247,What are nutritional biomarkers of IBD remission?,general,4,Mistral,False,therapy,['crp','albumin'],True,7
+248,Recommend thickened, calorie-dense meals for a 4yo with GERD and failure to thrive in India,recommendation,5,Mistral,True,therapy,[],True,13
+249,Medical nutrition therapy for a 3yo with rumination syndrome in South Africa,therapy,4,Mistral,False,recommendation,[],True,9
+250,Compare behavioral vs nutritional interventions for rumination in Nigeria,comparison,3,TinyLlama,True,therapy,[],False,8
+251,How does rumination affect growth?,general,3,Mistral,False,recommendation,[],False,5
+252,What is the role of diaphragmatic breathing in rumination management?,general,3,TinyLlama,False,therapy,[],False,8
+253,Recommend high-energy preterm weaning foods using local grains in Kenya,recommendation,4,Mistral,True,therapy,[],False,10
+254,Medical nutrition therapy for a 6-month-old with preterm history and cholestatic liver disease in Ghana,therapy,5,Mistral,False,recommendation,['bilirubin'],True,13
+255,Compare MCT oil tolerance in preterm vs term infants in Nigeria,comparison,4,Mistral,True,therapy,['fat'],False,9
+256,How does cholestasis affect fat-soluble vitamin absorption in preterms?,general,4,Mistral,False,therapy,['vitamin_a','vitamin_d','vitamin_e','vitamin_k'],True,9
+257,What is the role of ursodeoxycholic acid in preterm nutrition?,general,4,Mistral,False,recommendation,[],False,8
+258,Recommend insulin-to-carb ratios for a 11yo with T1D in India,recommendation,4,Mistral,True,therapy,['insulin','carbohydrate'],True,10
+259,Compare HbA1c targets for children vs adults with T1D in South Africa,comparison,3,TinyLlama,True,therapy,['hba1c'],False,10
+260,How does continuous glucose monitoring improve time-in-range in T1D?,general,4,Mistral,False,recommendation,['glucose'],False,9
+261,Medical nutrition therapy for a 14yo with T1D and disordered eating in Nigeria,therapy,5,Mistral,False,recommendation,[],True,11
+262,Recommend non-stigmatizing language for diabetes nutrition counseling in Ghana,recommendation,3,TinyLlama,True,therapy,[],False,9
+263,Compare food allergy prevalence in urban vs rural Africa,comparison,3,TinyLlama,True,therapy,[],False,8
+264,How does helminth infection affect food allergy risk?,general,4,Mistral,False,recommendation,[],False,7
+265,Recommend allergy-safe school lunch ideas in Kenya,recommendation,4,Mistral,True,therapy,[],False,8
+266,Medical nutrition therapy for a 5yo with food protein-induced allergic proctocolitis in India,therapy,5,Mistral,False,recommendation,[],True,12
+267,Compare maternal elimination diet efficacy for FPIAP in South Africa,comparison,4,Mistral,True,therapy,[],False,9
+268,How is FPIAP different from IBD?,general,3,Mistral,False,recommendation,[],False,6
+269,What is the prognosis of FPIAP?,general,3,TinyLlama,False,therapy,[],False,5
+270,Nutrition therapy for a 8yo with CF and CFRD on metformin in Nigeria,therapy,5,Mistral,False,recommendation,['hba1c'],True,10
+271,Recommend metformin-compatible meals for a child with CFRD in Kenya,recommendation,4,Mistral,True,therapy,['carbohydrate'],True,9
+272,Compare metformin side effects in CFRD vs type 2 diabetes in Ghana,comparison,3,TinyLlama,True,therapy,['vitamin_b12'],False,9
+273,How does metformin affect B12 in children with CFRD?,general,4,Mistral,False,recommendation,['vitamin_b12'],True,8
+274,What is the role of GLP-1 agonists in CFRD?,general,4,Mistral,False,therapy,[],True,7
+275,Medical nutrition therapy for a 4yo with urea cycle disorder during hyperammonemic crisis in India,therapy,5,Mistral,False,recommendation,['ammonia'],True,13
+276,Recommend emergency high-dextrose fluids for a child with UCD in South Africa,recommendation,5,Mistral,True,therapy,[],True,10
+277,Compare nitrogen scavenger efficacy in different UCDs in Nigeria,comparison,4,Mistral,True,therapy,[],False,8
+278,How is ammonia monitored in UCDs?,general,4,Mistral,False,recommendation,['ammonia'],False,6
+279,What are signs of hyperammonemia in infants?,general,4,Mistral,False,therapy,[],True,7
+280,Ketogenic diet for a 7yo with Doose syndrome in Kenya,therapy,5,Mistral,False,recommendation,['weight'],True,8
+281,Recommend ways to prevent kidney stones on long-term keto in Nigeria,recommendation,5,Mistral,True,therapy,['oxalate','citrate'],True,10
+282,Compare citrate supplementation strategies in keto-induced stones in Ghana,comparison,4,Mistral,True,therapy,['citrate'],False,8
+283,How does the ketogenic diet affect uric acid levels?,general,4,Mistral,False,recommendation,['uric_acid'],False,8
+284,What is the role of urine pH in stone prevention?,general,3,Mistral,False,therapy,['ph'],False,8
+285,Nutrition therapy for a 9yo with CKD stage 4 and secondary hyperparathyroidism in India,therapy,5,Mistral,False,recommendation,['pth','calcium','phosphate'],True,12
+286,Recommend calcimimetic-compatible meals for a child with CKD in South Africa,recommendation,5,Mistral,True,therapy,['calcium'],True,9
+287,Compare vitamin D analogs in pediatric CKD-MBD in Nigeria,comparison,4,Mistral,True,therapy,['vitamin_d'],False,8
+288,How is CKD-MBD staged in children?,general,4,Mistral,False,recommendation,['pth','calcium','phosphate'],True,7
+289,What is the role of parathyroidectomy in CKD?,general,4,Mistral,False,therapy,[],True,7
+290,Medical nutrition therapy for a 5yo with indeterminate colitis in Kenya,therapy,4,Mistral,False,recommendation,[],True,8
+291,Recommend low-residue, high-protein meals for a child with IBD in Ghana,recommendation,5,Mistral,True,therapy,['protein'],True,10
+292,Compare fecal calprotectin cutoffs for IBD vs IBS in Nigeria,comparison,4,Mistral,True,therapy,['fecal_calprotectin'],False,9
+293,How does CRP correlate with IBD activity?,general,4,Mistral,False,recommendation,['crp'],False,6
+294,What is the role of fecal microbiota transplantation in IBD?,general,4,Mistral,False,therapy,[],True,8
+295,Recommend anti-reflux positioning strategies with feeds for GERD in India,recommendation,3,TinyLlama,True,therapy,[],False,9
+296,Medical nutrition therapy for a 4yo with laryngopharyngeal reflux in South Africa,therapy,4,Mistral,False,recommendation,[],True,9
+297,Compare pH-impedance monitoring findings in typical vs atypical GERD in Nigeria,comparison,4,Mistral,True,therapy,[],False,9
+298,How does LPR affect voice in children?,general,3,Mistral,False,recommendation,[],False,6
+299,What dietary changes help LPR?,general,3,TinyLlama,False,therapy,[],False,5
+300,Compare growth velocity of preterm infants with BPD vs without in Kenya,comparison,4,Mistral,True,therapy,[],False,10
+301,How does oxygen therapy affect preterm energy expenditure?,general,4,Mistral,False,recommendation,[],True,7
+302,Recommend high-calorie fortifiers for preterm infants in Ghana,recommendation,4,Mistral,True,therapy,[],False,8
+303,Medical nutrition therapy for a 7-month-old with preterm history and iron deficiency anemia in Nigeria,therapy,5,Mistral,False,recommendation,['iron','ferritin'],True,14
+304,What is the role of delayed cord clamping in preterm iron stores?,general,4,Mistral,False,therapy,['iron'],True,9
+305,How does erythropoietin affect preterm nutrition?,general,4,Mistral,False,recommendation,[],False,6
+306,Recommend carb-to-insulin ratios for a 12yo with T1D in India,recommendation,4,Mistral,True,therapy,['insulin','carbohydrate'],True,10
+307,Compare dawn phenomenon management strategies in T1D teens in South Africa,comparison,4,Mistral,True,therapy,['glucose'],False,8
+308,How does menstrual cycle affect glycemic control in adolescent girls with T1D?,general,4,Mistral,False,recommendation,[],False,10
+309,Medical nutrition therapy for a 15yo with T1D and pregnancy in Nigeria,therapy,5,Mistral,False,recommendation,['hba1c'],True,10
+310,Recommend preconception nutrition for adolescents with T1D in Kenya,recommendation,4,Mistral,True,therapy,['folic_acid'],True,8
+311,Compare food allergy outcomes with early introduction in EAT vs LEAP trials,comparison,3,TinyLlama,True,therapy,[],False,9
+312,How effective is baked egg desensitization?,general,4,Mistral,False,recommendation,[],False,5
+313,Recommend maintenance diet after oral immunotherapy in Ghana,recommendation,4,Mistral,True,therapy,[],False,8
+314,Medical nutrition therapy for a 6yo with eosinophilic gastritis in India,therapy,5,Mistral,False,recommendation,[],True,9
+315,Compare six-food vs four-food elimination diets for EoE in South Africa,comparison,4,Mistral,True,therapy,[],False,10
+316,How is EoE diagnosed endoscopically?,general,3,Mistral,False,recommendation,[],False,5
+317,What is the role of PPIs in EoE?,general,3,Mistral,False,therapy,[],False,6
+318,Nutrition therapy for a 9yo with CF and CFRD on SGLT2 inhibitor in Nigeria,therapy,5,Mistral,False,recommendation,['hba1c'],True,11
+319,Recommend SGLT2 inhibitor-compatible meals for a child with CFRD in Kenya,recommendation,4,Mistral,True,therapy,['carbohydrate'],True,10
+320,Compare SGLT2 inhibitor side effects in CFRD vs type 2 diabetes in Ghana,comparison,3,TinyLlama,True,therapy,[],False,9
+321,How do SGLT2 inhibitors affect ketone risk in CFRD?,general,4,Mistral,False,recommendation,['ketones'],True,8
+322,What is the role of CGM in SGLT2 inhibitor therapy?,general,4,Mistral,False,therapy,['glucose'],False,8
+323,Medical nutrition therapy for a 5yo with glutaric aciduria type 1 in India,therapy,5,Mistral,False,recommendation,['lysine','tryptophan'],True,10
+324,Recommend lysine-restricted local foods for a child with GA1 in South Africa,recommendation,5,Mistral,True,therapy,['lysine'],True,11
+325,Compare emergency regimen for GA1 during illness in Nigeria,comparison,4,Mistral,True,therapy,[],False,8
+326,How is GA1 monitored biochemically?,general,4,Mistral,False,recommendation,['glutaric_acid'],True,5
+327,What are striatal injury risks in GA1?,general,4,Mistral,False,therapy,[],True,6
+328,Ketogenic diet for a 6yo with febrile infection-related epilepsy syndrome in Kenya,therapy,5,Mistral,False,recommendation,['weight'],True,11
+329,Recommend infection-prevention strategies on ketogenic diet in Nigeria,recommendation,4,Mistral,True,therapy,[],False,8
+330,Compare immune function in children on classic vs MCT keto in Ghana,comparison,4,Mistral,True,therapy,[],False,9
+331,How does the ketogenic diet affect vaccine response?,general,4,Mistral,False,recommendation,[],False,7
+332,What is the role of zinc in keto immune support?,general,4,Mistral,False,therapy,['zinc'],False,8
+333,Nutrition therapy for a 10yo with CKD stage 5 on dialysis in India,therapy,5,Mistral,False,recommendation,['egfr','potassium','phosphate'],True,11
+334,Recommend dialysis-compatible meals for a child with CKD in South Africa,recommendation,5,Mistral,True,therapy,['potassium','phosphate'],True,9
+335,Compare fluid restrictions on hemodialysis vs peritoneal dialysis in Nigeria,comparison,4,Mistral,True,therapy,['fluid'],False,9
+336,How does dialysis affect protein requirements?,general,4,Mistral,False,recommendation,['protein'],True,6
+337,What is the role of renal vitamins in dialysis?,general,4,Mistral,False,therapy,[],False,7
+338,Medical nutrition therapy for a 7yo with very early onset IBD in Kenya,therapy,5,Mistral,False,recommendation,['fecal_calprotectin'],True,10
+339,Recommend elemental formula strategies for VEO-IBD in Ghana,recommendation,5,Mistral,True,therapy,[],True,8
+340,Compare genetic testing yield in VEO-IBD vs older onset in Nigeria,comparison,4,Mistral,True,therapy,[],False,9
+341,How does VEO-IBD differ phenotypically?,general,4,Mistral,False,recommendation,[],False,5
+342,What is the role of hematopoietic stem cell transplant in VEO-IBD?,general,5,Mistral,False,therapy,[],True,9
+343,Recommend thickened, nutrient-dense smoothies for a 5yo with GERD in India,recommendation,4,Mistral,True,therapy,[],False,10
+344,Medical nutrition therapy for a 4yo with eosinophilic esophagitis unresponsive to PPI in South Africa,therapy,5,Mistral,False,recommendation,[],True,12
+345,Compare topical steroid efficacy with dietary elimination in EoE in Nigeria,comparison,4,Mistral,True,therapy,[],False,9
+346,How is EoE remission defined histologically?,general,4,Mistral,False,recommendation,[],False,6
+347,What is the role of biologics in EoE?,general,4,Mistral,False,therapy,[],True,6
+348,Compare preterm growth charts: WHO vs INTERGROWTH in Kenya,comparison,3,TinyLlama,True,therapy,[],False,8
+349,How does kangaroo mother care affect preterm feeding outcomes?,general,4,Mistral,False,recommendation,[],True,8
+350,Recommend strategies to prevent necrotizing enterocolitis in preterm infants in Ghana,recommendation,4,Mistral,True,therapy,[],True,10
+351,Medical nutrition therapy for a 6-month-old with preterm history and osteopenia in Nigeria,therapy,5,Mistral,False,recommendation,['calcium','phosphate'],True,12
+352,What is the role of vitamin K in preterm bone health?,general,4,Mistral,False,therapy,['vitamin_k'],False,8
+353,How does caffeine affect preterm nutrition?,general,4,Mistral,False,recommendation,[],False,5
+354,Recommend insulin adjustment strategies for sick days in a 10yo with T1D in India,recommendation,5,Mistral,True,therapy,['glucose'],True,11
+355,Compare ketone monitoring methods in pediatric DKA prevention in South Africa,comparison,4,Mistral,True,therapy,['ketones'],False,9
+356,How does illness affect insulin sensitivity in T1D?,general,4,Mistral,False,recommendation,[],False,7
+357,Medical nutrition therapy for a 13yo with T1D and celiac disease in Nigeria,therapy,5,Mistral,False,recommendation,['hba1c'],True,11
+358,Recommend gluten-free, low-glycemic local meals for T1D in Kenya,recommendation,4,Mistral,True,therapy,['glycemic_index'],True,10
+359,Compare gluten-free grain glycemic indices in Ghana,comparison,3,TinyLlama,True,therapy,['glycemic_index'],False,7
+360,How does celiac disease affect HbA1c interpretation?,general,4,Mistral,False,recommendation,['hba1c'],True,6
+361,Medical nutrition therapy for a 3yo with food protein-induced enterocolitis syndrome to rice in India,therapy,5,Mistral,False,recommendation,[],True,13
+362,Recommend safe weaning sequence for FPIES in South Africa,recommendation,5,Mistral,True,therapy,[],True,8
+363,Compare FPIES triggers in African vs Western diets in Nigeria,comparison,4,Mistral,True,therapy,[],False,9
+364,How is FPIES diagnosed without testing?,general,3,Mistral,False,recommendation,[],False,6
+365,What is the natural history of FPIES?,general,3,TinyLlama,False,therapy,[],False,6
+366,Nutrition therapy for a 8yo with CF and allergic bronchopulmonary aspergillosis on steroids in Kenya,therapy,5,Mistral,False,recommendation,[],True,13
+367,Recommend steroid-sparing, anti-inflammatory meals for CF in Ghana,recommendation,4,Mistral,True,therapy,[],False,9
+368,Compare bone density outcomes in CF children on chronic steroids in Nigeria,comparison,4,Mistral,True,therapy,['vitamin_d','calcium'],False,10
+369,How do steroids affect glucose metabolism in CF?,general,4,Mistral,False,recommendation,['glucose'],True,7
+370,What is the role of bisphosphonates in CF bone disease?,general,4,Mistral,False,therapy,[],True,7
+371,Medical nutrition therapy for a 6yo with methylmalonic acidemia during illness in India,therapy,5,Mistral,False,recommendation,['ammonia','lactate'],True,12
+372,Recommend emergency high-carbohydrate, low-protein fluids for organic acidemia in South Africa,recommendation,5,Mistral,True,therapy,['protein','carbohydrate'],True,13
+373,Compare carnitine dosing in different organic acidemias in Nigeria,comparison,4,Mistral,True,therapy,['carnitine'],False,8
+374,How is metabolic stroke prevented in organic acidemias?,general,4,Mistral,False,recommendation,[],True,7
+375,What is the role of liver transplant in organic acidemias?,general,4,Mistral,False,therapy,[],True,7
+376,Ketogenic diet for a 5yo with CDKL5 deficiency disorder in Kenya,therapy,5,Mistral,False,recommendation,['weight'],True,8
+377,Recommend ways to manage constipation on keto in Nigeria,recommendation,4,Mistral,True,therapy,[],False,8
+378,Compare seizure types responsive to ketogenic diet in Ghana,comparison,4,Mistral,True,therapy,[],False,8
+379,How does the ketogenic diet affect behavior in developmental disorders?,general,4,Mistral,False,recommendation,[],False,9
+380,What is the role of modified Atkins diet in resource-limited settings?,general,4,Mistral,False,therapy,[],False,9
+381,Nutrition therapy for a 11yo with CKD stage 3 and metabolic acidosis in India,therapy,5,Mistral,False,recommendation,['bicarbonate'],True,10
+382,Recommend bicarbonate-rich, kidney-safe meals for a child with CKD in South Africa,recommendation,5,Mistral,True,therapy,['bicarbonate'],True,10
+383,Compare serum bicarbonate targets in pediatric CKD guidelines in Nigeria,comparison,4,Mistral,True,therapy,['bicarbonate'],False,9
+384,How does metabolic acidosis affect muscle mass in CKD?,general,4,Mistral,False,recommendation,[],True,8
+385,What is the role of fruit-derived alkali in CKD?,general,4,Mistral,False,therapy,[],False,7
+386,Medical nutrition therapy for a 6yo with Crohn’s disease and perianal fistula in Kenya,therapy,5,Mistral,False,recommendation,['fecal_calprotectin'],True,11
+387,Recommend low-residue, high-zinc meals for fistula healing in Ghana,recommendation,5,Mistral,True,therapy,['zinc'],True,9
+388,Compare antibiotic efficacy with nutritional support in perianal Crohn’s in Nigeria,comparison,4,Mistral,True,therapy,[],False,9
+389,How does zinc affect wound healing in IBD?,general,4,Mistral,False,recommendation,['zinc'],False,7
+390,What is the role of seton placement in fistulizing Crohn’s?,general,4,Mistral,False,therapy,[],False,8
+391,Recommend high-calorie, easy-to-swallow meals for a 4yo with GERD and oral aversion in India,recommendation,5,Mistral,True,therapy,[],True,12
+392,Medical nutrition therapy for a 5yo with cyclic vomiting syndrome in South Africa,therapy,4,Mistral,False,recommendation,[],True,9
+393,Compare mitochondrial disorder screening in CVS in Nigeria,comparison,4,Mistral,True,therapy,[],False,7
+394,How does coenzyme Q10 affect CVS?,general,4,Mistral,False,recommendation,['coq10'],False,6
+395,What is the role of carnitine in CVS?,general,4,Mistral,False,therapy,['carnitine'],False,6
+396,Compare preterm iron supplementation protocols: ESPGHAN vs local guidelines in Kenya,comparison,4,Mistral,True,therapy,['iron'],False,10
+397,How does iron deficiency affect neurodevelopment in preterms?,general,4,Mistral,False,recommendation,['iron'],True,7
+398,Recommend iron-fortified local complementary foods for preterms in Ghana,recommendation,4,Mistral,True,therapy,['iron'],False,9
+399,Medical nutrition therapy for a 7-month-old with preterm history and vitamin D deficiency in Nigeria,therapy,5,Mistral,False,recommendation,['vitamin_d'],True,13
+400,What is the role of sunlight exposure in preterm vitamin D status?,general,4,Mistral,False,therapy,['vitamin_d'],False,8
+401,Recommend carb distribution for a 14yo with T1D on college schedule in India,recommendation,4,Mistral,True,therapy,['carbohydrate'],True,11
+402,Compare insulin pump site rotation strategies in hot climates in South Africa,comparison,3,TinyLlama,True,therapy,[],False,9
+403,How does alcohol affect T1D in adolescents?,general,4,Mistral,False,recommendation,[],True,6
+404,Medical nutrition therapy for a 16yo with T1D and pregnancy in Nigeria,therapy,5,Mistral,False,recommendation,['hba1c'],True,10
+405,Recommend preconception folic acid dose for adolescents with T1D in Kenya,recommendation,4,Mistral,True,therapy,['folic_acid'],True,9
+406,Compare food allergy resolution rates by allergen in Ghana,comparison,3,TinyLlama,True,therapy,[],False,8
+407,How does eczema severity predict food allergy persistence?,general,4,Mistral,False,recommendation,[],False,7
+408,Recommend reintroduction protocols for resolved milk allergy in Nigeria,recommendation,4,Mistral,True,therapy,[],False,8
+409,Medical nutrition therapy for a 7yo with food-dependent exercise-induced anaphylaxis in India,therapy,5,Mistral,False,recommendation,[],True,11
+410,Compare safe exercise timing after eating in FDEIA in South Africa,comparison,4,Mistral,True,therapy,[],False,9
+411,How is FDEIA diagnosed?,general,3,Mistral,False,recommendation,[],False,4
+412,Nutrition therapy for a 9yo with CF and CFRD on insulin pump in Kenya,therapy,5,Mistral,False,recommendation,['hba1c'],True,10
+413,Recommend pump-compatible meal timing for CFRD in Ghana,recommendation,4,Mistral,True,therapy,['carbohydrate'],True,8
+414,Compare insulin absorption with CF-related skin changes in Nigeria,comparison,4,Mistral,True,therapy,[],False,8
+415,How does CFRD affect lung function decline?,general,4,Mistral,False,recommendation,[],True,6
+416,What is the role of annual OGTT in CF?,general,4,Mistral,False,therapy,[],False,7
+417,Medical nutrition therapy for a 5yo with argininosuccinic aciduria in India,therapy,5,Mistral,False,recommendation,['ammonia'],True,9
+418,Recommend arginine supplementation strategies in ASA in South Africa,recommendation,5,Mistral,True,therapy,['arginine'],True,8
+419,Compare liver fibrosis risk in different urea cycle disorders in Nigeria,comparison,4,Mistral,True,therapy,[],False,9
+420,How is ASA monitored long-term?,general,4,Mistral,False,recommendation,['ammonia','arginine'],False,5
+421,What is the role of liver transplant in ASA?,general,4,Mistral,False,therapy,[],True,6
+422,Ketogenic diet for a 6yo with myoclonic-astatic epilepsy in Kenya,therapy,5,Mistral,False,recommendation,['weight'],True,8
+423,Recommend ways to prevent dyslipidemia on long-term keto in Nigeria,recommendation,5,Mistral,True,therapy,['lipids'],True,9
+424,Compare lipid-lowering strategies in pediatric keto in Ghana,comparison,4,Mistral,True,therapy,['lipids'],False,8
+425,How does the ketogenic diet affect endothelial function?,general,4,Mistral,False,recommendation,[],True,6
+426,What is the role of omega-3 in keto cardiovascular protection?,general,4,Mistral,False,therapy,['omega_3'],False,8
+427,Nutrition therapy for a 12yo with CKD stage 4 and growth hormone deficiency in India,therapy,5,Mistral,False,recommendation,['egfr','igf1'],True,11
+428,Recommend growth hormone-compatible meals for CKD in South Africa,recommendation,5,Mistral,True,therapy,['protein'],True,8
+429,Compare IGF-1 response to nutritional rehabilitation in CKD in Nigeria,comparison,4,Mistral,True,therapy,['igf1'],False,9
+430,How does growth hormone affect phosphate metabolism in CKD?,general,4,Mistral,False,recommendation,['phosphate'],True,8
+431,What is the role of rhGH in pediatric CKD?,general,4,Mistral,False,therapy,[],True,6
+432,Medical nutrition therapy for a 7yo with ulcerative colitis and primary sclerosing cholangitis in Kenya,therapy,5,Mistral,False,recommendation,['bilirubin'],True,12
+433,Recommend fat-soluble vitamin monitoring for PSC-IBD in Ghana,recommendation,5,Mistral,True,therapy,['vitamin_a','vitamin_d','vitamin_e','vitamin_k'],True,10
+434,Compare liver enzyme patterns in PSC vs autoimmune hepatitis in Nigeria,comparison,4,Mistral,True,therapy,['alt','ast'],False,9
+435,How does PSC affect nutrition in IBD?,general,4,Mistral,False,recommendation,[],True,6
+436,What is the role of UDCA in PSC?,general,4,Mistral,False,therapy,[],False,5
+437,Recommend high-calorie, low-acid meals for a 5yo with GERD and esophagitis in India,recommendation,5,Mistral,True,therapy,[],True,11
+438,Medical nutrition therapy for a 4yo with eosinophilic colitis in South Africa,therapy,5,Mistral,False,recommendation,[],True,8
+439,Compare elimination diet efficacy in EoC vs EoE in Nigeria,comparison,4,Mistral,True,therapy,[],False,8
+440,How is EoC diagnosed?,general,3,Mistral,False,recommendation,[],False,4
+441,What is the natural history of EoC?,general,3,TinyLlama,False,therapy,[],False,5
+442,Compare preterm DHA supplementation outcomes on neurodevelopment in Kenya,comparison,4,Mistral,True,therapy,['dha'],False,8
+443,How does DHA affect visual acuity in preterms?,general,4,Mistral,False,recommendation,['dha'],False,7
+444,Recommend DHA-rich local foods for preterm mothers in Ghana,recommendation,4,Mistral,True,therapy,['dha'],False,9
+445,Medical nutrition therapy for a 8-month-old with preterm history and zinc deficiency in Nigeria,therapy,5,Mistral,False,recommendation,['zinc'],True,12
+446,What is the role of zinc in preterm immune function?,general,4,Mistral,False,therapy,['zinc'],False,7
+447,How does zinc deficiency present in preterms?,general,4,Mistral,False,recommendation,['zinc'],False,6
+448,Recommend insulin dose adjustment for high-fat meals in a 13yo with T1D in India,recommendation,5,Mistral,True,therapy,['insulin'],True,12
+449,Compare fat-protein unit calculation methods in T1D in South Africa,comparison,4,Mistral,True,therapy,['fat','protein'],False,9
+450,How does fat affect postprandial glucose in T1D?,general,4,Mistral,False,recommendation,['glucose'],False,7
+451,Medical nutrition therapy for a 15yo with T1D and lipohypertrophy in Nigeria,therapy,5,Mistral,False,recommendation,[],True,9
+452,Recommend site rotation strategies with cultural clothing in Kenya,recommendation,3,TinyLlama,True,therapy,[],False,8
+453,Compare food allergy prevalence in atopic vs non-atopic children in Ghana,comparison,3,TinyLlama,True,therapy,[],False,9
+454,How does atopy affect food allergy severity?,general,4,Mistral,False,recommendation,[],False,6
+455,Recommend allergy action plans for school in Nigeria,recommendation,3,TinyLlama,True,therapy,[],False,7
+456,Medical nutrition therapy for a 6yo with food allergy and anaphylaxis to cashew in India,therapy,5,Mistral,False,recommendation,[],True,11
+457,Compare hidden cashew sources in local Indian sweets in South Africa,comparison,4,Mistral,True,therapy,[],False,9
+458,How is cashew allergy different from peanut?,general,4,Mistral,False,recommendation,[],False,6
+459,Nutrition therapy for a 10yo with CF and CFRD on GLP-1 agonist in Kenya,therapy,5,Mistral,False,recommendation,['hba1c'],True,10
+460,Recommend GLP-1 agonist-compatible meal volumes for CFRD in Ghana,recommendation,4,Mistral,True,therapy,['volume'],True,9
+461,Compare GLP-1 agonist side effects in CFRD vs obesity in Nigeria,comparison,3,TinyLlama,True,therapy,[],False,8
+462,How do GLP-1 agonists affect pancreatic enzyme efficacy?,general,4,Mistral,False,recommendation,[],True,7
+463,What is the role of dual-hormone artificial pancreas in CFRD?,general,4,Mistral,False,therapy,[],True,8
+464,Medical nutrition therapy for a 5yo with isovaleric acidemia during illness in India,therapy,5,Mistral,False,recommendation,['ammonia','isovalerylglycine'],True,12
+465,Recommend glycine supplementation for isovaleric acidemia in South Africa,recommendation,5,Mistral,True,therapy,['glycine'],True,8
+466,Compare protein tolerance in isovaleric vs propionic acidemia in Nigeria,comparison,4,Mistral,True,therapy,['protein'],False,9
+467,How is isovaleric acidemia diagnosed?,general,4,Mistral,False,recommendation,['isovalerylglycine'],False,5
+468,What is the odor of isovaleric acidemia?,general,3,TinyLlama,False,therapy,[],False,6
+469,Ketogenic diet for a 7yo with Lennox-Gastaut syndrome on felbamate in Kenya,therapy,5,Mistral,False,recommendation,['weight'],True,10
+470,Recommend liver monitoring strategies on felbamate and keto in Nigeria,recommendation,5,Mistral,True,therapy,['alt','ast'],True,9
+471,Compare felbamate hepatotoxicity risk with other antiepileptics in Ghana,comparison,4,Mistral,True,therapy,[],False,8
+472,How does felbamate affect folate metabolism?,general,4,Mistral,False,recommendation,['folate'],True,6
+473,What is the role of folate supplementation with felbamate?,general,4,Mistral,False,therapy,['folate'],False,7
+474,Nutrition therapy for a 13yo with CKD stage 5 and hyperkalemia in India,therapy,5,Mistral,False,recommendation,['potassium'],True,10
+475,Recommend emergency potassium-lowering dietary strategies in South Africa,recommendation,5,Mistral,True,therapy,['potassium'],True,8
+476,Compare potassium binders with dietary restriction in Nigeria,comparison,4,Mistral,True,therapy,['potassium'],False,8
+477,How does hyperkalemia present in children?,general,4,Mistral,False,recommendation,['potassium'],True,6
+478,What is the role of ECG in hyperkalemia?,general,4,Mistral,False,therapy,[],True,6
+479,Medical nutrition therapy for a 8yo with Crohn’s disease and iron deficiency anemia in Kenya,therapy,5,Mistral,False,recommendation,['iron','ferritin'],True,12
+480,Recommend IV iron vs oral iron strategies in IBD in Ghana,recommendation,5,Mistral,True,therapy,['iron'],True,9
+481,Compare hepcidin levels in IBD anemia vs iron deficiency in Nigeria,comparison,4,Mistral,True,therapy,['hepcidin','ferritin'],False,9
+482,How does inflammation affect iron absorption in IBD?,general,4,Mistral,False,recommendation,['hepcidin','iron'],True,8
+483,What is the role of ferric carboxymaltose in IBD?,general,4,Mistral,False,therapy,['iron'],True,7
+484,Recommend thickened, low-acid, high-calorie meals for a 5yo with GERD and failure to thrive in India,recommendation,5,Mistral,True,therapy,[],True,13
+485,Medical nutrition therapy for a 4yo with Sandifer syndrome and hiatal hernia in South Africa,therapy,5,Mistral,False,recommendation,[],True,10
+486,Compare fundoplication outcomes with medical management in Nigeria,comparison,4,Mistral,True,therapy,[],False,8
+487,How does hiatal hernia affect GERD severity?,general,4,Mistral,False,recommendation,[],False,6
+488,What is the role of pH-impedance testing pre-fundoplication?,general,4,Mistral,False,therapy,[],False,7
+489,Compare preterm probiotic supplementation strains for NEC prevention in Kenya,comparison,4,Mistral,True,therapy,[],False,9
+490,How do probiotics affect preterm gut colonization?,general,4,Mistral,False,recommendation,[],True,6
+491,Recommend evidence-based probiotic strains for preterms in Ghana,recommendation,4,Mistral,True,therapy,[],False,8
+492,Medical nutrition therapy for a 9-month-old with preterm history and vitamin A deficiency in Nigeria,therapy,5,Mistral,False,recommendation,['vitamin_a'],True,13
+493,What is the role of vitamin A in preterm lung development?,general,4,Mistral,False,therapy,['vitamin_a'],True,8
+494,How does vitamin A deficiency present in preterms?,general,4,Mistral,False,recommendation,['vitamin_a'],False,6
+495,Recommend carb counting for a 16yo with T1D starting university in India,recommendation,4,Mistral,True,therapy,['carbohydrate'],True,10
+496,Compare continuous glucose monitoring accuracy in hot climates in South Africa,comparison,4,Mistral,True,therapy,['glucose'],False,8
+497,How does travel affect T1D management?,general,4,Mistral,False,recommendation,[],False,5
+498,Medical nutrition therapy for a 17yo with T1D and eating disorder in Nigeria,therapy,5,Mistral,False,recommendation,[],True,10
+499,Recommend multidisciplinary team approach for T1D and eating disorders in Kenya,recommendation,4,Mistral,True,therapy,[],False,9
+500,Compare long-term outcomes of early vs late food allergy introduction in Ghana,comparison,3,TinyLlama,True,therapy,[],False,9

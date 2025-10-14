@@ -692,6 +692,30 @@ class ChatOrchestrator:
                 classification = self.classifier.classify(query)
             except Exception:
                 classification = {"label": "general"}
+
+            # CRITICAL: THERAPY GATEKEEPER - Enforce mandatory medications + biomarkers
+            if classification.get("label") == "therapy":
+                medications = classification.get("medications", [])
+                biomarkers = classification.get("biomarkers", [])
+
+                # Downgrade to recommendation if missing medications
+                if not medications or len(medications) == 0:
+                    logger.warning("⚠️ Therapy downgraded to recommendation: No medications detected")
+                    classification["label"] = "recommendation"
+                    classification["downgrade_reason"] = "missing_medications"
+                    classification["original_label"] = "therapy"
+
+                # Downgrade to recommendation if missing biomarkers
+                elif not biomarkers or len(biomarkers) == 0:
+                    logger.warning("⚠️ Therapy downgraded to recommendation: No biomarkers detected")
+                    classification["label"] = "recommendation"
+                    classification["downgrade_reason"] = "missing_biomarkers"
+                    classification["original_label"] = "therapy"
+
+                else:
+                    # Both medications AND biomarkers present - therapy allowed
+                    logger.info(f"✅ Therapy gatekeeper passed: {len(medications)} medications, {len(biomarkers)} biomarkers")
+
             template_key = pre_key or classification.get("label", "general")
             # On first turn, lock the intent so follow-ups don't jump intents
             self._intent_lock = self._intent_lock or template_key

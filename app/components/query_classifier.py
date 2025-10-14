@@ -1,6 +1,7 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import os
+import re
 from app.config.config import DISTILBERT_CLASSIFIER_PATH
 import logging
 from typing import Optional
@@ -10,6 +11,60 @@ logger = logging.getLogger(__name__)
 
 # Ensure Windows path compatibility
 MODEL_PATH = os.path.normpath(DISTILBERT_CLASSIFIER_PATH)
+
+# Biomarkers list (must match training data)
+BIOMARKERS = [
+    'creatinine', 'HbA1c', 'ferritin', 'urea',
+    'albumin', 'glucose', 'zinc', 'iron', 'protein', 'fiber',
+    'calcium', 'phytate', 'potassium', 'sodium', 'magnesium',
+    'phosphorus', 'cholesterol', 'triglycerides', 'bilirubin',
+    'egfr', 'ldl', 'hemoglobin', 'transferrin', 'alt', 'tsh',
+    'ammonia', 'leucine', 'phenylalanine', 'vitamin_d', 'vitamin_b12',
+    'vitamin_a', 'vitamin_k', 'vitamin_e', 'folate'
+]
+
+# Medications list (extracted from Drug-Nutrient Interactions TOC + common pediatric meds)
+MEDICATIONS = [
+    # Antiepileptics (AED) - Critical for epilepsy therapy
+    'phenytoin', 'phenobarbital', 'carbamazepine', 'valproate', 'valproic acid',
+    'lamotrigine', 'levetiracetam', 'topiramate',
+
+    # Diabetes medications
+    'insulin', 'metformin', 'sulfonylureas', 'glipizide', 'glyburide',
+
+    # Antibiotics (common in CF, infections)
+    'rifampin', 'isoniazid', 'tetracycline', 'doxycycline', 'fluoroquinolones',
+    'ciprofloxacin', 'azithromycin', 'amoxicillin',
+
+    # Immunosuppressants (transplant, IBD)
+    'cyclosporine', 'tacrolimus', 'sirolimus', 'mycophenolate', 'azathioprine',
+
+    # Corticosteroids (CF, IBD, asthma)
+    'prednisone', 'prednisolone', 'dexamethasone', 'hydrocortisone', 'budesonide',
+
+    # Cardiac drugs (CHD)
+    'digoxin', 'furosemide', 'spironolactone', 'enalapril', 'captopril',
+
+    # Proton pump inhibitors (GERD, gastroparesis)
+    'omeprazole', 'lansoprazole', 'pantoprazole', 'esomeprazole',
+
+    # H2 blockers
+    'ranitidine', 'famotidine', 'cimetidine',
+
+    # Chemotherapy (oncology)
+    'methotrexate', 'cisplatin', '6-mercaptopurine',
+
+    # Diuretics (CKD, heart failure)
+    'furosemide', 'thiazide', 'hydrochlorothiazide',
+
+    # NSAIDs
+    'ibuprofen', 'naproxen', 'aspirin',
+
+    # Other important pediatric drugs
+    'sulfasalazine', 'mesalamine', 'infliximab', 'adalimumab',
+    'pancreatic enzymes', 'creon', 'zenpep',  # CF specific
+    'penicillamine', 'allopurinol', 'colchicine'
+]
 
 class NutritionQueryClassifier:
     def __init__(self, model_path: str = MODEL_PATH):
@@ -38,15 +93,60 @@ class NutritionQueryClassifier:
         except Exception as e:
             logger.error(f"❌ Failed to load classifier: {str(e)}")
             raise CustomException("Classifier initialization failed", e)
-    
+
+    def preprocess_with_biomarker_tags(self, text: str) -> str:
+        """
+        Apply biomarker-aware preprocessing with [BIOMARKER] tags.
+        CRITICAL: Must match training preprocessing exactly.
+        """
+        modified_text = text
+        for bm in BIOMARKERS:
+            # Use whitespace boundaries (not \\b which breaks on HbA1c)
+            left = r'(^|\s)'
+            escaped_bm = re.escape(bm)
+            value = r'(?:\s*[\d.,]+\s*\%)?'  # Optional value with %
+            right = r'(?=\s|$)'
+            pattern = left + escaped_bm + value + right
+
+            # Wrap biomarkers with special tokens
+            modified_text = re.sub(
+                pattern,
+                r'\g<1>[BIOMARKER]\g<0>[/BIOMARKER]',  # \g<1> = leading space, \g<0> = full match
+                modified_text,
+                flags=re.IGNORECASE
+            )
+
+        return modified_text
+
+    def extract_medications(self, query: str) -> list:
+        """
+        Extract medication names from query.
+        Uses keyword matching with medication list.
+        """
+        medications = []
+        query_lower = query.lower()
+
+        for med in MEDICATIONS:
+            # Check for medication mentions
+            if med.lower() in query_lower:
+                medications.append(med)
+
+        # Remove duplicates while preserving order
+        medications = list(dict.fromkeys(medications))
+
+        return medications
+
     def classify(self, query: str) -> dict:
         """Return classification with clinical safety checks"""
         try:
-            # Tokenize input
+            # CRITICAL: Apply biomarker tag preprocessing (must match training)
+            preprocessed_query = self.preprocess_with_biomarker_tags(query)
+
+            # Tokenize input with biomarker tags
             inputs = self.tokenizer(
-                query, 
-                return_tensors="pt", 
-                truncation=True, 
+                preprocessed_query,
+                return_tensors="pt",
+                truncation=True,
                 padding=True,
                 max_length=512
             )
@@ -68,6 +168,7 @@ class NutritionQueryClassifier:
             result = {
                 "label": label,
                 "biomarkers": self.extract_biomarkers(query),
+                "medications": self.extract_medications(query),
                 "needs_followup": self._needs_followup(label, query),
                 "is_high_risk": self.detect_high_risk(query),
                 "confidence": confidence,
@@ -81,6 +182,7 @@ class NutritionQueryClassifier:
             return {
                 "label": "general",
                 "biomarkers": [],
+                "medications": [],
                 "needs_followup": False,
                 "is_high_risk": False,
                 "confidence": 0.0,

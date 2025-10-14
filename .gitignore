@@ -3,6 +3,7 @@
 rag_env/
 __pycache__/
 machine_learning/models/
+machine_learning/data
 data/
 logs/
 vectorstore/
