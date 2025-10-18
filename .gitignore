@@ -10,3 +10,4 @@ vectorstore/db_faiss
 vectorstore/
 .claude/
 cache/
+chat_orchestrator.py

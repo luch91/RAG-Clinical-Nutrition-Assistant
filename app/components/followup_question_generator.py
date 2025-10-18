@@ -1,163 +1,210 @@
+# app/components/followup_question_generator.py
 import logging
 from app.common.logger import get_logger
 logger = get_logger(__name__)
-from typing import List
+from typing import List, Optional, Dict, Any
 
 class FollowUpQuestionGenerator:
     def __init__(self):
-        # Define slot priority order (critical first)
+        # Slot priority order tuned to your requirements (critical first)
         self.slot_priority = [
-            "diagnosis",  # Critical for therapy mode
-            "age", "sex",  # Basic demographics
-            "weight_kg", "height_cm",  # Needed for BMI calculation
-            "medications",  # Needed for drug-nutrient interactions (optional)
-            "allergies",  # Critical for safety (optional)
-            "key_biomarkers",  # Optional - many patients don't have recent labs
-            "country",  # Optional - defaults available
-            "dietary_patterns",  # Lower priority
+            "diagnosis",      # Critical for therapy mode
+            "age",            # demographics
+            "medications",    # must-have for therapy
+            "country",        # for FCT mapping
+            "biomarkers",     # must-have for therapy (can be multiple)
+            "height_cm",      # requested when necessary (e.g., for BMI/energy)
+            "weight_kg",
+            "allergies",
+            "dietary_patterns",
         ]
-    
-    def generate_follow_up_question(self, query_info: dict, profile: dict, lab_results: list, clarifications: dict) -> dict:
+
+        # Step-by-step slots order for therapy "step by step" flow
+        self.step_by_step_slots = ["age", "medications", "country", "biomarkers"]
+
+    def generate_follow_up_question(self, query_info: dict, profile: dict, lab_results: list, clarifications: dict) -> Optional[dict]:
         """
         Generate ONE follow-up question per turn, prioritizing critical slots.
-        Returns a dictionary with:
-        - question: the question to ask
-        - slot: the slot name this question relates to
-        - composer_placeholder: the exact text to show in the composer placeholder
+        If query_info indicates a gatekeeper downgrade, return the educational fallback prompt.
         """
-        # Determine what's missing based on intent
+        # If gatekeeper downgraded from therapy -> recommendation, present single educational fallback prompt
+        if query_info.get("downgrade_reason"):
+            # The classifier already provided fallback_options and educational_text
+            edu_text = query_info.get("educational_text") or ""
+            fallback_options = query_info.get("fallback_options") or []
+            # Build prompt text preferring concise UX
+            options_text = " / ".join([f"{opt['id']}: {opt['text']}" for opt in fallback_options])
+            prompt = edu_text + "\n\nOptions: " + options_text
+            return {
+                "question": prompt,
+                "slot": "fallback_choice",
+                "composer_placeholder": "Reply 'upload', 'step by step', or 'overview'"
+            }
+
+        # Otherwise follow normal missing-slot flow
         intent = query_info.get("label", "general")
         missing_slots = self._get_missing_slots(intent, profile, lab_results)
-        invalid_slots = self._get_invalid_slots(query_info, profile, lab_results)
-        
-        # Prioritize invalid reasons over missing slots
+        invalid_slots = self._get_invalid_slots(profile)
+
+        # Prioritize invalid slots
         if invalid_slots:
-            # Return first invalid reason as clarification question
-            invalid_question = self._create_invalid_question(invalid_slots[0])
+            slot = invalid_slots[0]
             return {
-                "question": invalid_question,
-                "slot": invalid_slots[0],
-                "composer_placeholder": invalid_question
+                "question": self._create_invalid_question(slot),
+                "slot": slot,
+                "composer_placeholder": self._create_invalid_question(slot)
             }
-        
-        # If no invalid slots, check for missing slots
+
+        # If nothing missing - no follow-up needed
         if not missing_slots:
             return None
-        
-        # Find highest priority missing slot
+
+        # If the user explicitly indicated "step by step" in clarifications, follow that order
+        if clarifications.get("mode") == "step_by_step":
+            for slot in self.step_by_step_slots:
+                if slot in missing_slots:
+                    q = self._create_question_for_slot(slot)
+                    return {"question": q, "slot": slot, "composer_placeholder": q}
+
+        # Default: choose by slot_priority
         for slot in self.slot_priority:
             if slot in missing_slots:
-                question = self._create_question_for_slot(slot, intent)
-                return {
-                    "question": question,
-                    "slot": slot,
-                    "composer_placeholder": question
-                }
-        
+                q = self._create_question_for_slot(slot)
+                return {"question": q, "slot": slot, "composer_placeholder": q}
+
         # Fallback to first missing slot
-        question = self._create_question_for_slot(missing_slots[0], intent)
-        return {
-            "question": question,
-            "slot": missing_slots[0],
-            "composer_placeholder": question
-        }
-    
+        slot = missing_slots[0]
+        q = self._create_question_for_slot(slot)
+        return {"question": q, "slot": slot, "composer_placeholder": q}
+
+    def generate_fallback_choice_prompt(self, fallback_options: List[Dict[str, str]]) -> dict:
+        """
+        Generate a single user prompt showing the three fallback choices.
+        This can be used independently by the orchestrator if desired.
+        """
+        options_text = "\n".join([f"{opt['id']}: {opt['text']}" for opt in fallback_options])
+        prompt = (
+            "I can only provide an overview because a full therapy plan needs both medication and biomarker data.\n\n"
+            "Please choose one of the options below:\n" + options_text +
+            "\n\nReply with 'upload', 'step by step', or 'overview'."
+        )
+        return {"question": prompt, "slot": "fallback_choice", "composer_placeholder": "upload / step by step / overview"}
+
     def _get_missing_slots(self, intent: str, profile: dict, lab_results: list) -> List[str]:
         """Determine which slots are missing for this intent"""
         missing = []
-        
-        # Common slots across intents
-        if not profile or not profile.get("weight_kg") and not profile.get("weight"):
+
+        # Profile may be None
+        profile = profile or {}
+
+        # Weight/height best-effort detection: accept 'weight' or 'weight_kg'; 'height' or 'height_cm'
+        if not profile.get("weight_kg") and not profile.get("weight"):
             missing.append("weight_kg")
-        if not profile or not profile.get("height_cm") and not profile.get("height"):
+        if not profile.get("height_cm") and not profile.get("height"):
             missing.append("height_cm")
-        if not profile or not profile.get("diagnosis"):
+        if not profile.get("diagnosis"):
             missing.append("diagnosis")
-        if not profile or not profile.get("medications"):
-            missing.append("medications")
-        if not profile or not profile.get("allergies") or profile.get("allergies") is None:
-            missing.append("allergies")
-        if not profile or not profile.get("country"):
+
+        # For therapy/recommendation, medications and allergies are important
+        if intent in ["therapy", "recommendation"]:
+            if not profile.get("medications"):
+                missing.append("medications")
+            # Allergies still important for safety
+            if profile.get("allergies") is None:
+                missing.append("allergies")
+
+        # Country mapping for FCT usage
+        if not profile.get("country"):
             missing.append("country")
-        
-        # Intent-specific slots
-        # Note: key_biomarkers is now optional for therapy - removed from required checks
-        elif intent == "comparison":
-            if not profile or not profile.get("food_a") or not profile.get("food_b"):
-                missing.append("food_a")
-                missing.append("food_b")
-        
-        return missing
-    
-    def _get_invalid_slots(self, query_info: dict, profile: dict, lab_results: list) -> List[str]:
-        """Determine which slots have invalid values for this intent"""
+
+        # Biomarkers: optional for recommendation, required for therapy (but gatekeeper already enforced)
+        if intent == "therapy":
+            # in therapy mode we assume gatekeeper validated having both meds and biomarkers
+            if not profile.get("biomarkers") and not lab_results:
+                missing.append("biomarkers")
+
+        # Comparison intent: need two foods
+        if intent == "comparison":
+            if not profile.get("food_a") or not profile.get("food_b"):
+                missing.extend(["food_a", "food_b"])
+
+        # Remove duplicates while preserving order
+        seen = set()
+        final_missing = []
+        for s in missing:
+            if s not in seen:
+                seen.add(s)
+                final_missing.append(s)
+
+        return final_missing
+
+    def _get_invalid_slots(self, profile: dict) -> List[str]:
+        """Return list of invalid slots (e.g., bad age)"""
         invalid = []
-        
-        # Check for invalid values in profile
-        if profile:
-            # Check age
-            if "age" in profile:
-                try:
-                    age_val = int(profile["age"])
-                    if age_val < 0 or age_val > 120:
-                        invalid.append("age")
-                except Exception:
+        if not profile:
+            return invalid
+
+        if "age" in profile:
+            try:
+                age_val = int(profile["age"])
+                if age_val < 0 or age_val > 120:
                     invalid.append("age")
-            
-            # Check height
-            if "height_cm" in profile:
-                try:
-                    height_val = float(profile["height_cm"])
-                    if height_val < 50 or height_val > 250:
-                        invalid.append("height_cm")
-                except Exception:
+            except Exception:
+                invalid.append("age")
+
+        if "height_cm" in profile:
+            try:
+                height_val = float(profile["height_cm"])
+                if height_val < 30 or height_val > 250:
                     invalid.append("height_cm")
-            
-            # Check weight
-            if "weight_kg" in profile:
-                try:
-                    weight_val = float(profile["weight_kg"])
-                    if weight_val < 10 or weight_val > 400:
-                        invalid.append("weight_kg")
-                except Exception:
+            except Exception:
+                invalid.append("height_cm")
+
+        if "weight_kg" in profile:
+            try:
+                weight_val = float(profile["weight_kg"])
+                if weight_val < 2 or weight_val > 400:
                     invalid.append("weight_kg")
-        
+            except Exception:
+                invalid.append("weight_kg")
+
         return invalid
-    
+
     def _create_invalid_question(self, slot: str) -> str:
-        """Create a clarification question for an invalid slot value"""
         if slot == "age":
-            return "What is your age in years? (Must be between 0 and 120)"
+            return "What is the patient's age in years? (0-120)"
         elif slot == "height_cm":
-            return "What is your height in centimeters? (Must be between 50 and 250 cm)"
+            return "What is the patient's height in centimeters? (e.g., 85)"
         elif slot == "weight_kg":
-            return "What is your weight in kilograms? (Must be between 10 and 400 kg)"
+            return "What is the patient's weight in kilograms? (e.g., 12.5)"
         elif slot == "country":
             return "Which country's Food Composition Table should I use? (e.g., Nigeria, Kenya, Canada)"
         elif slot == "medications":
-            return "Are you currently taking any medications? If yes, please list them."
+            return "Please list current medications (include dose/frequency if possible), or say 'none'."
         elif slot == "allergies":
-            return "Do you have any food allergies (e.g., peanuts, dairy, gluten, soy)? Please list them or say 'none'."
-        elif slot == "key_biomarkers":
-            return "Please provide your most recent lab results (e.g., HbA1c, creatinine, eGFR)."
-        return f"Clarify: {slot} value is invalid"
-    
-    def _create_question_for_slot(self, slot: str, intent: str) -> str:
-        """Create a single, clear question for a specific slot"""
+            return "Please list any known food allergies (or say 'none')."
+        elif slot == "biomarkers":
+            return "Please provide recent lab results (e.g., creatinine 0.6 mg/dL, HbA1c 7.2%). You can upload a lab PDF or type values."
+        return f"Clarify {slot}."
+
+    def _create_question_for_slot(self, slot: str) -> str:
+        """Return a single clear question for the requested slot"""
         if slot == "weight_kg":
-            return "What is your current weight in kilograms?"
+            return "What is the patient's current weight in kilograms?"
         elif slot == "height_cm":
-            return "What is your current height in centimeters?"
+            return "What is the patient's current height in centimeters?"
         elif slot == "diagnosis":
-            return "What is your diagnosis or medical condition?"
+            return "What is the diagnosis or medical condition?"
         elif slot == "medications":
-            return "Are you currently taking any medications? If yes, please list them."
+            return "Are any medications being taken? If yes, please list them (or say 'none')."
         elif slot == "allergies":
-            return "Do you have any food allergies (e.g., peanuts, dairy, gluten, soy)? Please list them or say 'none'."
+            return "Any food allergies? List them or say 'none'."
         elif slot == "country":
-            return "Which country's Food Composition Table should I use? (e.g., Nigeria, Kenya, Canada)"
-        elif slot == "key_biomarkers":
-            return "Please provide your most recent lab results (e.g., HbA1c, creatinine, eGFR)."
+            return "Which country's Food Composition Table should I use? (e.g., Nigeria, Kenya)"
+        elif slot == "biomarkers":
+            return "Please provide recent lab values (e.g., creatinine 0.6 mg/dL; HbA1c 7.2%). You can upload a file."
         elif slot == "food_a" or slot == "food_b":
-            return "Please name the foods you want to compare."
-        return f"Please provide {slot.replace('_', ' ')} information."
+            return "Please name the food to compare."
+        elif slot == "age":
+            return "What is the patient's age in years?"
+        return f"Please provide {slot.replace('_',' ')}."
