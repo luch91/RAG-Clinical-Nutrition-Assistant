@@ -6,5 +6,7 @@ machine_learning/models/
 machine_learning/data
 data/
 logs/
+vectorstore/db_faiss
 vectorstore/
+.claude/
 cache/

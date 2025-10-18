@@ -1,0 +1,310 @@
+    def _get_biomarker_questions(self) -> List[Dict[str, Any]]:
+        """Get diagnosis-specific biomarker questions for ALL 8 supported conditions"""
+        questions = []
+
+        diagnosis_lower = (self.diagnosis or "").lower()
+
+        # 1. Type 1 Diabetes
+        if "diabet" in diagnosis_lower or "t1d" in diagnosis_lower or "iddm" in diagnosis_lower:
+            questions.append({
+                "slot": "hba1c",
+                "question": "What is the patient's HbA1c level?",
+                "hint": "Enter HbA1c value (e.g., 7.5) or 'unknown'",
+                "required": False,
+                "parser": "biomarker",
+                "unit": "%"
+            })
+            questions.append({
+                "slot": "glucose",
+                "question": "What is the patient's fasting glucose level?",
+                "hint": "Enter glucose in mg/dL (e.g., 120) or 'unknown'",
+                "required": False,
+                "parser": "biomarker",
+                "unit": "mg/dL"
+            })
+
+        # 2. Chronic Kidney Disease (CKD)
+        elif "ckd" in diagnosis_lower or "kidney" in diagnosis_lower or "renal" in diagnosis_lower:
+            questions.append({
+                "slot": "creatinine",
+                "question": "What is the patient's serum creatinine level?",
+                "hint": "Enter creatinine in mg/dL or 'unknown'",
+                "required": False,
+                "parser": "biomarker",
+                "unit": "mg/dL"
+            })
+            questions.append({
+                "slot": "egfr",
+                "question": "What is the patient's eGFR?",
+                "hint": "Enter eGFR in mL/min/1.73m² or 'unknown'",
+                "required": False,
+                "parser": "biomarker",
+                "unit": "mL/min/1.73m²"
+            })
+            questions.append({
+                "slot": "potassium",
+                "question": "What is the patient's potassium level?",
+                "hint": "Enter K+ in mEq/L or 'unknown'",
+                "required": False,
+                "parser": "biomarker",
+                "unit": "mEq/L"
+            })
+            questions.append({
+                "slot": "phosphorus",
+                "question": "What is the patient's phosphorus level?",
+                "hint": "Enter phosphorus in mg/dL or 'unknown'",
+                "required": False,
+                "parser": "biomarker",
+                "unit": "mg/dL"
+            })
+
+        # 3. Inherited Metabolic Disorders (PKU, MSUD, Galactosemia) - CHECK BEFORE EPILEPSY
+        # IMPORTANT: Must be before epilepsy check because "keto" in epilepsy matches "phenylKETOnuria"
+        elif any(term in diagnosis_lower for term in ["pku", "phenylketonuria", "msud", "maple syrup", "galactosemia", "metabolic disorder", "inborn error"]):
+            questions.append({
+                "slot": "aed_level",
+                "question": "What are the patient's anti-epileptic drug levels (if known)?",
+                "hint": "Enter drug levels or 'unknown'",
+                "required": False,
+                "parser": "biomarker",
+                "unit": ""
+            })
+            questions.append({
+                "slot": "ketone_level",
+                "question": "What is the patient's blood ketone level (if on ketogenic diet)?",
+                "hint": "Enter ketone level in mmol/L or 'unknown'",
+                "required": False,
+                "parser": "biomarker",
+                "unit": "mmol/L"
+            })
+            questions.append({
+                "slot": "seizure_frequency",
+                "question": "How many seizures per month does the patient experience?",
+                "hint": "Enter average number per month or 'unknown'",
+                "required": False,
+                "parser": "biomarker",
+                "unit": "per month"
+            })
+
+        # 4. Cystic Fibrosis (CF)
+        elif "cystic fibrosis" in diagnosis_lower or "cf" in diagnosis_lower or "cftr" in diagnosis_lower:
+            questions.append({
+                "slot": "fev1",
+                "question": "What is the patient's FEV1 (lung function)?",
+                "hint": "Enter FEV1 percentage (e.g., 75) or 'unknown'",
+                "required": False,
+                "parser": "biomarker",
+                "unit": "%"
+            })
+            questions.append({
+                "slot": "pancreatic_status",
+                "question": "Is the patient pancreatic insufficient? (yes/no/unknown)",
+                "hint": "Type 'yes', 'no', or 'unknown'",
+                "required": False,
+                "parser": "string",
+                "unit": ""
+            })
+            questions.append({
+                "slot": "vitamin_d",
+                "question": "What is the patient's vitamin D level?",
+                "hint": "Enter vitamin D in ng/mL or 'unknown'",
+                "required": False,
+                "parser": "biomarker",
+                "unit": "ng/mL"
+            })
+            questions.append({
+                "slot": "vitamin_a",
+                "question": "What is the patient's vitamin A level?",
+                "hint": "Enter vitamin A in µg/dL or 'unknown'",
+                "required": False,
+                "parser": "biomarker",
+                "unit": "µg/dL"
+            })
+
+        # 5. Inherited Metabolic Disorders (PKU, MSUD, Galactosemia)
+        elif any(term in diagnosis_lower for term in ["pku", "phenylketonuria", "msud", "maple syrup", "galactosemia", "metabolic disorder", "inborn error"]):
+            # PKU-specific
+            if "pku" in diagnosis_lower or "phenylketonuria" in diagnosis_lower:
+                questions.append({
+                    "slot": "phenylalanine",
+                    "question": "What is the patient's blood phenylalanine level?",
+                    "hint": "Enter phenylalanine in mg/dL or 'unknown'",
+                    "required": False,
+                    "parser": "biomarker",
+                    "unit": "mg/dL"
+                })
+                questions.append({
+                    "slot": "tyrosine",
+                    "question": "What is the patient's blood tyrosine level?",
+                    "hint": "Enter tyrosine in mg/dL or 'unknown'",
+                    "required": False,
+                    "parser": "biomarker",
+                    "unit": "mg/dL"
+                })
+
+            # MSUD-specific
+            elif "msud" in diagnosis_lower or "maple syrup" in diagnosis_lower:
+                questions.append({
+                    "slot": "leucine",
+                    "question": "What is the patient's blood leucine level?",
+                    "hint": "Enter leucine in µmol/L or 'unknown'",
+                    "required": False,
+                    "parser": "biomarker",
+                    "unit": "µmol/L"
+                })
+                questions.append({
+                    "slot": "isoleucine",
+                    "question": "What is the patient's blood isoleucine level?",
+                    "hint": "Enter isoleucine in µmol/L or 'unknown'",
+                    "required": False,
+                    "parser": "biomarker",
+                    "unit": "µmol/L"
+                })
+                questions.append({
+                    "slot": "valine",
+                    "question": "What is the patient's blood valine level?",
+                    "hint": "Enter valine in µmol/L or 'unknown'",
+                    "required": False,
+                    "parser": "biomarker",
+                    "unit": "µmol/L"
+                })
+
+            # Galactosemia-specific
+            elif "galactosemia" in diagnosis_lower:
+                questions.append({
+                    "slot": "galactose_1_phosphate",
+                    "question": "What is the patient's galactose-1-phosphate level?",
+                    "hint": "Enter galactose-1-phosphate in mg/dL or 'unknown'",
+                    "required": False,
+                    "parser": "biomarker",
+                    "unit": "mg/dL"
+                })
+                questions.append({
+                    "slot": "galt_activity",
+                    "question": "What is the patient's GALT enzyme activity?",
+                    "hint": "Enter GALT activity percentage or 'unknown'",
+                    "required": False,
+                    "parser": "biomarker",
+                    "unit": "%"
+                })
+
+            # General metabolic markers (for all IEMs)
+            questions.append({
+                "slot": "albumin",
+                "question": "What is the patient's albumin level?",
+                "hint": "Enter albumin in g/dL or 'unknown'",
+                "required": False,
+                "parser": "biomarker",
+                "unit": "g/dL"
+            })
+
+        # 6. Preterm Nutrition
+        elif "preterm" in diagnosis_lower or "premature" in diagnosis_lower or "nicu" in diagnosis_lower or "preemie" in diagnosis_lower:
+            questions.append({
+                "slot": "gestational_age",
+                "question": "What was the baby's gestational age at birth?",
+                "hint": "Enter weeks (e.g., 32) or 'unknown'",
+                "required": False,
+                "parser": "biomarker",
+                "unit": "weeks"
+            })
+            questions.append({
+                "slot": "corrected_age",
+                "question": "What is the baby's corrected age?",
+                "hint": "Enter corrected age in weeks or 'unknown'",
+                "required": False,
+                "parser": "biomarker",
+                "unit": "weeks"
+            })
+            questions.append({
+                "slot": "feeding_method",
+                "question": "What is the current feeding method?",
+                "hint": "e.g., breast milk, formula, mixed, or 'unknown'",
+                "required": False,
+                "parser": "string",
+                "unit": ""
+            })
+            questions.append({
+                "slot": "hemoglobin",
+                "question": "What is the baby's hemoglobin level?",
+                "hint": "Enter hemoglobin in g/dL or 'unknown'",
+                "required": False,
+                "parser": "biomarker",
+                "unit": "g/dL"
+            })
+
+        # 7. Food Allergy
+        elif "food allerg" in diagnosis_lower or "allergic" in diagnosis_lower or "anaphylaxis" in diagnosis_lower:
+            questions.append({
+                "slot": "allergen_type",
+                "question": "What foods is the patient allergic to?",
+                "hint": "List specific allergens (e.g., peanuts, milk, eggs)",
+                "required": False,
+                "parser": "string",
+                "unit": ""
+            })
+            questions.append({
+                "slot": "ige_level",
+                "question": "What is the patient's total IgE level (if known)?",
+                "hint": "Enter IgE in IU/mL or 'unknown'",
+                "required": False,
+                "parser": "biomarker",
+                "unit": "IU/mL"
+            })
+            questions.append({
+                "slot": "reaction_severity",
+                "question": "What is the severity of reactions? (mild/moderate/severe)",
+                "hint": "Type 'mild', 'moderate', 'severe', or 'unknown'",
+                "required": False,
+                "parser": "string",
+                "unit": ""
+            })
+
+        # 8. GI Disorders (IBD, GERD, Crohn's, Ulcerative Colitis)
+        elif any(term in diagnosis_lower for term in ["ibd", "crohn", "ulcerative colitis", "gerd", "reflux", "inflammatory bowel"]):
+            # IBD-specific (Crohn's, UC)
+            if any(term in diagnosis_lower for term in ["ibd", "crohn", "ulcerative colitis", "inflammatory bowel"]):
+                questions.append({
+                    "slot": "crp",
+                    "question": "What is the patient's C-reactive protein (CRP) level?",
+                    "hint": "Enter CRP in mg/L or 'unknown'",
+                    "required": False,
+                    "parser": "biomarker",
+                    "unit": "mg/L"
+                })
+                questions.append({
+                    "slot": "esr",
+                    "question": "What is the patient's ESR (sedimentation rate)?",
+                    "hint": "Enter ESR in mm/hr or 'unknown'",
+                    "required": False,
+                    "parser": "biomarker",
+                    "unit": "mm/hr"
+                })
+                questions.append({
+                    "slot": "fecal_calprotectin",
+                    "question": "What is the patient's fecal calprotectin level?",
+                    "hint": "Enter calprotectin in µg/g or 'unknown'",
+                    "required": False,
+                    "parser": "biomarker",
+                    "unit": "µg/g"
+                })
+                questions.append({
+                    "slot": "albumin",
+                    "question": "What is the patient's albumin level?",
+                    "hint": "Enter albumin in g/dL or 'unknown'",
+                    "required": False,
+                    "parser": "biomarker",
+                    "unit": "g/dL"
+                })
+
+            # GERD-specific
+            if "gerd" in diagnosis_lower or "reflux" in diagnosis_lower:
+                questions.append({
+                    "slot": "symptom_frequency",
+                    "question": "How many times per week does the patient experience reflux symptoms?",
+                    "hint": "Enter frequency per week or 'unknown'",
+                    "required": False,
+                    "parser": "biomarker",
+                    "unit": "per week"
+                })
+

@@ -8,7 +8,11 @@
       "Bash(curl:*)",
       "Bash(find:*)",
       "Bash(rm:*)",
-      "Bash(pdfinfo:*)"
+      "Bash(pdfinfo:*)",
+      "Bash(timeout 30 python test_phase3_simple.py)",
+      "Bash(timeout 60 python test_option_a_b_direct.py)",
+      "Bash(timeout 60 python test_llm_therapy_generation.py)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []

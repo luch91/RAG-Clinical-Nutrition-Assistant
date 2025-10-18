@@ -16,6 +16,12 @@ faiss-cpu==1.9.0
 
 # Document Processing
 pypdf==4.1.0
+pdfplumber==0.11.0  # For lab PDF text extraction
+pytesseract==0.3.10  # For lab image OCR
+Pillow>=10.0.0  # For image processing
+
+# UI Framework
+gradio==4.44.0
 
 # API Clients
 huggingface-hub>=0.23.0

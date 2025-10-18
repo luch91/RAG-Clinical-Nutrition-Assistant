@@ -123,39 +123,41 @@ def get_llm_client(model_name: str = None) -> LLM:
     """
     Factory function to initialize and return a LangChain-compatible LLM.
     Maps template keys to appropriate models per acceptance criteria:
-    - general & comparison → Gemma 2B (fast, lightweight)
-    - all others → DeepSeek-R1 (powerful, clinical-grade)
+    - therapy → DeepSeek-R1-Distill-Llama-70B (powerful, clinical reasoning)
+    - general, comparison, recommendation → Llama-3.2-3B (fast, cost-effective)
     """
     # Map template keys to model configurations — STRICTLY ENFORCED
     MODEL_MAP = {
-        # Lightweight, fast models for non-clinical queries
-        "general": {"provider": "huggingface", "model": "google/gemma-2-2b-it"},
-        "comparison": {"provider": "huggingface", "model": "google/gemma-2-2b-it"},
-        
-        # High-performance clinical models for therapy, recommendation, etc.
+        # THERAPY: DeepSeek-R1 (powerful reasoning for medical therapy) via Together AI
         "therapy": {"provider": "together", "model": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"},
-        "recommendation": {"provider": "together", "model": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"},
-        "dermatology": {"provider": "together", "model": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"},
-        "renal": {"provider": "together", "model": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"},
-        "diabetes": {"provider": "together", "model": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"},
-        "vegetarian": {"provider": "together", "model": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"},
-        "allergy": {"provider": "together", "model": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"},
-        "sports": {"provider": "together", "model": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"},
-        "pregnancy": {"provider": "together", "model": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"},
-        "lactation": {"provider": "together", "model": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"},
-        "pediatric": {"provider": "together", "model": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"},
-        "geriatrics": {"provider": "together", "model": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"},
-        "cardiac": {"provider": "together", "model": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"},
-        "gastro": {"provider": "together", "model": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"},
-        "nutrigenomics": {"provider": "together", "model": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"},
-        "genetic_risk": {"provider": "together", "model": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"},
-        "iron_deficiency": {"provider": "together", "model": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"},
-        "zinc_deficiency": {"provider": "together", "model": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"},
-        "calcium_deficiency": {"provider": "together", "model": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"},
-        "post_surgical": {"provider": "together", "model": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"},
-        "weight_loss": {"provider": "together", "model": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"},
-        "cancer": {"provider": "together", "model": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"},
-        "IEM": {"provider": "together", "model": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"},
+
+        # ALL OTHERS: Llama-3.2-3B via Together AI (fast, reliable)
+        # Fallback to HuggingFace if Together fails
+        "general": {"provider": "together", "model": "meta-llama/Llama-3.2-3B-Instruct-Turbo"},
+        "comparison": {"provider": "together", "model": "meta-llama/Llama-3.2-3B-Instruct-Turbo"},
+        "recommendation": {"provider": "together", "model": "meta-llama/Llama-3.2-3B-Instruct-Turbo"},
+        # Legacy categories (deprecated, kept for backward compatibility)
+        "dermatology": {"provider": "huggingface", "model": "google/gemma-2-2b-it"},
+        "renal": {"provider": "huggingface", "model": "google/gemma-2-2b-it"},
+        "diabetes": {"provider": "huggingface", "model": "google/gemma-2-2b-it"},
+        "vegetarian": {"provider": "huggingface", "model": "google/gemma-2-2b-it"},
+        "allergy": {"provider": "huggingface", "model": "google/gemma-2-2b-it"},
+        "sports": {"provider": "huggingface", "model": "google/gemma-2-2b-it"},
+        "pregnancy": {"provider": "huggingface", "model": "google/gemma-2-2b-it"},
+        "lactation": {"provider": "huggingface", "model": "google/gemma-2-2b-it"},
+        "pediatric": {"provider": "huggingface", "model": "google/gemma-2-2b-it"},
+        "geriatrics": {"provider": "huggingface", "model": "google/gemma-2-2b-it"},
+        "cardiac": {"provider": "huggingface", "model": "google/gemma-2-2b-it"},
+        "gastro": {"provider": "huggingface", "model": "google/gemma-2-2b-it"},
+        "nutrigenomics": {"provider": "huggingface", "model": "google/gemma-2-2b-it"},
+        "genetic_risk": {"provider": "huggingface", "model": "google/gemma-2-2b-it"},
+        "iron_deficiency": {"provider": "huggingface", "model": "google/gemma-2-2b-it"},
+        "zinc_deficiency": {"provider": "huggingface", "model": "google/gemma-2-2b-it"},
+        "calcium_deficiency": {"provider": "huggingface", "model": "google/gemma-2-2b-it"},
+        "post_surgical": {"provider": "huggingface", "model": "google/gemma-2-2b-it"},
+        "weight_loss": {"provider": "huggingface", "model": "google/gemma-2-2b-it"},
+        "cancer": {"provider": "huggingface", "model": "google/gemma-2-2b-it"},
+        "IEM": {"provider": "huggingface", "model": "google/gemma-2-2b-it"},
     }
 
     # Get default strategy from config if no model_name provided
@@ -169,26 +171,25 @@ def get_llm_client(model_name: str = None) -> LLM:
     model_id = config["model"]
     logger.info(f"Using {provider} provider with model: {model_id}")
 
-    # Create appropriate LLM instance
-    if provider == "together":
-        try:
-            if not TOGETHER_API_KEY and not os.getenv("TOGETHER_API_KEY"):
-                logger.warning("⚠️ No Together API key found. Falling back to Hugging Face.")
-            else:
-                return TogetherLLM(model_name=model_id)
-        except Exception as e:
-            logger.warning(f"Together LLM initialization failed: {str(e)}")
+    # Create appropriate LLM instance - ALWAYS TRY TOGETHER AI FIRST
+    try:
+        if not TOGETHER_API_KEY and not os.getenv("TOGETHER_API_KEY"):
+            logger.warning("⚠️ No Together API key found. Will try HuggingFace fallback.")
+            raise ValueError("No Together API key")
 
-    # Fallback to Hugging Face — use Gemma ONLY for general/comparison, meta-llama for clinical
+        # Try Together AI
+        return TogetherLLM(model_name=model_id)
+    except Exception as e:
+        logger.warning(f"Together AI failed: {str(e)}. Trying HuggingFace fallback.")
+
+    # Fallback to Hugging Face with Llama
     try:
         if not HUGGINGFACE_API_KEY and not os.getenv("HUGGINGFACE_API_KEY"):
             logger.warning("⚠️ No Hugging Face API key found. Using free tier limitations.")
-        # Use appropriate fallback model based on intent
-        if model_name in ["general", "comparison"]:
-            fallback_model = "google/gemma-2-2b-it"
-        else:
-            # For therapy/clinical queries, use a more capable model
-            fallback_model = "meta-llama/Llama-3.2-3B-Instruct"
+
+        # Use Llama 3.2 3B for fallback (better than Gemma)
+        fallback_model = "meta-llama/Llama-3.2-3B-Instruct"
+        logger.warning(f"⚠️ Falling back to HuggingFace {fallback_model} for intent: {model_name}")
         return HuggingFaceLLM(repo_id=fallback_model)
     except Exception as e:
         logger.error(f"Both LLM providers failed: {str(e)}")

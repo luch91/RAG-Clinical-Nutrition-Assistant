@@ -60,34 +60,52 @@ def _normalize_metadata_filter(filters: Dict[str, Any]) -> Dict[str, Any]:
     - Map alias keys (e.g., country_table -> country when applicable)
     - Drop non-metadata hints (e.g., exclude_allergens)
     - Validate country-specific FCT mapping
+    - Support chapter-aware clinical text filtering (condition_tags, age_relevance, therapy_area)
     """
     if not isinstance(filters, dict):
         return {}
-    
+
     meta: Dict[str, Any] = {}
-    
+
     # Country-specific FCT handling - standardize to 'country' key
     if filters.get("country"):
         country = filters["country"].lower().strip()
         meta["country"] = country
-    
+
     # Source file/table selection - standardize to 'source' key
     if filters.get("source"):
         meta["source"] = filters["source"]
-    
+
     # Disease filtering
     if filters.get("disease"):
         meta["disease"] = filters["disease"]
-    
+
+    # CLINICAL TEXT METADATA FILTERING (Chapter-aware retrieval)
+    # Condition tags (e.g., ["T1D", "epilepsy", "CKD"])
+    if filters.get("condition_tags"):
+        meta["condition_tags"] = filters["condition_tags"]
+
+    # Age relevance (e.g., "infant", "toddler", "child", "adolescent", "all_ages")
+    if filters.get("age_relevance"):
+        meta["age_relevance"] = filters["age_relevance"]
+
+    # Therapy area (e.g., "Preterm", "T1D", "Food Allergy", "CF", "IEMs", "Epilepsy", "CKD", "GI Disorders")
+    if filters.get("therapy_area"):
+        meta["therapy_area"] = filters["therapy_area"]
+
+    # Document type (e.g., "clinical_text", "FCT", "DRI")
+    if filters.get("doc_type"):
+        meta["doc_type"] = filters["doc_type"]
+
     # Pass-through of other safe metadata keys if present
-    for key in ("category", "table_country", "food"):
+    for key in ("category", "table_country", "food", "chapter_number", "chapter_title"):
         if filters.get(key) is not None:
             meta[key] = filters[key]
-    
+
     # Allergen exclusion - handle properly for FCT data
     if filters.get("exclude_allergens"):
         meta["exclude_allergens"] = filters["exclude_allergens"]
-    
+
     return meta
 
 def _apply_filter_search(query: str, filters: Dict[str, Any], k: int = 5) -> List[Document]:

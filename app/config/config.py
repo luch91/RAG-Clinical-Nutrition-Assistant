@@ -80,7 +80,7 @@ def initialize_paths(project_root=None):
     # DistilBERT Classifier
     DISTILBERT_CLASSIFIER_PATH = os.getenv(
         "DISTILBERT_CLASSIFIER_PATH",
-        os.path.join(MODELS_PATH, "distilbert-classifier-v2")
+        os.path.join(MODELS_PATH, "distilbert-clinical-v2")
     )
     
     # Print for debugging

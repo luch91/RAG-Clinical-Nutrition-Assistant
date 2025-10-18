@@ -14,21 +14,58 @@ Responsibilities:
 - Sources + model transparency
 """
 from typing import Dict, Any, List, Optional,Tuple
-from app.components.query_classifier import NutritionQueryClassifier
+from app.components.query_classifier import NutritionQueryClassifier, BIOMARKERS
 from app.components.api_models import get_llm_client
 from app.components.hybrid_retriever import filtered_retrieval, retriever
 from app.components.nutrient_calculator import optimize_diet, meal_planner, convert_fct_rows_to_foods
 from app.common.logger import get_logger
 # Day 1 & Day 2
 from app.common.slot_extractor import extract_slots_from_query
-from app.common.ambiguity_gate import validate_slots
+# PHASE 4 CLEANUP: validate_slots removed - step-by-step collector handles validation
 from app.common.retrieval_filters import build_filters
 # Day 3
 from app.common.templates import build_prompt
 # Follow-up generator
 from app.components.followup_question_generator import FollowUpQuestionGenerator
+# Step-by-step collector
+from app.components.step_by_step_collector import StepByStepTherapyCollector
 
 logger = get_logger(__name__)
+
+# ---------------------------
+# Supported Therapy Conditions (Official List - NEVER FORGET)
+# ---------------------------
+SUPPORTED_THERAPY_CONDITIONS = [
+    # Preterm Nutrition
+    "preterm", "premature", "nicu", "low birth weight", "preemie",
+
+    # Type 1 Diabetes
+    "type 1 diabetes", "t1d", "diabetes type 1", "insulin dependent diabetes", "iddm",
+
+    # Food Allergy
+    "food allergy", "food allergies", "allergic", "anaphylaxis",
+
+    # Cystic Fibrosis
+    "cystic fibrosis", "cf", "cftr",
+
+    # Inherited Metabolic Disorders
+    "pku", "phenylketonuria",
+    "msud", "maple syrup urine disease",
+    "galactosemia",
+    "iem", "inborn error", "metabolic disorder",
+
+    # Epilepsy / Ketogenic Therapy
+    "epilepsy", "seizure", "seizures", "ketogenic", "keto diet", "keto therapy",
+
+    # Chronic Kidney Disease
+    "ckd", "chronic kidney disease", "renal disease", "kidney disease", "renal failure",
+
+    # GI Disorders (IBD / GERD)
+    "ibd", "inflammatory bowel",
+    "crohn", "crohn's", "crohn's disease",
+    "ulcerative colitis", "uc",
+    "gerd", "reflux", "gastroesophageal reflux"
+]
 
 # ---------------------------
 # Keyword Mapper (Fast Pre-Classifier)
@@ -59,6 +96,30 @@ KEYWORD_MAP = {
     "autoimmune": "therapy",
 }
 
+def is_therapy_supported(diagnosis: str) -> bool:
+    """
+    Check if diagnosis is in the supported therapy list.
+
+    Official therapy support conditions:
+    1. Preterm Nutrition
+    2. Type 1 Diabetes
+    3. Food Allergy
+    4. Cystic Fibrosis
+    5. Inherited Metabolic Disorders (PKU, MSUD, Galactosemia)
+    6. Epilepsy / Ketogenic Therapy
+    7. Chronic Kidney Disease
+    8. GI Disorders (IBD / GERD)
+
+    Returns:
+        True if diagnosis matches any supported condition, False otherwise
+    """
+    if not diagnosis:
+        return False
+
+    diagnosis_lower = diagnosis.lower()
+    return any(condition in diagnosis_lower for condition in SUPPORTED_THERAPY_CONDITIONS)
+
+
 class ChatOrchestrator:
     def __init__(self) -> None:
         self.classifier = NutritionQueryClassifier()
@@ -77,6 +138,8 @@ class ChatOrchestrator:
         self.follow_up_generator = FollowUpQuestionGenerator()
         # Medication validation cache (in-memory)
         self._medication_cache: Dict[str, Dict[str, Any]] = {}
+        # Step-by-step therapy collector (dedicated state machine)
+        self._step_by_step_collector: Optional[StepByStepTherapyCollector] = None
     
     # ---------------------------
     # Meal plan helpers (consent-based)
@@ -173,6 +236,7 @@ class ChatOrchestrator:
         self._retry_count = 0
         self._awaiting_confirmation = False
         self._meal_plan_consent = False
+        self._step_by_step_collector = None  # Clear step-by-step collector
         # Return a clean message (avoid encoding artifacts)
         msg = "Session reset. I've cleared stored profile (country, age, BMI, etc.)."
         return {"message": msg}
@@ -236,7 +300,12 @@ class ChatOrchestrator:
 
                     if candidates:
                         best_match = candidates[0]
-                        confidence = best_match.get("score", 0) / 100.0
+                        # Handle score as both string and number
+                        score_raw = best_match.get("score", 0)
+                        try:
+                            confidence = float(score_raw) / 100.0
+                        except (ValueError, TypeError):
+                            confidence = 0.0
                         suggested_name = best_match.get("name", "")
 
                         if confidence >= MEDICATION_VALIDATION_CONFIDENCE:
@@ -448,6 +517,294 @@ class ChatOrchestrator:
         return None, "failed"
 
     # ---------------------------
+    # Rejection handler (graceful degradation)
+    # ---------------------------
+    def _handle_slot_rejection(self, slot: str, rejection_reason: str, classification: dict, merged_slots: Dict[str, Any]) -> dict:
+        """
+        Handle when user can't/won't provide required slot.
+        Implements graceful degradation with alternatives.
+
+        Args:
+            slot: The slot that was rejected (e.g., "biomarkers", "medications", "age")
+            rejection_reason: Why it was rejected ("user_rejected", "not_available", etc.)
+            classification: The classification result from query_classifier
+            merged_slots: Current session slots
+
+        Returns:
+            Dict response with graceful degradation options
+        """
+        # Critical slots for therapy (medications + biomarkers)
+        if slot in ["medications", "biomarkers"] or slot in BIOMARKERS:
+            diagnosis = merged_slots.get("diagnosis", "your condition")
+
+            if rejection_reason == "user_rejected":
+                # User explicitly said "no" or "don't have"
+                if slot == "medications":
+                    message = (
+                        f"I understand you're not currently on medications. "
+                        f"I can provide general nutritional recommendations for {diagnosis}, "
+                        f"but personalized therapy requires medication information.\n\n"
+                        f"Would you like:\n"
+                        f"1. General nutritional recommendations (no medications needed)\n"
+                        f"2. Wait - I'll get my medication list and come back\n\n"
+                        f"Type '1' for general recommendations or '2' to get medications first."
+                    )
+                else:  # biomarkers
+                    message = (
+                        f"I understand lab results aren't available. "
+                        f"Without biomarker data (HbA1c, creatinine, eGFR, etc.), I can provide "
+                        f"general nutritional recommendations for {diagnosis}, but NOT personalized therapy.\n\n"
+                        f"Would you like:\n"
+                        f"1. General nutritional recommendations (no labs needed)\n"
+                        f"2. Upload lab results if you have them (photo/PDF)\n"
+                        f"3. Wait - I'll get my lab results and come back\n\n"
+                        f"Type '1', '2', or '3'."
+                    )
+
+                # Clear the awaiting slot and downgrade intent to recommendation
+                self._awaiting_slot = None
+                self._awaiting_question = None
+                self._retry_count = 0
+
+                return {
+                    "template": "followup",
+                    "answer": message,
+                    "followups": [],
+                    "model_used": "none",
+                    "therapy_output": None,
+                    "therapy_summary": None,
+                    "sources_used": [],
+                    "model_note": f"Rejected slot: {slot}",
+                    "warnings": ["slot_rejected", "downgrade_to_recommendation"],
+                    "composer_placeholder": "Choose 1, 2, or 3"
+                }
+
+        # Non-critical slots (age, weight, height, country)
+        elif slot in ["age", "weight_kg", "height_cm", "sex", "country"]:
+            if rejection_reason == "user_rejected":
+                message = (
+                    f"No problem. I'll use typical age-based defaults for {slot.replace('_', ' ')}. "
+                    f"The recommendations may be less personalized, but I'll still provide helpful guidance."
+                )
+
+                # Set default value based on slot type
+                default_values = {
+                    "age": 30,  # Adult default
+                    "weight_kg": 70,
+                    "height_cm": 170,
+                    "sex": "unknown",
+                    "country": "Nigeria"  # Default to Nigeria (primary FCT)
+                }
+
+                if slot in default_values:
+                    merged_slots[slot] = default_values[slot]
+                    self.session_slots[slot] = default_values[slot]
+
+                self._awaiting_slot = None
+                self._awaiting_question = None
+                self._retry_count = 0
+
+                return {
+                    "template": "followup",
+                    "answer": message,
+                    "followups": [],
+                    "model_used": "none",
+                    "therapy_output": None,
+                    "therapy_summary": None,
+                    "sources_used": [],
+                    "model_note": f"Using default for {slot}",
+                    "warnings": ["using_defaults"],
+                    "composer_placeholder": ""
+                }
+
+        # Allergies (can be "none")
+        elif slot == "allergies":
+            merged_slots[slot] = ["none"]
+            self.session_slots[slot] = ["none"]
+            self._awaiting_slot = None
+            self._awaiting_question = None
+            self._retry_count = 0
+            # DON'T return early - let code fall through to generate therapy
+            logger.info("✅ Allergies processed - continuing to therapy generation")
+
+        # Diagnosis (critical for therapy)
+        elif slot == "diagnosis":
+            if rejection_reason == "user_rejected":
+                message = (
+                    "A diagnosis helps me provide more targeted recommendations. "
+                    "Without it, I can only offer very general nutritional guidance. "
+                    "Would you like to:\n"
+                    "1. Provide a general health goal instead (e.g., 'improve energy', 'weight management')\n"
+                    "2. Continue with general nutrition recommendations\n\n"
+                    "Type '1' or '2'."
+                )
+
+                return {
+                    "template": "followup",
+                    "answer": message,
+                    "followups": [],
+                    "model_used": "none",
+                    "therapy_output": None,
+                    "therapy_summary": None,
+                    "sources_used": [],
+                    "model_note": "Diagnosis rejected",
+                    "warnings": ["missing_diagnosis"],
+                    "composer_placeholder": "Choose 1 or 2"
+                }
+
+        # Fallback for any other slots
+        else:
+            self._awaiting_slot = None
+            self._awaiting_question = None
+            self._retry_count = 0
+
+            return {
+                "template": "followup",
+                "answer": f"Understood. Continuing without {slot.replace('_', ' ')}...",
+                "followups": [],
+                "model_used": "none",
+                "therapy_output": None,
+                "therapy_summary": None,
+                "sources_used": [],
+                "model_note": f"Skipped slot: {slot}",
+                "warnings": ["slot_skipped"],
+                "composer_placeholder": ""
+            }
+
+    # ---------------------------
+    # Therapy onboarding flow
+    # ---------------------------
+    def _therapy_onboarding_flow(
+        self,
+        diagnosis: str,
+        missing_meds: bool,
+        missing_biomarkers: bool,
+        missing_age: bool,
+        missing_weight: bool,
+        query: str
+    ) -> Dict[str, Any]:
+        """
+        Onboarding flow for users who explicitly request therapy but lack data.
+        Instead of silent downgrade, educate and guide data collection.
+        """
+
+        # Build list of missing items
+        missing_items = []
+        if missing_age:
+            missing_items.append("❌ Patient age (for age-appropriate requirements)")
+        if missing_meds:
+            missing_items.append("❌ Current medications (for drug-nutrient interactions)")
+        if missing_biomarkers:
+            missing_items.append("❌ Recent lab results (creatinine, eGFR, electrolytes)")
+        if missing_weight:
+            missing_items.append("❌ Weight & height (for calorie calculations)")
+
+        missing_items_text = "\n".join(missing_items)
+
+        # Get diagnosis-specific biomarkers
+        diagnosis_biomarkers = self._get_diagnosis_specific_biomarkers(diagnosis)
+
+        # Format response
+        answer = f"""🎯 **{diagnosis or 'Pediatric'} Diet Therapy - Let's Get Started!**
+
+I can create a **personalized therapy plan** for {diagnosis or 'this condition'}, but I need clinical information first. This ensures safe, evidence-based recommendations.
+
+**Required Information:**
+{missing_items_text}
+
+**Optional but Helpful:**
+• Country/region (for food availability)
+• Food allergies or intolerances
+{f'• {diagnosis} stage (if known)' if diagnosis and diagnosis.upper() in ['CKD', 'Cirrhosis'] else ''}
+
+{f'''**Key Lab Values for {diagnosis}:**
+{diagnosis_biomarkers}
+''' if diagnosis_biomarkers else ''}
+
+---
+
+**How would you like to proceed?**
+
+📋 **Option 1: Upload Lab Results** (Fastest)
+   Upload a PDF or photo of recent lab report. I'll extract biomarker values automatically.
+   → Click [Upload Lab Results] button below ↓
+
+✍️ **Option 2: Answer Step-by-Step** ({len(missing_items)} questions)
+   I'll ask one question at a time (age, medications, labs, etc.)
+   Takes 2-3 minutes.
+   → Type "step by step"
+
+📚 **Option 3: General {diagnosis or 'Diet'} Information First**
+   Get general diet guidelines for {diagnosis or 'this condition'} while you gather clinical data, then come back for personalized therapy.
+   → Type "general info first"
+
+Which option works best for you?
+
+---
+_⚠️ For educational purposes only. Not medical advice. Consult a healthcare provider._
+"""
+
+        # CRITICAL: Set self._awaiting_slot so next turn triggers the handler
+        self._awaiting_slot = "data_collection_method"
+        self._awaiting_question = "Choose data collection method"
+        self._intent_lock = "therapy"  # Lock to therapy intent
+
+        return {
+            "template": "followup",
+            "answer": answer,
+            "followups": [],
+            "model_used": "none",
+            "therapy_output": None,
+            "therapy_summary": None,
+            "sources_used": [],
+            "citations": [],
+            "model_note": "Therapy onboarding - awaiting data collection method",
+            "warnings": ["therapy_onboarding", "missing_clinical_data"],
+            "composer_placeholder": "Choose: upload / step by step / general info first",
+            "quick_actions": ["Upload Lab Results", "Step by Step", "General Info First"],
+            "highlight_upload_button": True,
+            "awaiting_slot": "data_collection_method",
+            "classification": {
+                "label": "therapy_pending",
+                "original_label": "therapy",
+                "diagnosis": diagnosis,
+                "missing_items": missing_items
+            }
+        }
+
+    def _get_diagnosis_specific_biomarkers(self, diagnosis: str) -> str:
+        """Return key biomarkers for specific diagnosis"""
+
+        if not diagnosis:
+            return ""
+
+        diagnosis_lower = diagnosis.lower()
+
+        biomarker_map = {
+            "ckd": "Creatinine, eGFR, Potassium, Phosphate, Calcium, Albumin",
+            "chronic kidney disease": "Creatinine, eGFR, Potassium, Phosphate, Calcium, Albumin",
+            "renal": "Creatinine, eGFR, Potassium, Phosphate, Calcium, Albumin",
+            "t1d": "HbA1c, Fasting Glucose, C-peptide (if available)",
+            "type 1 diabetes": "HbA1c, Fasting Glucose, C-peptide (if available)",
+            "diabetes": "HbA1c, Fasting Glucose, C-peptide (if available)",
+            "epilepsy": "Drug levels (if on AEDs), Vitamin D, Folate, B12",
+            "cf": "Vitamins A/D/E/K, Albumin, Prealbumin",
+            "cystic fibrosis": "Vitamins A/D/E/K, Albumin, Prealbumin",
+            "iem": "Depends on specific IEM - Amino acids, Organic acids",
+            "inborn error": "Depends on specific IEM - Amino acids, Organic acids",
+            "cirrhosis": "Albumin, Bilirubin, PT/INR, Ammonia",
+            "food allergy": "IgE levels (if known), Eosinophil count",
+            "allergy": "IgE levels (if known), Eosinophil count",
+            "preterm": "Albumin, Calcium, Phosphate, ALP, Weight gain"
+        }
+
+        for key, biomarkers in biomarker_map.items():
+            if key in diagnosis_lower:
+                return biomarkers
+
+        return ""
+
+    # ---------------------------
     # Pre-classifier
     # ---------------------------
     def _pre_classify(self, query: str) -> str:
@@ -462,44 +819,400 @@ class ChatOrchestrator:
         return ""
     
     # ---------------------------
-    # Minimal therapy target generator (age-based defaults)
+    # OPTION A + B: Enhanced Therapy Generation with Biomarkers + LLM
     # ---------------------------
     def _generate_diet_therapy(self, slots: Dict[str, Any]) -> Dict[str, Any]:
-        """Generate simple nutrient targets with age-based defaults.
-        - If weight/height present, prefer provided values; otherwise fall back to age group defaults.
-        - Returns a structure compatible with the Therapy Summary renderer.
         """
+        Generate personalized nutrition therapy using:
+        - Option A: Enhanced formulas with diagnosis-specific biomarker logic
+        - Option B: LLM-powered therapy generation with RAG retrieval
+
+        Returns structure compatible with Therapy Summary renderer.
+        """
+        # Extract demographics
         age = slots.get("age")
         sex = (slots.get("sex") or "").lower()
         weight = slots.get("weight_kg") or slots.get("weight")
         height = slots.get("height_cm") or slots.get("height")
+        diagnosis = slots.get("diagnosis", "").lower()
+
         try:
             age_val = int(age) if age is not None else None
         except Exception:
             age_val = None
+
         is_adult = (age_val is None) or (age_val >= 18)
+
+        # Default values if missing
         if weight is None:
             weight = 60 if sex == "female" else 70 if is_adult else 30
         if height is None:
             height = 165 if sex == "female" else 175 if is_adult else 130
-        energy_kcal = 2000 if is_adult else 1400
+
         try:
             w = float(weight)
-            protein_g = max(45, round(0.8 * w)) if is_adult else max(30, round(1.0 * w))
+            h = float(height)
         except Exception:
-            protein_g = 50 if is_adult else 30
-        targets = {
-            "energy_kcal": energy_kcal,
-            "macros": {"protein_g": protein_g},
-            "micros": {},
-        }
+            w = weight
+            h = height
+
+        # OPTION A: Diagnosis-Specific Biomarker-Driven Targets
+        targets = self._calculate_diagnosis_specific_targets(
+            diagnosis=diagnosis,
+            age_val=age_val,
+            weight=w,
+            height=h,
+            sex=sex,
+            is_adult=is_adult,
+            slots=slots
+        )
+
+        # OPTION B: LLM-Powered Therapy Enhancement
+        llm_therapy_guidance = self._generate_llm_therapy_guidance(
+            diagnosis=diagnosis,
+            slots=slots,
+            targets=targets
+        )
+
+        # Combine both approaches
         therapy_output: Dict[str, Any] = {
             "nutrient_targets": targets,
             "biochemical_rationale": self._biochemical_rationale(slots, targets),
             "drug_nutrient_interactions": [],
             "optimized_plan": {},
+            "llm_guidance": llm_therapy_guidance  # From Option B
         }
+
         return therapy_output
+
+    def _calculate_diagnosis_specific_targets(
+        self,
+        diagnosis: str,
+        age_val: Optional[int],
+        weight: float,
+        height: float,
+        sex: str,
+        is_adult: bool,
+        slots: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        OPTION A: Calculate nutrient targets based on diagnosis and biomarkers.
+        Implements diagnosis-specific logic for all 8 supported conditions.
+        """
+        # Base calculations
+        energy_kcal = 2000 if is_adult else 1400
+        protein_g = max(45, round(0.8 * weight)) if is_adult else max(30, round(1.0 * weight))
+
+        # Initialize targets
+        targets = {
+            "energy_kcal": energy_kcal,
+            "macros": {"protein_g": protein_g, "carb_g": 250, "fat_g": 65},
+            "micros": {}
+        }
+
+        # 1. TYPE 1 DIABETES
+        if "diabet" in diagnosis or "t1d" in diagnosis or "iddm" in diagnosis:
+            hba1c = slots.get("hba1c")
+            glucose = slots.get("glucose")
+
+            # Adjust carb targets based on HbA1c control
+            if hba1c:
+                if hba1c > 8.0:
+                    # Poor control - tighter carb restriction
+                    targets["macros"]["carb_g"] = 150
+                    targets["micros"]["fiber_g"] = 30  # High fiber for glycemic control
+                elif hba1c > 7.0:
+                    # Moderate control
+                    targets["macros"]["carb_g"] = 180
+                    targets["micros"]["fiber_g"] = 25
+                else:
+                    # Good control
+                    targets["macros"]["carb_g"] = 200
+                    targets["micros"]["fiber_g"] = 25
+
+            # Micronutrients for diabetes
+            targets["micros"]["chromium_mcg"] = 200
+            targets["micros"]["magnesium_mg"] = 400
+            targets["micros"]["vitamin_d_iu"] = 2000
+
+        # 2. CHRONIC KIDNEY DISEASE (CKD)
+        elif "ckd" in diagnosis or "kidney" in diagnosis or "renal" in diagnosis:
+            egfr = slots.get("egfr")
+            creatinine = slots.get("creatinine")
+            potassium = slots.get("potassium")
+            phosphorus = slots.get("phosphorus")
+
+            # Adjust protein based on CKD stage (eGFR)
+            if egfr:
+                if egfr < 15:
+                    # Stage 5 (dialysis)
+                    targets["macros"]["protein_g"] = round(1.2 * weight) if is_adult else round(1.5 * weight)
+                elif egfr < 30:
+                    # Stage 4
+                    targets["macros"]["protein_g"] = round(0.6 * weight) if is_adult else round(0.8 * weight)
+                elif egfr < 60:
+                    # Stage 3
+                    targets["macros"]["protein_g"] = round(0.8 * weight) if is_adult else round(1.0 * weight)
+
+            # Mineral restrictions based on biomarkers
+            if potassium and potassium > 5.0:
+                targets["micros"]["potassium_mg"] = 2000  # Restrict
+            else:
+                targets["micros"]["potassium_mg"] = 3000
+
+            if phosphorus and phosphorus > 4.5:
+                targets["micros"]["phosphorus_mg"] = 800  # Restrict
+            else:
+                targets["micros"]["phosphorus_mg"] = 1200
+
+            # Always restrict sodium in CKD
+            targets["micros"]["sodium_mg"] = 2000
+            targets["micros"]["calcium_mg"] = 1000
+
+        # 3. EPILEPSY / KETOGENIC THERAPY
+        elif "epilep" in diagnosis or "seizure" in diagnosis or "ketogenic" in diagnosis or "keto" in diagnosis:
+            ketone_level = slots.get("ketone_level")
+            seizure_frequency = slots.get("seizure_frequency")
+
+            # Ketogenic ratio calculations
+            if "ketogenic" in diagnosis.lower() or ketone_level:
+                # Classic ketogenic diet: 4:1 or 3:1 ratio (fat:protein+carb)
+                targets["energy_kcal"] = round(energy_kcal * 1.2)  # Higher energy from fat
+                targets["macros"]["fat_g"] = round(weight * 3.5)  # High fat
+                targets["macros"]["carb_g"] = 20  # Very low carb
+                targets["macros"]["protein_g"] = round(weight * 1.0)
+
+            # Micronutrients for epilepsy
+            targets["micros"]["vitamin_d_iu"] = 2000
+            targets["micros"]["calcium_mg"] = 1300
+            targets["micros"]["selenium_mcg"] = 70
+
+        # 4. CYSTIC FIBROSIS (CF)
+        elif "cystic fibrosis" in diagnosis or "cf" in diagnosis or "cftr" in diagnosis:
+            fev1 = slots.get("fev1")
+            pancreatic_status = slots.get("pancreatic_status")
+
+            # High-calorie, high-fat diet
+            targets["energy_kcal"] = round(energy_kcal * 1.5)  # 150% of normal
+            targets["macros"]["protein_g"] = round(weight * 1.5)  # Higher protein
+            targets["macros"]["fat_g"] = round(weight * 2.0)  # High fat
+
+            # Fat-soluble vitamins (CF patients often deficient)
+            targets["micros"]["vitamin_a_iu"] = 10000
+            targets["micros"]["vitamin_d_iu"] = 2000
+            targets["micros"]["vitamin_e_iu"] = 400
+            targets["micros"]["vitamin_k_mcg"] = 120
+            targets["micros"]["sodium_mg"] = 3000  # Liberal sodium (sweat losses)
+
+        # 5. INHERITED METABOLIC DISORDERS (IEMs)
+        elif any(term in diagnosis for term in ["pku", "phenylketonuria", "msud", "maple syrup", "galactosemia", "metabolic disorder", "inborn error"]):
+            # PKU
+            if "pku" in diagnosis or "phenylketonuria" in diagnosis:
+                phenylalanine = slots.get("phenylalanine")
+
+                if phenylalanine:
+                    if phenylalanine > 10:
+                        # High phe - strict restriction
+                        targets["macros"]["protein_g"] = round(weight * 0.5)  # Low natural protein
+                        targets["micros"]["phenylalanine_mg"] = 300  # Strict limit
+                    elif phenylalanine > 6:
+                        targets["macros"]["protein_g"] = round(weight * 0.7)
+                        targets["micros"]["phenylalanine_mg"] = 500
+                    else:
+                        targets["macros"]["protein_g"] = round(weight * 1.0)
+                        targets["micros"]["phenylalanine_mg"] = 700
+
+                targets["micros"]["tyrosine_mg"] = 4000  # Supplemental tyrosine
+
+            # MSUD
+            elif "msud" in diagnosis or "maple syrup" in diagnosis:
+                leucine = slots.get("leucine")
+
+                # Restrict branched-chain amino acids
+                targets["macros"]["protein_g"] = round(weight * 0.7)
+                targets["micros"]["leucine_mg"] = 500  # Strict limit
+                targets["micros"]["isoleucine_mg"] = 300
+                targets["micros"]["valine_mg"] = 350
+
+            # Galactosemia
+            elif "galactosemia" in diagnosis:
+                # Strict galactose/lactose restriction
+                targets["macros"]["carb_g"] = 200
+                targets["micros"]["calcium_mg"] = 1300  # Compensate for no dairy
+                targets["micros"]["vitamin_d_iu"] = 2000
+
+        # 6. PRETERM NUTRITION
+        elif "preterm" in diagnosis or "premature" in diagnosis or "nicu" in diagnosis or "preemie" in diagnosis:
+            gestational_age = slots.get("gestational_age")
+            corrected_age = slots.get("corrected_age")
+
+            # Aggressive nutrition for catch-up growth
+            targets["energy_kcal"] = round(120 * weight)  # kcal/kg/day
+            targets["macros"]["protein_g"] = round(3.5 * weight)  # g/kg/day
+            targets["macros"]["fat_g"] = round(6 * weight)  # High fat for brain development
+
+            # Critical micronutrients for preterm
+            targets["micros"]["iron_mg"] = 4  # High iron needs
+            targets["micros"]["calcium_mg"] = 200  # mg/kg/day
+            targets["micros"]["phosphorus_mg"] = 120
+            targets["micros"]["vitamin_d_iu"] = 400
+
+        # 7. FOOD ALLERGY
+        elif "food allerg" in diagnosis or "allergic" in diagnosis or "anaphylaxis" in diagnosis:
+            allergen_type = slots.get("allergen_type")
+            ige_level = slots.get("ige_level")
+
+            # Ensure adequate nutrition despite exclusions
+            targets["macros"]["protein_g"] = round(weight * 1.2)  # Compensate for restrictions
+            targets["micros"]["calcium_mg"] = 1300  # If dairy allergy
+            targets["micros"]["vitamin_d_iu"] = 2000
+            targets["micros"]["omega3_mg"] = 1000  # Anti-inflammatory
+
+        # 8. GI DISORDERS (IBD, GERD, Crohn's, UC)
+        elif any(term in diagnosis for term in ["ibd", "crohn", "ulcerative colitis", "gerd", "reflux", "inflammatory bowel"]):
+            crp = slots.get("crp")
+            esr = slots.get("esr")
+            fecal_calprotectin = slots.get("fecal_calprotectin")
+            albumin = slots.get("albumin")
+
+            # Anti-inflammatory, easily digestible diet
+            targets["energy_kcal"] = round(energy_kcal * 1.3)  # Higher energy needs
+            targets["macros"]["protein_g"] = round(weight * 1.5)  # High protein for healing
+            targets["macros"]["fat_g"] = round(weight * 1.0)  # Moderate fat
+
+            # Micronutrients for IBD
+            targets["micros"]["vitamin_d_iu"] = 2000
+            targets["micros"]["vitamin_b12_mcg"] = 100
+            targets["micros"]["folate_mcg"] = 800
+            targets["micros"]["iron_mg"] = 27  # Often deficient
+            targets["micros"]["zinc_mg"] = 25
+            targets["micros"]["omega3_mg"] = 2000  # Anti-inflammatory
+
+        return targets
+
+    def _generate_llm_therapy_guidance(
+        self,
+        diagnosis: str,
+        slots: Dict[str, Any],
+        targets: Dict[str, Any]
+    ) -> str:
+        """
+        OPTION B: Generate LLM-powered therapy guidance using DeepSeek + RAG.
+        Provides clinical reasoning and food recommendations.
+        """
+        if not diagnosis:
+            return ""
+
+        try:
+            # Build biomarkers summary
+            biomarkers_text = self._format_biomarkers_for_llm(slots)
+
+            # Retrieve therapy guidelines from RAG (if available)
+            guidelines_context = ""
+            try:
+                therapy_docs = filtered_retrieval(
+                    f"Diet therapy guidelines for {diagnosis}",
+                    {},  # Empty filters dict (positional arg)
+                    k=5,
+                    sources=["Clinical Nutrition", "Guidelines", "Clinical Paediatric Dietetics"]
+                )
+                guidelines_context = "\n".join([doc.page_content for doc in (therapy_docs or [])]) if therapy_docs else ""
+            except Exception as retrieval_error:
+                logger.debug(f"RAG retrieval skipped (retriever not initialized): {retrieval_error}")
+                # Continue without RAG context - LLM can still provide guidance
+
+            # Build prompt for DeepSeek
+            prompt = f"""You are a clinical nutrition expert. Generate a concise therapy guidance for:
+
+**Diagnosis:** {diagnosis}
+**Age:** {slots.get('age', 'Not specified')} years
+**Weight:** {slots.get('weight_kg', 'Not specified')} kg
+**Medications:** {', '.join(slots.get('medications', [])) if slots.get('medications') else 'None'}
+
+**Biomarkers:**
+{biomarkers_text}
+
+**Calculated Nutrient Targets:**
+- Energy: {targets.get('energy_kcal')} kcal/day
+- Protein: {targets.get('macros', {}).get('protein_g')} g/day
+- Carbs: {targets.get('macros', {}).get('carb_g')} g/day
+- Fat: {targets.get('macros', {}).get('fat_g')} g/day
+
+**Clinical Guidelines Context:**
+{guidelines_context[:1000] if guidelines_context else 'Using evidence-based clinical nutrition principles'}
+
+Provide:
+1. Brief rationale for these targets based on diagnosis and biomarkers
+2. Top 5 food recommendations specific to this condition
+3. Foods to avoid or limit
+4. One key monitoring parameter
+
+Keep response under 300 words, clinical and evidence-based."""
+
+            # Call DeepSeek model
+            try:
+                llm = get_llm_client("therapy")  # Uses DeepSeek for therapy intent
+                guidance = llm.invoke(prompt)
+                return guidance if isinstance(guidance, str) else str(guidance)
+            except Exception as llm_error:
+                logger.debug(f"LLM call skipped: {llm_error}")
+                return ""
+
+        except Exception as e:
+            logger.warning(f"LLM therapy guidance generation failed: {str(e)}")
+            return ""
+
+    def _format_biomarkers_for_llm(self, slots: Dict[str, Any]) -> str:
+        """Format biomarkers from slots into readable text for LLM"""
+        biomarkers = []
+
+        # Type 1 Diabetes
+        if slots.get("hba1c"):
+            biomarkers.append(f"HbA1c: {slots['hba1c']}%")
+        if slots.get("glucose"):
+            biomarkers.append(f"Fasting Glucose: {slots['glucose']} mg/dL")
+
+        # CKD
+        if slots.get("creatinine"):
+            biomarkers.append(f"Creatinine: {slots['creatinine']} mg/dL")
+        if slots.get("egfr"):
+            biomarkers.append(f"eGFR: {slots['egfr']} mL/min/1.73m²")
+        if slots.get("potassium"):
+            biomarkers.append(f"Potassium: {slots['potassium']} mEq/L")
+        if slots.get("phosphorus"):
+            biomarkers.append(f"Phosphorus: {slots['phosphorus']} mg/dL")
+
+        # Epilepsy
+        if slots.get("ketone_level"):
+            biomarkers.append(f"Blood Ketones: {slots['ketone_level']} mmol/L")
+        if slots.get("seizure_frequency"):
+            biomarkers.append(f"Seizure Frequency: {slots['seizure_frequency']}/month")
+
+        # CF
+        if slots.get("fev1"):
+            biomarkers.append(f"FEV1: {slots['fev1']}%")
+        if slots.get("vitamin_d"):
+            biomarkers.append(f"Vitamin D: {slots['vitamin_d']} ng/mL")
+
+        # IEMs
+        if slots.get("phenylalanine"):
+            biomarkers.append(f"Phenylalanine: {slots['phenylalanine']} mg/dL")
+        if slots.get("leucine"):
+            biomarkers.append(f"Leucine: {slots['leucine']} µmol/L")
+
+        # Preterm
+        if slots.get("gestational_age"):
+            biomarkers.append(f"Gestational Age: {slots['gestational_age']} weeks")
+        if slots.get("hemoglobin"):
+            biomarkers.append(f"Hemoglobin: {slots['hemoglobin']} g/dL")
+
+        # IBD
+        if slots.get("crp"):
+            biomarkers.append(f"CRP: {slots['crp']} mg/L")
+        if slots.get("albumin"):
+            biomarkers.append(f"Albumin: {slots['albumin']} g/dL")
+
+        return "\n".join(biomarkers) if biomarkers else "No biomarkers provided"
     
     # ---------------------------
     # Decide if FCT is needed
@@ -684,6 +1397,8 @@ class ChatOrchestrator:
         # If we are awaiting a specific slot from the previous turn, do not reclassify intent
         pre_key = None
         classification = {"label": "general"}
+        slots = {}  # Initialize slots early to avoid UnboundLocalError
+
         if self._awaiting_slot and self._intent_lock:
             template_key = self._intent_lock
         else:
@@ -693,35 +1408,92 @@ class ChatOrchestrator:
             except Exception:
                 classification = {"label": "general"}
 
-            # CRITICAL: THERAPY GATEKEEPER - Enforce mandatory medications + biomarkers
+            # Extract slots from classification early (before therapy gatekeeper needs them)
+            try:
+                slots = extract_slots_from_query(query, classification)
+            except Exception:
+                slots = {}
+
+            # CRITICAL: Add diagnosis from classification to slots
+            if classification.get("diagnosis"):
+                slots["diagnosis"] = classification.get("diagnosis")
+                # Also store in session_slots immediately so it's available for collector
+                self.session_slots["diagnosis"] = classification.get("diagnosis")
+
+            # CRITICAL: ENHANCED THERAPY GATEKEEPER with Onboarding
             if classification.get("label") == "therapy":
                 medications = classification.get("medications", [])
                 biomarkers = classification.get("biomarkers", [])
 
-                # Downgrade to recommendation if missing medications
-                if not medications or len(medications) == 0:
-                    logger.warning("⚠️ Therapy downgraded to recommendation: No medications detected")
+                # Check if user EXPLICITLY requested therapy
+                explicit_therapy_keywords = [
+                    "therapy", "treatment plan", "meal plan", "diet plan",
+                    "personalized", "specific plan", "calculate", "requirements",
+                    "need diet", "need meal", "nutrition therapy"
+                ]
+                user_explicitly_wants_therapy = any(
+                    keyword in query.lower()
+                    for keyword in explicit_therapy_keywords
+                )
+
+                # Merge with session slots to check total missing
+                temp_merged = dict(self.session_slots)
+                for k, v in slots.items():
+                    if v is not None:
+                        temp_merged[k] = v
+
+                missing_meds = not medications or len(medications) == 0
+                missing_biomarkers = not biomarkers or len(biomarkers) == 0
+                missing_age = not temp_merged.get("age")
+                missing_weight = not temp_merged.get("weight_kg")
+
+                critical_missing_count = sum([missing_meds, missing_biomarkers, missing_age, missing_weight])
+
+                if critical_missing_count == 0:
+                    # ALL DATA PRESENT - Proceed with therapy!
+                    logger.info(f"✅ Therapy gatekeeper passed: {len(medications)} medications, {len(biomarkers)} biomarkers")
+
+                elif critical_missing_count >= 2 and user_explicitly_wants_therapy:
+                    # USER EXPLICITLY WANTS THERAPY but missing 2+ critical slots
+                    # → Don't silently downgrade, ONBOARD them!
+                    logger.info("🎯 Therapy onboarding triggered: user wants therapy but missing data")
+                    return self._therapy_onboarding_flow(
+                        diagnosis=temp_merged.get("diagnosis"),
+                        missing_meds=missing_meds,
+                        missing_biomarkers=missing_biomarkers,
+                        missing_age=missing_age,
+                        missing_weight=missing_weight,
+                        query=query
+                    )
+
+                elif critical_missing_count >= 2 and not user_explicitly_wants_therapy:
+                    # Therapy intent detected but user didn't explicitly ask for it
+                    # → Silently downgrade (old behavior)
+                    logger.warning("⚠️ Therapy downgraded: missing critical data, user didn't explicitly request")
                     classification["label"] = "recommendation"
-                    classification["downgrade_reason"] = "missing_medications"
+                    classification["downgrade_reason"] = "missing_critical_data"
                     classification["original_label"] = "therapy"
 
-                # Downgrade to recommendation if missing biomarkers
-                elif not biomarkers or len(biomarkers) == 0:
-                    logger.warning("⚠️ Therapy downgraded to recommendation: No biomarkers detected")
-                    classification["label"] = "recommendation"
-                    classification["downgrade_reason"] = "missing_biomarkers"
-                    classification["original_label"] = "therapy"
+                elif missing_meds and not missing_biomarkers:
+                    # Only medications missing - quick ask
+                    logger.info("Therapy gatekeeper: missing medications only")
+                    # Will be handled by standard follow-up flow
+
+                elif missing_biomarkers and not missing_meds:
+                    # Only biomarkers missing - nudge upload
+                    logger.info("Therapy gatekeeper: missing biomarkers only")
+                    # Will be handled by standard follow-up flow
 
                 else:
-                    # Both medications AND biomarkers present - therapy allowed
+                    # Missing only 1 critical slot or both present
                     logger.info(f"✅ Therapy gatekeeper passed: {len(medications)} medications, {len(biomarkers)} biomarkers")
 
             template_key = pre_key or classification.get("label", "general")
             # On first turn, lock the intent so follow-ups don't jump intents
             self._intent_lock = self._intent_lock or template_key
         
-        # CRITICAL: High-risk query handling
-        if classification.get("is_high_risk", False):
+        # CRITICAL: High-risk query handling (BUT NOT DURING STEP-BY-STEP COLLECTION!)
+        if classification.get("is_high_risk", False) and not self._step_by_step_collector:
             return {
                 "template": "followup",
                 "answer": "I notice this may be a high-risk query. Are you under the care of a healthcare provider?",
@@ -734,12 +1506,177 @@ class ChatOrchestrator:
                 "warnings": ["high_risk"],
             }
         
-        # If we asked a specific question in the last turn, use enhanced parser
+        # If we asked a specific question in the last turn, use context-aware extraction
         if self._awaiting_slot:
             answer_text = (query or "").strip()
             slot = self._awaiting_slot
 
-            # Special handling: If awaiting confirmation for medications
+            # Initialize slots dict and merged_slots early for rejection handler
+            slots = {}
+            merged_slots = dict(self.session_slots)
+
+            # PRIORITY: If step-by-step collector is active, route all responses to it
+            if self._step_by_step_collector is not None:
+                logger.info(f"Routing response to step-by-step collector: {answer_text[:50]}")
+                response = self._step_by_step_collector.process_answer(answer_text)
+
+                # Check if collection is complete
+                if response.get("step_by_step_complete"):
+                    logger.info("✅ Step-by-step collection complete - triggering therapy generation")
+                    # Merge collected data into session_slots
+                    collected_data = response.get("collected_data", {})
+                    for k, v in collected_data.items():
+                        if v is not None:  # Don't overwrite with None
+                            self.session_slots[k] = v
+
+                    # Clear collector and awaiting state
+                    self._step_by_step_collector = None
+                    self._awaiting_slot = None
+                    self._intent_lock = None
+
+                    # Log collected data for debugging
+                    logger.info(f"Collected data: {list(collected_data.keys())}")
+
+                    # Recursively call handle_query with a synthetic therapy request
+                    # This will trigger normal therapy generation with all collected slots
+                    synthetic_query = f"Generate personalized therapy plan for {collected_data.get('diagnosis', 'patient')}"
+                    logger.info(f"Calling handle_query recursively with: {synthetic_query}")
+                    return self.handle_query(synthetic_query)
+                else:
+                    # Still collecting - update awaiting_slot and return next question
+                    self._awaiting_slot = response.get("awaiting_slot")
+                    logger.info(f"Collector waiting for: {self._awaiting_slot}")
+                    return response
+
+            # SPECIAL HANDLER: data_collection_method (from therapy onboarding)
+            # IMPORTANT: Only handle this if collector is NOT already active!
+            if slot == "data_collection_method" and not self._step_by_step_collector:
+                answer_lower = answer_text.lower().strip()
+
+                if "step" in answer_lower or "2" in answer_lower:
+                    # User chose step-by-step data collection
+                    logger.info("User chose step-by-step data collection - initializing collector")
+                    self._intent_lock = "therapy"  # Lock to therapy intent
+
+                    # Initialize step-by-step collector with diagnosis and any existing slots
+                    diagnosis = merged_slots.get("diagnosis")
+                    self._step_by_step_collector = StepByStepTherapyCollector(
+                        diagnosis=diagnosis,
+                        initial_slots=merged_slots
+                    )
+
+                    # Start the collector - get first question
+                    collector_response = self._step_by_step_collector.start()
+
+                    # CRITICAL: Set awaiting_slot from collector response
+                    self._awaiting_slot = collector_response.get("awaiting_slot")
+                    logger.info(f"Collector started - awaiting slot: {self._awaiting_slot}")
+
+                    return collector_response
+
+                elif "upload" in answer_lower or "1" in answer_lower:
+                    # User chose to upload lab results
+                    logger.info("User chose to upload lab results")
+                    self._awaiting_slot = None
+                    return {
+                        "template": "followup",
+                        "answer": "📋 Please upload your lab results using the **[Upload Lab Results]** button below.\n\nI'll extract biomarker values (creatinine, eGFR, HbA1c, etc.) automatically from the PDF or photo.",
+                        "followups": [],
+                        "model_used": "none",
+                        "therapy_output": None,
+                        "therapy_summary": None,
+                        "sources_used": [],
+                        "citations": [],
+                        "model_note": "Awaiting lab upload",
+                        "warnings": ["therapy_onboarding"],
+                        "composer_placeholder": "Click upload button",
+                        "highlight_upload_button": True
+                    }
+
+                elif "general" in answer_lower or "3" in answer_lower:
+                    # User chose general info first
+                    logger.info("User chose general info (downgrade to recommendation)")
+                    self._awaiting_slot = None
+                    self._intent_lock = "recommendation"  # Downgrade to recommendation
+                    classification["label"] = "recommendation"
+                    classification["downgrade_reason"] = "user_chose_general_info"
+                    classification["original_label"] = "therapy"
+
+                    # Fall through to normal recommendation handling
+                    template_key = "recommendation"
+
+                else:
+                    # Unclear response - ask again
+                    return {
+                        "template": "followup",
+                        "answer": "Please choose one of the options:\n\n1. **Upload Lab Results** (fastest)\n2. **Step-by-Step** (I'll ask questions)\n3. **General Info First** (guidelines only)\n\nType '1', '2', or '3':",
+                        "followups": [],
+                        "model_used": "none",
+                        "therapy_output": None,
+                        "therapy_summary": None,
+                        "sources_used": [],
+                        "citations": [],
+                        "model_note": "Clarifying data collection method",
+                        "warnings": ["therapy_onboarding"],
+                        "composer_placeholder": "Choose 1, 2, or 3"
+                    }
+
+            # CRITICAL: Use new context-aware extraction from classifier
+            extracted = self.classifier.extract_from_followup_response(answer_text, slot)
+
+            # Handle rejection first
+            if not extracted.get("found") and extracted.get("reason") == "user_rejected":
+                # User rejected - offer graceful degradation
+                return self._handle_slot_rejection(slot, "user_rejected", classification, merged_slots)
+
+            # Handle biomarker slots with values
+            if extracted.get("found") and slot in BIOMARKERS:
+                # Successfully extracted biomarker value
+                biomarker_data = {
+                    "value": extracted["value"],
+                    "unit": extracted["unit"],
+                    "biomarker": extracted["biomarker"]
+                }
+                slots[slot] = biomarker_data
+                self.session_slots[slot] = biomarker_data
+                self._awaiting_slot = None
+                self._awaiting_question = None
+                self._retry_count = 0
+                logger.info(f"✅ Extracted {slot}: {extracted['value']} {extracted['unit']}")
+                # Fall through to continue
+
+            # Handle medication slots
+            elif extracted.get("found") and slot == "medications":
+                medications = extracted["medications"]
+                slots[slot] = medications
+                self.session_slots[slot] = medications
+                self._awaiting_slot = None
+                self._awaiting_question = None
+                self._retry_count = 0
+                logger.info(f"✅ Extracted medications: {medications}")
+                # Fall through
+
+            # Handle unclear response or out of range
+            elif not extracted.get("found"):
+                if extracted.get("reason") == "out_of_range":
+                    # Value seems unusual - ask for confirmation
+                    return {
+                        "template": "followup",
+                        "answer": extracted.get("message", f"That value seems unusual. Please confirm or re-enter."),
+                        "followups": [],
+                        "model_used": "none",
+                        "therapy_output": None,
+                        "therapy_summary": None,
+                        "sources_used": [],
+                        "model_note": "Value out of range",
+                        "warnings": ["value_validation"],
+                        "composer_placeholder": "Confirm or re-enter value"
+                    }
+                else:
+                    # Unclear response - retry or use old parser
+                    pass  # Fall through to existing parser
+
+            # Special handling: If awaiting confirmation for medications (legacy path)
             if self._awaiting_confirmation and slot == "medications" and self._pending_medications:
                 low = answer_text.lower().strip()
                 if low in ["yes", "yeah", "yep", "correct", "ok", "okay", "y"]:
@@ -788,8 +1725,6 @@ class ChatOrchestrator:
 
             # Use enhanced parser
             coerced, status = self._parse_user_response(answer_text, slot)
-
-            slots = {}
 
             # Handle based on parse status
             if status == "success":
@@ -948,72 +1883,20 @@ class ChatOrchestrator:
                         "warnings": ["parsing_failed"],
                         "composer_placeholder": clarification
                     }
-        else:
-            try:
-                slots = extract_slots_from_query(query, classification)
-            except Exception:
-                slots = {}
-        
+
+        # Merge slots with session (slots already extracted earlier if not awaiting)
         merged_slots = dict(self.session_slots)
         for k, v in slots.items():
             if v is not None:
                 merged_slots[k] = v
-        
-        # Validate slots before proceeding
-        try:
-            ok, missing, invalid = validate_slots(template_key, merged_slots)
-        except Exception:
-            ok, missing, invalid = True, [], []
-        
-        if not ok:
-            # Use follow-up generator to get a single question
-            follow_up_data = self.follow_up_generator.generate_follow_up_question(
-                query_info={"label": template_key},
-                profile=merged_slots,
-                lab_results=[],
-                clarifications={}
-            )
-            
-            if follow_up_data:
-                self._awaiting_slot = follow_up_data["slot"]
-                progress = self._get_progress_indicator(template_key, merged_slots)
-                question_with_progress = follow_up_data["question"] + progress
-                self._awaiting_question = question_with_progress
 
-                return {
-                    "template": "followup",
-                    "answer": question_with_progress,
-                    "followups": [],
-                    "model_used": "none",
-                    "therapy_output": None,
-                    "therapy_summary": None,
-                    "sources_used": [],
-                    "model_note": "Awaiting required details",
-                    "warnings": ["missing_data"],
-                    "composer_placeholder": follow_up_data["composer_placeholder"]
-                }
-            else:
-                # Fallback to craft_missing_slot_questions if generator fails
-                qs = craft_missing_slot_questions(template_key, missing, invalid) or []
-                next_q = qs[0] if qs else "Could you share the missing details (age, sex, diagnosis, allergies)?"
-                self._awaiting_slot = missing[0] if missing else None
-                self._awaiting_question = next_q
-                
-                return {
-                    "template": "followup",
-                    "answer": next_q,
-                    "followups": [],
-                    "model_used": "none",
-                    "therapy_output": None,
-                    "therapy_summary": None,
-                    "sources_used": [],
-                    "model_note": "Awaiting required details",
-                    "warnings": ["missing_data"],
-                    "composer_placeholder": next_q
-                }
+        # PHASE 4 CLEANUP: Old slot validation loop removed
+        # Step-by-step collector handles all data collection for therapy intents
+        # No need for dual validation system
         
-        # CRITICAL: Medication-first check for therapy intents
-        if template_key in ["therapy", "dermatology"]:
+        # PHASE 4 CLEANUP: Medication check only for non-step-by-step flows
+        # Step-by-step collector handles all data collection including medications
+        if template_key in ["therapy", "dermatology"] and not self._step_by_step_collector:
             if not merged_slots.get("medications") or not isinstance(merged_slots["medications"], list) or len(merged_slots["medications"]) == 0:
                 # Check if we've already asked about medications
                 if not self._awaiting_slot or self._awaiting_slot != "medications":
@@ -1329,5 +2212,6 @@ class ChatOrchestrator:
             "llm_model_id": getattr(llm, "model_id", model_name),
             "model_note": model_note,
             "warnings": warnings,
-            "composer_placeholder": self._awaiting_question or ""
+            "composer_placeholder": self._awaiting_question or "",
+            "classification": classification  # Include classification for testing/debugging
         }
