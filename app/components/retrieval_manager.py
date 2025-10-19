@@ -1,131 +1,296 @@
 # app/components/retrieval_manager.py
-import logging
-from typing import Dict, Any, List, Optional
-from langchain.schema import Document
+"""
+RetrievalManager
+- Higher-level RAG-layered retrieval controller built on top of hybrid_retriever.py
+- Provides:
+    * retrieve_context(user_query, intent, condition, profile, k, source_priority, filters)
+    * enrich_context_metadata(docs) -> attach/enforce metadata tags (uses metadata_enricher)
+    * build_rag_candidates(...) -> list of filter dicts ordered strict->relaxed
+    * select_docs_for_llm(...) -> rank / dedupe / trim docs and return final context
+"""
 
+import logging
+from typing import List, Dict, Any, Optional, Tuple
 from app.common.logger import get_logger
 from app.common.custom_exception import CustomException
-
-# Reuse hybrid retriever and metadata enricher
-from app.components.hybrid_retriever import filtered_retrieval
-from app.components.metadata_enricher import MetadataEnricher
+from app.components import hybrid_retriever  # uses filtered_retrieval() and retriever
+from app.components.metadata_enricher import enrich_chapter_metadata  # already in memory
+from langchain.schema import Document
 
 logger = get_logger(__name__)
 
 
 class RetrievalManager:
-    """
-    Manages all context retrieval operations.
-    Connects intent, condition, and profile info to filtered FAISS retrieval.
-    """
+    def __init__(self, retriever_wrapper=None):
+        """
+        Initialize RetrievalManager.
+        If retriever_wrapper not provided, uses hybrid_retriever.filtered_retrieval.
+        """
+        self.retrieval_fn = hybrid_retriever.filtered_retrieval
+        self.is_available = hybrid_retriever._retriever_manager.is_available()
+        logger.info(f"RetrievalManager initialized (available={self.is_available})")
 
-    def _init_(self):
-        self.enricher = MetadataEnricher()
-
+    # -------------------------------------------------------
+    # Public API: retrieve_context
+    # -------------------------------------------------------
     def retrieve_context(
         self,
-        query: str,
+        user_query: str,
         intent: str,
-        slots: Optional[Dict[str, Any]] = None,
         condition: Optional[str] = None,
-        sources: Optional[List[str]] = None,
-        k: int = 5,
+        profile: Optional[Dict[str, Any]] = None,
+        k: int = 6,
+        source_priority: Optional[List[str]] = None,
+        filters: Optional[Dict[str, Any]] = None,
     ) -> List[Document]:
         """
-        Main entry point for context retrieval.
-
-        Steps:
-        1. Build metadata filters based on intent, slots, and condition.
-        2. Retrieve documents via hybrid retriever.
-        3. Enrich metadata for later reasoning or citation.
-        4. Return structured results.
+        Perform RAG-layered retrieval.
+        Strategy:
+          1) Build strict filters based on condition + therapy area + country + age_relevance
+          2) Try strict filters (chapter-aware, therapy_area, condition_tags)
+          3) If no results, progressively relax filters (drop age, drop therapy_area, only source)
+          4) If still none, do semantic-only search (no filter)
+          5) Return top-K documents (deduped), enriched via metadata_enricher
         """
-        slots = slots or {}
-        filters = self._build_filters(intent, slots, condition)
-        try:
-            logger.info(f"RetrievalManager: Executing filtered retrieval for intent={intent}")
-            results = filtered_retrieval(query=query, filter_candidates=filters, k=k, sources=sources)
+        if not self.is_available:
+            raise CustomException("Retriever not initialized", None)
 
-            if not results:
-                logger.warning(f"No retrieval results found for query='{query[:80]}...' with filters={filters}")
-                return []
-
-            enriched_docs = self.enricher.enrich(results)
-            logger.info(f"Retrieved and enriched {len(enriched_docs)} documents.")
-            return enriched_docs
-
-        except Exception as e:
-            logger.error(f"RetrievalManager failed: {str(e)}")
-            raise CustomException("RetrievalManager failure", e)
-
-    def _build_filters(self, intent: str, slots: Dict[str, Any], condition: Optional[str]) -> List[Dict[str, Any]]:
-        """
-        Construct tiered filter candidates depending on the query intent and user profile data.
-        The goal is to balance specificity with fallback flexibility.
-        """
-        filters: List[Dict[str, Any]] = []
-        base_filter: Dict[str, Any] = {}
-
-        # Country-specific FCT
-        if slots.get("country"):
-            base_filter["country"] = slots["country"]
-
-        # Intent-based document type selection
-        if intent == "comparison":
-            base_filter["doc_type"] = "FCT"
-        elif intent in ["recommendation", "therapy"]:
-            base_filter["doc_type"] = "clinical_text"
-        else:
-            base_filter["doc_type"] = "general"
-
-        # Age relevance mapping
-        if "age" in slots:
-            age_relevance = self._map_age_relevance(slots["age"])
-            if age_relevance:
-                base_filter["age_relevance"] = age_relevance
-
-        # Condition or therapy area
+        profile = profile or {}
+        country = profile.get("country") or (filters or {}).get("country")
+        age = profile.get("age")
+        therapy_area = None
         if condition:
-            base_filter["therapy_area"] = condition
-        elif slots.get("diagnosis"):
-            base_filter["therapy_area"] = slots["diagnosis"]
+            therapy_area = self._map_condition_to_therapy_area(condition)
 
-        # Medications (for condition-specific mapping)
-        if slots.get("medications"):
-            base_filter["condition_tags"] = [m.lower() for m in slots["medications"]] if isinstance(slots["medications"], list) else [slots["medications"].lower()]
+        # Build an ordered set of candidate filter dicts (strict -> relaxed)
+        candidate_filters = self._build_rag_candidates(
+            condition=condition,
+            therapy_area=therapy_area,
+            country=country,
+            age=age,
+            explicit_filters=filters,
+            source_priority=source_priority
+        )
 
-        # Optional disease or keyword refinement
-        if slots.get("disease"):
-            base_filter["disease"] = slots["disease"]
+        # Try each candidate until we get results
+        results: List[Document] = []
+        for f in candidate_filters:
+            try:
+                docs = self.retrieval_fn(user_query, f, k=k, sources=f.get("sources") if f.get("sources") else None)
+                if docs:
+                    logger.info(f"RetrievalManager: got {len(docs)} docs for filter {f}")
+                    results = docs
+                    break
+            except Exception as e:
+                logger.exception(f"Retrieval failed for filter {f}: {e}")
+                continue
 
-        # Primary strict filter
-        filters.append(base_filter)
+        # If no results, do semantic-only search (empty filter)
+        if not results:
+            try:
+                logger.warning("RAG fallback: semantic-only search (no metadata filter)")
+                docs = self.retrieval_fn(user_query, {}, k=k, sources=source_priority or None)
+                results = docs or []
+            except Exception as e:
+                logger.exception(f"Semantic-only retrieval failed: {e}")
+                results = []
 
-        # Relaxed fallback: remove specific fields to broaden retrieval
-        relaxed = base_filter.copy()
-        relaxed.pop("therapy_area", None)
-        relaxed.pop("condition_tags", None)
-        filters.append(relaxed)
+        # Deduplicate by (source, chapter_num, page_range) and take top-k
+        results = self._dedupe_and_rank(results, k=k)
 
-        logger.debug(f"Built filters for intent={intent}: {filters}")
-        return filters
+        # Enrich metadata (ensures tags present for LLM citation and later filtering)
+        enriched = self.enrich_context_metadata(results)
 
-    def _map_age_relevance(self, age: Any) -> Optional[str]:
-        """Map numerical age to age_relevance categories used in metadata"""
-        try:
-            age_val = int(age)
-        except Exception:
+        return enriched
+
+    # -------------------------------------------------------
+    # Build RAG candidate filters
+    # -------------------------------------------------------
+    def _build_rag_candidates(
+        self,
+        condition: Optional[str],
+        therapy_area: Optional[str],
+        country: Optional[str],
+        age: Optional[Any],
+        explicit_filters: Optional[Dict[str, Any]],
+        source_priority: Optional[List[str]]
+    ) -> List[Dict[str, Any]]:
+        """
+        Produce a prioritized list of filter dicts (strict -> relaxed).
+        Each dict is suitable for hybrid_retriever.filtered_retrieval(...)
+        """
+        explicit_filters = explicit_filters or {}
+        candidates: List[Dict[str, Any]] = []
+
+        # 1. Most strict: therapy_area + condition_tags + age_relevance + country + sources
+        strict = {}
+        if therapy_area:
+            strict["therapy_area"] = therapy_area
+        if condition:
+            strict["condition_tags"] = [condition.lower().replace(" ", "_")]
+        if age:
+            # convert age to typical labels used in metadata_enricher
+            try:
+                age_val = int(age)
+                age_label = self._age_to_relevance(age_val)
+                strict["age_relevance"] = age_label
+            except Exception:
+                pass
+        if country:
+            strict["country"] = country
+        if explicit_filters.get("doc_type"):
+            strict["doc_type"] = explicit_filters["doc_type"]
+        if source_priority:
+            strict["sources"] = source_priority
+
+        if strict:
+            candidates.append(strict)
+
+        # 2. Relax age requirement (still therapy_area + condition)
+        relax_age = dict(strict)
+        if "age_relevance" in relax_age:
+            relax_age.pop("age_relevance", None)
+        if relax_age:
+            candidates.append(relax_age)
+
+        # 3. Therapy area only + country
+        therapy_only = {}
+        if therapy_area:
+            therapy_only["therapy_area"] = therapy_area
+        if country:
+            therapy_only["country"] = country
+        if therapy_only:
+            candidates.append(therapy_only)
+
+        # 4. Condition tags only
+        if condition:
+            candidates.append({"condition_tags": [condition.lower().replace(" ", "_")]})
+
+        # 5. Fallback to DRI/drug_nutrient sources if doc_type specified in explicit_filters
+        if explicit_filters.get("doc_type"):
+            candidates.append({"doc_type": explicit_filters["doc_type"], "country": country} if country else {"doc_type": explicit_filters["doc_type"]})
+
+        # 6. Source-priority pass: try each source as its own filter
+        if source_priority:
+            for s in source_priority:
+                candidates.append({"source": s, "country": country} if country else {"source": s})
+
+        # 7. Very relaxed: only country or doc_type hints
+        if country:
+            candidates.append({"country": country})
+        if explicit_filters.get("doc_type"):
+            candidates.append({"doc_type": explicit_filters.get("doc_type")})
+
+        # 8. Last resort: empty dict (semantic-only). hybrid_retriever will be given {} directly by retrieve_context.
+        candidates.append({})
+
+        # Deduplicate candidate list while preserving order
+        seen = set()
+        final = []
+        for c in candidates:
+            # freeze to tuple for hashability
+            key = tuple(sorted(c.items()))
+            if key not in seen:
+                seen.add(key)
+                final.append(c)
+        logger.debug(f"RAG filter candidates: {final}")
+        return final
+
+    # -------------------------------------------------------
+    # Enrich metadata (calls metadata_enricher but ensures safe handling)
+    # -------------------------------------------------------
+    def enrich_context_metadata(self, docs: List[Document]) -> List[Document]:
+        """
+        Ensure each Document has enriched metadata (condition_tags, age_relevance, therapy_area, etc.)
+        Uses enrich_chapter_metadata() from metadata_enricher where doc.metadata.document_type is known.
+        """
+        enriched_docs = []
+        for doc in docs or []:
+            try:
+                doc_type = doc.metadata.get("document_type")
+                if doc_type:
+                    # enrich_chapter_metadata expects Document + doc_type string
+                    enriched = enrich_chapter_metadata(doc, doc_type)
+                    enriched_docs.append(enriched)
+                else:
+                    enriched_docs.append(doc)
+            except Exception as e:
+                logger.exception(f"Failed to enrich metadata for doc {doc.metadata.get('chapter_title','?')}: {e}")
+                enriched_docs.append(doc)
+        return enriched_docs
+
+    # -------------------------------------------------------
+    # Utilities: dedupe/rank
+    # -------------------------------------------------------
+    def _dedupe_and_rank(self, docs: List[Document], k: int = 6) -> List[Document]:
+        """
+        Deduplicate by (source, chapter_num, page_start) and return top-k.
+        Ranking strategy: prefer chapter docs (protocols), then by page_count (longer), then by source priority.
+        """
+        seen = set()
+        ranked = []
+        # Simple scoring
+        def score_doc(d: Document) -> Tuple[int, int]:
+            chunk_type = d.metadata.get("chunk_type", "")
+            page_count = (d.metadata.get("page_end',0") - d.metadata.get("page_start',0")) if isinstance(d.metadata.get("page_start"), int) else 0
+            score1 = 2 if chunk_type == "protocol" else 1 if chunk_type == "chapter" else 0
+            return (score1, page_count)
+
+        # sort by score descending
+        docs_sorted = sorted(docs, key=lambda d: score_doc(d), reverse=True)
+        for d in docs_sorted:
+            key = (d.metadata.get("source"), d.metadata.get("chapter_num"), d.metadata.get("page_start"))
+            if key not in seen:
+                seen.add(key)
+                ranked.append(d)
+            if len(ranked) >= k:
+                break
+        return ranked
+
+    # -------------------------------------------------------
+    # Helpers
+    # -------------------------------------------------------
+    def _map_condition_to_therapy_area(self, condition: str) -> Optional[str]:
+        """
+        Map free-text condition to canonical therapy_area keys used in metadata_enricher.
+        Minimal mapping for the therapy set you specified.
+        """
+        if not condition:
             return None
+        c = condition.lower()
+        if "preterm" in c or "premature" in c or "nicu" in c:
+            return "preterm"
+        if "type 1" in c or "t1d" in c or "diabetes" in c:
+            return "t1d"
+        if "food allergy" in c or "allergy" in c:
+            return "food_allergy"
+        if "cystic fibrosis" in c or "cf" in c:
+            return "cf"
+        if "pku" in c or "msud" in c or "galactosemia" in c or "inborn error" in c:
+            return "iem"
+        if "epile" in c or "seizure" in c:
+            return "epilepsy"
+        if "kidney" in c or "ckd" in c or "renal" in c:
+            return "ckd"
+        if "ibd" in c or "crohn" in c or "ulcerative" in c or "gerd" in c or "gastro" in c:
+            return "gi_disorders"
+        return None
 
-        if age_val < 1:
-            return "infant"
-        elif 1 <= age_val <= 3:
-            return "toddler"
-        elif 4 <= age_val <= 9:
-            return "child"
-        elif 10 <= age_val <= 17:
-            return "adolescent"
-        elif 18 <= age_val <= 64:
-            return "adult"
-        else:
-            return "elderly"
+    def _age_to_relevance(self, age: int) -> List[str]:
+        """
+        Return approximate 'age_relevance' labels used in metadata_enricher.
+        E.g. preterm, 0-2y, 3-5y, 6-12y, 13-18y, all_ages
+        """
+        if age < 0:
+            return []
+        if age < 1:
+            return ["preterm", "0-12mo_corrected"]
+        if age < 3:
+            return ["0-2y"]
+        if age < 6:
+            return ["3-5y"]
+        if age < 13:
+            return ["6-12y"]
+        if age < 19:
+            return ["13-18y"]
+        return ["all_ages"]
