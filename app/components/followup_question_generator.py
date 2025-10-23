@@ -26,6 +26,9 @@ class FollowUpQuestionGenerator:
         """
         Generate ONE follow-up question per turn, prioritizing critical slots.
         If query_info indicates a gatekeeper downgrade, return the educational fallback prompt.
+
+        CRITICAL FIX: For therapy intent, if critical requirements (meds/biomarkers) are rejected,
+        return None to trigger gatekeeper enforcement immediately.
         """
         # If gatekeeper downgraded from therapy -> recommendation, present single educational fallback prompt
         if query_info.get("downgrade_reason"):
@@ -43,6 +46,19 @@ class FollowUpQuestionGenerator:
 
         # Otherwise follow normal missing-slot flow
         intent = query_info.get("label", "general")
+
+        # CRITICAL FIX (APPROACH 3): For therapy intent, check if critical requirements are rejected
+        # If medications OR biomarkers are rejected, don't ask for optional slots - let gatekeeper handle
+        if intent == "therapy":
+            meds_rejected = self._is_slot_rejected(profile, "medications")
+            biomarkers_rejected = self._is_slot_rejected(profile, "biomarkers")
+
+            # If EITHER critical requirement is rejected, stop asking questions
+            # This allows the gatekeeper in _handle_therapy to catch it and downgrade
+            if meds_rejected or biomarkers_rejected:
+                # Return None = no more questions = proceed to gatekeeper check
+                return None
+
         missing_slots = self._get_missing_slots(intent, profile, lab_results)
         invalid_slots = self._get_invalid_slots(profile)
 
@@ -60,14 +76,24 @@ class FollowUpQuestionGenerator:
             return None
 
         # If the user explicitly indicated "step by step" in clarifications, follow that order
-        if clarifications.get("mode") == "step_by_step":
+        if clarifications and clarifications.get("mode") == "step_by_step":
             for slot in self.step_by_step_slots:
                 if slot in missing_slots:
                     q = self._create_question_for_slot(slot)
                     return {"question": q, "slot": slot, "composer_placeholder": q}
 
         # Default: choose by slot_priority
-        for slot in self.slot_priority:
+        # CRITICAL FIX: For therapy intent, prioritize biomarkers BEFORE country
+        priority_list = self.slot_priority.copy()
+        if intent == "therapy":
+            # Reorder: biomarkers must come before country for therapy
+            if "biomarkers" in priority_list and "country" in priority_list:
+                priority_list.remove("biomarkers")
+                country_idx = priority_list.index("country")
+                # Insert biomarkers right before country
+                priority_list.insert(country_idx, "biomarkers")
+
+        for slot in priority_list:
             if slot in missing_slots:
                 q = self._create_question_for_slot(slot)
                 return {"question": q, "slot": slot, "composer_placeholder": q}
@@ -90,6 +116,32 @@ class FollowUpQuestionGenerator:
         )
         return {"question": prompt, "slot": "fallback_choice", "composer_placeholder": "upload / step by step / overview"}
 
+    def _is_slot_rejected(self, profile: dict, slot_name: str) -> bool:
+        """Check if a slot was explicitly rejected by user"""
+        return (
+            profile.get(f"_rejected_{slot_name}") or
+            profile.get(slot_name) == "user_declined"
+        )
+
+    def _is_slot_actually_filled(self, profile: dict, slot_name: str) -> bool:
+        """Helper: Check if a slot is actually filled with valid data"""
+        value = profile.get(slot_name)
+
+        # Check if None or empty string
+        if value is None or value == "":
+            return False
+
+        # Check if empty list
+        if isinstance(value, list) and len(value) == 0:
+            return False
+
+        # Check if marked as declined (not valid data)
+        if value == "user_declined":
+            return False
+
+        # Otherwise it's filled with actual data
+        return True
+
     def _get_missing_slots(self, intent: str, profile: dict, lab_results: list) -> List[str]:
         """Determine which slots are missing for this intent"""
         missing = []
@@ -97,20 +149,23 @@ class FollowUpQuestionGenerator:
         # Profile may be None
         profile = profile or {}
 
+        # CRITICAL FIX: Only add to missing if NOT rejected AND NOT filled
         # Weight/height best-effort detection: accept 'weight' or 'weight_kg'; 'height' or 'height_cm'
-        if not profile.get("weight_kg") and not profile.get("weight"):
+        if not self._is_slot_rejected(profile, "weight_kg") and not self._is_slot_actually_filled(profile, "weight_kg") and not self._is_slot_actually_filled(profile, "weight"):
             missing.append("weight_kg")
-        if not profile.get("height_cm") and not profile.get("height"):
+        if not self._is_slot_rejected(profile, "height_cm") and not self._is_slot_actually_filled(profile, "height_cm") and not self._is_slot_actually_filled(profile, "height"):
             missing.append("height_cm")
-        if not profile.get("diagnosis"):
+        if not self._is_slot_rejected(profile, "diagnosis") and not self._is_slot_actually_filled(profile, "diagnosis"):
             missing.append("diagnosis")
+        if not self._is_slot_rejected(profile, "age") and not self._is_slot_actually_filled(profile, "age"):
+            missing.append("age")
 
         # For therapy/recommendation, medications and allergies are important
         if intent in ["therapy", "recommendation"]:
-            if not profile.get("medications"):
+            if not self._is_slot_rejected(profile, "medications") and not self._is_slot_actually_filled(profile, "medications"):
                 missing.append("medications")
             # Allergies still important for safety
-            if profile.get("allergies") is None:
+            if not self._is_slot_rejected(profile, "allergies") and not self._is_slot_actually_filled(profile, "allergies"):
                 missing.append("allergies")
 
         # Country mapping for FCT usage

@@ -27,6 +27,14 @@ class ComputationManager:
     def estimate_energy_macros(
         self, age: int, sex: str, weight: float, height: float, activity_level: str
     ) -> Dict[str, Any]:
+        # CRITICAL FIX: Validate anthropometry inputs
+        if weight <= 0:
+            raise ValueError(f"Weight must be positive (got {weight} kg)")
+        if height <= 0:
+            raise ValueError(f"Height must be positive (got {height} cm)")
+        if age < 0:
+            raise ValueError(f"Age cannot be negative (got {age} years)")
+
         sex = sex.upper()
         activity_factor = {
             "sedentary": 1.3,

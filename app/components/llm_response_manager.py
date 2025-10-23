@@ -167,8 +167,11 @@ class LLMResponseManager:
     def extract_entities(self, query: str) -> Dict[str, Any]:
         """
         Use classifier helper methods (available) to pull diagnosis, biomarkers, medications, country.
+        Also extracts age, weight, height using regex patterns.
         Returns a small dict of extracted entities.
         """
+        import re
+
         ent = {
             "diagnosis": self.classifier._extract_diagnosis(query),
             "biomarkers_detailed": self.classifier.extract_biomarkers_with_values(query),
@@ -176,6 +179,65 @@ class LLMResponseManager:
             "medications": self.classifier.extract_medications(query),
             "country": self.classifier._extract_country(query),
         }
+
+        # CRITICAL FIX: Extract age (missing from original implementation)
+        # Patterns: "7 years old", "7yo", "7 y/o", "7-year-old", "age 7", "7 year old"
+        age_patterns = [
+            r'(\d+\.?\d*)\s*(?:years?\s+old|y/?o|year[\s-]old)',
+            r'age\s+(\d+\.?\d*)',
+            r'(\d+\.?\d*)\s*y\b',  # "7y"
+        ]
+        for pattern in age_patterns:
+            match = re.search(pattern, query.lower())
+            if match:
+                try:
+                    age = float(match.group(1))
+                    if 0 < age <= 18:  # Pediatric range validation
+                        ent["age"] = int(age) if age == int(age) else age
+                        logger.debug(f"Extracted age: {ent['age']}")
+                        break
+                except (ValueError, IndexError):
+                    pass
+
+        # Extract weight: "70kg", "70 kg", "weighs 70 kg", "weight: 70kg"
+        weight_patterns = [
+            r'(\d+\.?\d*)\s*kg\b',
+            r'weight[:\s]+(\d+\.?\d*)\s*(?:kg)?',
+            r'weighs?\s+(\d+\.?\d*)\s*(?:kg)?',
+        ]
+        for pattern in weight_patterns:
+            match = re.search(pattern, query.lower())
+            if match:
+                try:
+                    weight = float(match.group(1))
+                    if 1 < weight < 200:  # Sanity check
+                        ent["weight_kg"] = weight
+                        logger.debug(f"Extracted weight: {weight}kg")
+                        break
+                except (ValueError, IndexError):
+                    pass
+
+        # Extract height: "175cm", "175 cm", "height 175cm", "1.75m", "1.75 m"
+        height_patterns = [
+            r'(\d+\.?\d*)\s*cm\b',
+            r'(\d+\.\d+)\s*m\b',  # meters
+            r'height[:\s]+(\d+\.?\d*)\s*(?:cm)?',
+        ]
+        for pattern in height_patterns:
+            match = re.search(pattern, query.lower())
+            if match:
+                try:
+                    height = float(match.group(1))
+                    # Convert meters to cm if needed
+                    if height < 3:  # Likely in meters
+                        height = height * 100
+                    if 30 < height < 250:  # Sanity check
+                        ent["height_cm"] = height
+                        logger.debug(f"Extracted height: {height}cm")
+                        break
+                except (ValueError, IndexError):
+                    pass
+
         return ent
 
     # -------------------------
@@ -239,17 +301,16 @@ class LLMResponseManager:
         """
         Main orchestrator entry for each user message.
         Returns a structured response dict that front-end/DialogManager can interpret.
+
+        CRITICAL FIX (APPROACH 1): Extract entities FIRST, then handle followup state.
+        This allows opportunistic data capture even when awaiting a slot.
         """
         session = self._get_session(session_id)
 
-        # 1) classify
-        query_info = self.classify_query(session_id, user_query)
-        label = query_info.get("label", "general")
-        session["last_query_info"] = query_info
-
-        # 2) extract entities and merge into session slots if present
+        # APPROACH 1: ALWAYS extract entities first (even in followup mode)
+        # This prevents data loss when user volunteers information during followup
         entities = self.extract_entities(user_query)
-        # merge: prefer existing slots; update if new info extracted
+        # Merge entities into session slots if present
         for k, v in entities.items():
             if v:
                 if k == "biomarkers_detailed":
@@ -271,6 +332,56 @@ class LLMResponseManager:
                     session["slots"]["medications"] = existing
                 else:
                     session["slots"].setdefault(k, v)
+
+        # THEN check if we're awaiting a followup response
+        awaiting_slot = session.get("awaiting_slot")
+        if awaiting_slot:
+            logger.info(f"Detected followup context - awaiting slot: {awaiting_slot}")
+            # Route to followup handler
+            result = self.handle_followup_response(session_id, user_query, awaiting_slot)
+
+            # Check if slot was filled or rejected
+            if result["status"] == "slot_filled":
+                # Clear awaiting state
+                session.pop("awaiting_slot", None)
+                # Re-run the pipeline with last query to continue flow
+                last_query = session.get("last_raw_query", "")
+                if last_query:
+                    logger.info(f"Slot filled, re-running pipeline with original query: {last_query}")
+                    return self.handle_user_query(session_id, last_query)
+                else:
+                    return {"status": "slot_filled", "message": f"Updated {awaiting_slot}"}
+            elif result["status"] == "slot_not_filled":
+                # Handle rejection
+                reason = result.get("details", {}).get("reason")
+                if reason == "user_rejected":
+                    # User said "no" - mark slot as explicitly rejected
+                    logger.info(f"User rejected slot {awaiting_slot}, marking as rejected")
+                    session.pop("awaiting_slot", None)
+                    # Mark slot as rejected (use special marker to distinguish from missing)
+                    session["slots"][f"_rejected_{awaiting_slot}"] = True
+                    session["slots"][awaiting_slot] = "user_declined"  # Mark as declined
+
+                    # Re-run the pipeline to ask for next slot or continue
+                    last_query = session.get("last_raw_query", "")
+                    if last_query:
+                        logger.info(f"Re-running pipeline after rejection to get next question")
+                        return self.handle_user_query(session_id, last_query)
+                    else:
+                        return {"status": "acknowledged", "message": "Continuing without that information"}
+                else:
+                    # Unclear response - ask again with clarification
+                    return {"status": "needs_clarification", "message": f"I didn't understand. {session.get('last_followup_question', 'Please try again.')}"}
+            else:
+                return result
+
+        # 1) classify
+        query_info = self.classify_query(session_id, user_query)
+        label = query_info.get("label", "general")
+        session["last_query_info"] = query_info
+        session["last_raw_query"] = user_query  # CRITICAL: Store for re-run after followup
+
+        # 2) Entity extraction and merging already done above (moved before followup check)
 
         # 3) route based on label
         if label == "comparison":
@@ -382,6 +493,10 @@ class LLMResponseManager:
         # Determine missing slots
         followup = self.followup_gen.generate_follow_up_question(query_info, session.get("slots"), session.get("lab_results"), session.get("clarifications"))
         if followup:
+            # CRITICAL: Store awaiting slot in session to detect followup responses
+            session["awaiting_slot"] = followup.get("slot")
+            session["last_followup_question"] = followup.get("question")
+            logger.info(f"Asking followup for slot: {followup.get('slot')}")
             return {"status": "needs_slot", "followup": followup}
 
         # All required slots present - compute DRI targets
@@ -463,12 +578,66 @@ class LLMResponseManager:
         else:
             # missing diagnosis slot -> ask followup
             followup = self.followup_gen.generate_follow_up_question(query_info, session.get("slots"), session.get("lab_results"), session.get("clarifications"))
+            # CRITICAL: Store awaiting slot in session
+            session["awaiting_slot"] = followup.get("slot")
+            session["last_followup_question"] = followup.get("question")
+            logger.info(f"Asking followup for slot: {followup.get('slot')}")
             return {"status": "needs_slot", "followup": followup}
 
         # Now ensure required clinical slots are present: medications, biomarkers (or lab_results), age/anthro, country
         followup = self.followup_gen.generate_follow_up_question(query_info, session.get("slots"), session.get("lab_results"), session.get("clarifications"))
         if followup:
+            # CRITICAL: Store awaiting slot in session
+            session["awaiting_slot"] = followup.get("slot")
+            session["last_followup_question"] = followup.get("question")
+            logger.info(f"Asking followup for slot: {followup.get('slot')}")
             return {"status": "needs_slot", "followup": followup}
+
+        # CRITICAL GATEKEEPER: Therapy requires BOTH medications AND biomarkers
+        slots = session["slots"]
+        meds = slots.get("medications")
+        biomarkers_detailed = slots.get("biomarkers_detailed", {})
+        lab_results = session.get("lab_results", [])
+
+        # Check if medications are actually provided (not declined/empty)
+        has_meds = (
+            meds and
+            meds != "user_declined" and
+            not (isinstance(meds, list) and len(meds) == 0) and
+            not slots.get("_rejected_medications")
+        )
+
+        # Check if biomarkers are actually provided
+        has_biomarkers = (
+            (bool(biomarkers_detailed) or bool(lab_results)) and
+            not slots.get("_rejected_biomarkers")
+        )
+
+        logger.info(f"Therapy gatekeeper check: has_meds={has_meds}, has_biomarkers={has_biomarkers}")
+
+        if not (has_meds and has_biomarkers):
+            # CRITICAL: Downgrade to recommendation if missing either requirement
+            missing = []
+            if not has_meds:
+                missing.append("medications")
+            if not has_biomarkers:
+                missing.append("biomarkers")
+
+            logger.warning(f"Therapy gatekeeper FAILED - missing: {missing}. Downgrading to recommendation.")
+
+            msg = {
+                "status": "downgraded",
+                "reason": f"missing_{'_and_'.join(missing)}",
+                "message": (
+                    f"Therapeutic meal planning requires both medications AND biomarker data. "
+                    f"Missing: {', '.join(missing)}. "
+                    f"I will provide general dietary recommendations instead."
+                )
+            }
+            # Downgrade to recommendation flow
+            rec = self._handle_recommendation(session_id, query, session, query_info)
+            msg["recommendation_payload"] = rec
+            return msg
 
         # All required slots present -> compute therapeutic targets
         slots = session["slots"]
@@ -570,6 +739,8 @@ class LLMResponseManager:
         Use the classifier's extract_from_followup_response to interpret a user response for a known awaiting slot.
         Update session slots and then re-run the main pipeline for the last query (if present).
         """
+        from app.components.query_classifier import BIOMARKERS
+
         session = self._get_session(session_id)
         qc = self.classifier
         extract = qc.extract_from_followup_response(user_response, awaiting_slot)
@@ -579,7 +750,7 @@ class LLMResponseManager:
             return {"status": "slot_not_filled", "details": extract}
 
         # Update slots
-        if awaiting_slot in qc.BIOMARKERS:
+        if awaiting_slot in BIOMARKERS:
             session["slots"].setdefault("biomarkers_detailed", {})
             session["slots"]["biomarkers_detailed"][awaiting_slot] = {
                 "value": extract["value"],

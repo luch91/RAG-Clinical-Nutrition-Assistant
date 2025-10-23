@@ -256,13 +256,117 @@ class NutritionQueryClassifier:
         biomarkers_dict = self.extract_biomarkers_with_values(query)
         return list(biomarkers_dict.keys())
 
+    def _validate_biomarker_value(self, biomarker: str, value: float, unit: str) -> dict:
+        """
+        Validate biomarker values against physiological ranges.
+        Returns: {"valid": bool, "warning": str or None, "severity": "impossible"|"critical"|"warning"|None}
+        """
+        # Define physiological ranges (min, max, critical_low, critical_high)
+        # Format: (absolute_min, absolute_max, critical_low, critical_high)
+        ranges = {
+            "hba1c": (0.1, 20.0, 3.0, 14.0) if unit == "%" else (1, 200, 20, 140),  # % or mmol/mol
+            "glucose": (10, 1000, 40, 500) if unit == "mg/dL" else (0.5, 55, 2.2, 27.8),  # mg/dL or mmol/L
+            "creatinine": (0.01, 30.0, 0.2, 15.0) if unit == "mg/dL" else (1, 2655, 18, 1327),  # mg/dL or µmol/L
+            "albumin": (0.1, 6.0, 1.5, 5.5) if unit == "g/dL" else (1, 60, 15, 55),  # g/dL or g/L
+            "hemoglobin": (0.5, 25.0, 5.0, 20.0) if unit == "g/dL" else (5, 250, 50, 200),  # g/dL or g/L
+            "potassium": (0.5, 10.0, 2.0, 8.0),  # mEq/L or mmol/L
+            "sodium": (80, 200, 120, 160),  # mEq/L or mmol/L
+            "calcium": (2.0, 15.0, 6.0, 13.0) if unit == "mg/dL" else (0.5, 3.75, 1.5, 3.25),  # mg/dL or mmol/L
+            "egfr": (1, 200, 5, 150),  # mL/min/1.73m²
+            "urea": (1, 300, 5, 200) if unit == "mg/dL" else (0.5, 107, 1.8, 71.4),  # mg/dL or mmol/L
+            "ferritin": (0.1, 10000, 5, 1500),  # ng/mL
+            "alt": (1, 5000, 5, 1000),  # U/L
+            "tsh": (0.01, 100, 0.1, 20),  # mIU/L
+            "ammonia": (1, 1000, 10, 500),  # µmol/L
+            "triglycerides": (10, 5000, 30, 1000) if unit == "mg/dL" else (0.1, 56.5, 0.34, 11.3),  # mg/dL or mmol/L
+            "ldl": (10, 500, 20, 300) if unit == "mg/dL" else (0.26, 12.9, 0.52, 7.76),  # mg/dL or mmol/L
+        }
+
+        # CRITICAL FIX: Unit-sensitive ranges for biomarkers with different unit systems
+        # These need special handling because the same biomarker has different ranges depending on unit
+        if biomarker == "creatinine":
+            if unit in ["mg/dL", "mg/dl"]:
+                abs_min, abs_max, crit_low, crit_high = (0.01, 30.0, 0.2, 15.0)
+            elif unit == "µmol/L":
+                abs_min, abs_max, crit_low, crit_high = (1, 2655, 18, 1327)
+            else:  # default to mg/dL
+                abs_min, abs_max, crit_low, crit_high = (0.01, 30.0, 0.2, 15.0)
+        elif biomarker == "albumin":
+            if unit in ["g/dL", "g/dl"]:
+                abs_min, abs_max, crit_low, crit_high = (0.1, 6.0, 1.5, 5.5)
+            elif unit == "g/L":
+                abs_min, abs_max, crit_low, crit_high = (1, 60, 15, 55)
+            else:  # default to g/dL
+                abs_min, abs_max, crit_low, crit_high = (0.1, 6.0, 1.5, 5.5)
+        elif biomarker == "hemoglobin":
+            if unit in ["g/dL", "g/dl"]:
+                abs_min, abs_max, crit_low, crit_high = (0.5, 25.0, 5.0, 20.0)
+            elif unit == "g/L":
+                abs_min, abs_max, crit_low, crit_high = (5, 250, 50, 200)
+            else:  # default to g/dL
+                abs_min, abs_max, crit_low, crit_high = (0.5, 25.0, 5.0, 20.0)
+        elif biomarker == "hba1c":
+            if unit == "%":
+                abs_min, abs_max, crit_low, crit_high = (0.1, 20.0, 3.0, 14.0)
+            elif unit == "mmol/mol":
+                abs_min, abs_max, crit_low, crit_high = (1, 200, 20, 140)
+            else:  # default to %
+                abs_min, abs_max, crit_low, crit_high = (0.1, 20.0, 3.0, 14.0)
+        elif biomarker == "glucose":
+            if unit in ["mg/dL", "mg/dl"]:
+                abs_min, abs_max, crit_low, crit_high = (10, 1000, 40, 500)
+            elif unit == "mmol/L":
+                abs_min, abs_max, crit_low, crit_high = (0.5, 55, 2.2, 27.8)
+            else:  # default to mg/dL
+                abs_min, abs_max, crit_low, crit_high = (10, 1000, 40, 500)
+        elif biomarker in ranges:
+            # For other biomarkers, use the predefined ranges
+            abs_min, abs_max, crit_low, crit_high = ranges[biomarker]
+        else:
+            # Unknown biomarker - no validation
+            return {"valid": True, "warning": None, "severity": None}
+
+        # Check impossible values
+        if value <= 0:
+            return {
+                "valid": False,
+                "warning": f"{biomarker.upper()} cannot be zero or negative (got {value} {unit})",
+                "severity": "impossible"
+            }
+
+        if value < abs_min or value > abs_max:
+            return {
+                "valid": False,
+                "warning": f"{biomarker.upper()} {value} {unit} is physiologically impossible (range: {abs_min}-{abs_max} {unit})",
+                "severity": "impossible"
+            }
+
+        # Check critical values (dangerous but possible)
+        if value < crit_low:
+            return {
+                "valid": True,
+                "warning": f"{biomarker.upper()} {value} {unit} is critically LOW (typical minimum: {crit_low} {unit})",
+                "severity": "critical"
+            }
+
+        if value > crit_high:
+            return {
+                "valid": True,
+                "warning": f"{biomarker.upper()} {value} {unit} is critically HIGH (typical maximum: {crit_high} {unit})",
+                "severity": "critical"
+            }
+
+        # Value is within acceptable range
+        return {"valid": True, "warning": None, "severity": None}
+
     def extract_biomarkers_with_values(self, query: str) -> dict:
         """
         Extract biomarkers with their values and units.
+        NOW WITH VALIDATION: Rejects impossible values, flags dangerous ones.
 
         Returns:
             {
-                "creatinine": {"value": 2.1, "unit": "mg/dL", "raw": "creatinine 2.1 mg/dL"},
+                "creatinine": {"value": 2.1, "unit": "mg/dL", "raw": "creatinine 2.1 mg/dL", "validation": {...}},
                 "HbA1c": {"value": 8.5, "unit": "%", "raw": "HbA1c 8.5%"}
             }
         """
@@ -315,13 +419,26 @@ class NutritionQueryClassifier:
                     value = float(match.group(1))
                     unit = match.group(2) if match.group(2) else config["default_unit"]
 
-                    # Store extracted biomarker
-                    biomarkers[biomarker] = {
-                        "value": value,
-                        "unit": unit,
-                        "raw": match.group(0),
-                        "term_used": term
-                    }
+                    # CRITICAL FIX: Validate biomarker value
+                    validation = self._validate_biomarker_value(biomarker, value, unit)
+
+                    # Only store if value is valid (not impossible)
+                    if validation["valid"]:
+                        biomarkers[biomarker] = {
+                            "value": value,
+                            "unit": unit,
+                            "raw": match.group(0),
+                            "term_used": term,
+                            "validation": validation  # Include validation info
+                        }
+
+                        # Log warnings for critical values
+                        if validation["severity"] == "critical":
+                            logger.warning(f"Critical biomarker value detected: {validation['warning']}")
+                    else:
+                        # Log rejection of impossible values
+                        logger.warning(f"Rejected impossible biomarker value: {validation['warning']}")
+
                     break  # Found this biomarker, move to next
 
         return biomarkers

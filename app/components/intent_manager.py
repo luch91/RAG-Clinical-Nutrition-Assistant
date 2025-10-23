@@ -51,7 +51,7 @@ class IntentManager:
     applies higher-level policy (therapy gatekeeper, graceful degradation).
     """
 
-    def _init_(self, classifier: Optional[NutritionQueryClassifier] = None):
+    def __init__(self, classifier: Optional[NutritionQueryClassifier] = None):
         self.classifier = classifier or NutritionQueryClassifier()
         logger.info("IntentManager initialized")
 

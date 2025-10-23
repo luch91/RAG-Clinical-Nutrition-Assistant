@@ -15,7 +15,22 @@
       "Bash(findstr:*)",
       "Bash(awk:*)",
       "Bash(for file in app/components/*.py)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(if [ -d \"vectorstore/db_faiss\" ])",
+      "Bash(then echo \"✅ Vector store exists\")",
+      "Bash(else echo \"❌ Vector store NOT FOUND\")",
+      "Bash(fi)",
+      "Bash(if [ -d \"machine_learning/models/distilbert-clinical-v2\" ])",
+      "Bash(then echo \"✅ DistilBERT model exists\")",
+      "Bash(else echo \"❌ DistilBERT model NOT FOUND\")",
+      "Bash(if [ -f \".env\" ])",
+      "Bash(then echo \"✅ .env exists\")",
+      "Bash(else echo \"❌ .env NOT FOUND\")",
+      "Bash(timeout 60 python:*)",
+      "Bash(timeout 30 python:*)",
+      "Bash(echo \"EXIT_CODE: $?\")",
+      "Bash(timeout 90 python:*)",
+      "Bash(timeout 45 python:*)"
     ],
     "deny": [],
     "ask": []
