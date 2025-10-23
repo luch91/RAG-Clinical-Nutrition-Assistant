@@ -16,7 +16,7 @@ class DRILoader:
     Source: Table E3.1.A4, 'Nutritional Goals for Each Age/Sex Group'
     """
 
-    def _init_(self, data_path: str | Path):
+    def __init__(self, data_path: str | Path):
         self.data_path = Path(data_path)
         self.dri_data = self._load_data()
 

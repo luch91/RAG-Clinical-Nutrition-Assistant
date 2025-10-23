@@ -15,9 +15,10 @@ class ComputationManager:
     - Micronutrient targets (via DRI Loader)
     - Diet optimization (via NutrientCalculator)
     - Structured profile generation for retrieval/UI
+    - BMI calculation and categorization
     """
 
-    def _init_(self, dri_table_path: str = "data/dri_table.csv"):
+    def __init__(self, dri_table_path: str = "data/dri_table.csv"):
         self.dri = DRILoader(dri_table_path)
 
     # --------------------------------------------------------
@@ -85,6 +86,74 @@ class ComputationManager:
             },
         }
         return macros
+
+    # --------------------------------------------------------
+    # 1.5️⃣ BMI CALCULATION & CATEGORIZATION
+    # --------------------------------------------------------
+    def calculate_bmi(self, weight_kg: float, height_cm: float, age: Optional[int] = None) -> Dict[str, Any]:
+        """
+        Calculate BMI and categorize based on WHO standards.
+        For pediatric patients (age < 18), uses simplified categories.
+
+        Args:
+            weight_kg: Weight in kilograms
+            height_cm: Height in centimeters
+            age: Age in years (optional, for pediatric-specific categories)
+
+        Returns:
+            Dict with bmi, category, status, unit, and reference
+        """
+        try:
+            height_m = float(height_cm) / 100
+            if height_m <= 0:
+                return {"error": "Invalid height: must be greater than 0"}
+
+            bmi = float(weight_kg) / (height_m ** 2)
+            bmi_val = round(bmi, 2)
+
+            # Pediatric vs Adult categories
+            if age and age < 18:
+                # Simplified pediatric BMI categories (age-specific percentiles would be more accurate)
+                if bmi < 13:
+                    category = "Underweight"
+                    status = "Below healthy weight range - nutritional assessment recommended"
+                elif 13 <= bmi < 17:
+                    category = "Normal weight"
+                    status = "Healthy weight range"
+                elif 17 <= bmi < 19:
+                    category = "Overweight"
+                    status = "Above healthy weight range - monitor closely"
+                else:
+                    category = "Obese"
+                    status = "Well above healthy weight range - medical consultation recommended"
+                reference = "WHO Child Growth Standards (simplified)"
+            else:
+                # Adult BMI categories (WHO classification)
+                if bmi < 18.5:
+                    category = "Underweight"
+                    status = "Below healthy weight range"
+                elif 18.5 <= bmi < 25:
+                    category = "Normal weight"
+                    status = "Healthy weight range"
+                elif 25 <= bmi < 30:
+                    category = "Overweight"
+                    status = "Above healthy weight range"
+                else:
+                    category = "Obese"
+                    status = "Well above healthy weight range - medical consultation recommended"
+                reference = "WHO BMI Classification (Adult)"
+
+            return {
+                "bmi": bmi_val,
+                "category": category,
+                "status": status,
+                "unit": "kg/m²",
+                "reference": reference,
+                "interpretation": f"BMI of {bmi_val} kg/m² falls into the '{category}' category"
+            }
+
+        except (ValueError, ZeroDivisionError, TypeError) as e:
+            return {"error": f"Invalid input for BMI calculation: {e}"}
 
     # --------------------------------------------------------
     # 2️⃣ MICRONUTRIENT TARGETS (via DRILoader)

@@ -12,7 +12,10 @@
       "Bash(timeout 30 python test_phase3_simple.py)",
       "Bash(timeout 60 python test_option_a_b_direct.py)",
       "Bash(timeout 60 python test_llm_therapy_generation.py)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(awk:*)",
+      "Bash(for file in app/components/*.py)",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []

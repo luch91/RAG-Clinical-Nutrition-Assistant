@@ -13,7 +13,7 @@ import gradio as gr
 import os
 import json
 from typing import Dict, Any, List, Tuple, Optional
-from app.components.chat_orchestrator import ChatOrchestrator
+from app.components.llm_response_manager import LLMResponseManager
 from app.components.vector_store import load_vector_store
 from app.components.hybrid_retriever import init_retriever
 from app.common.logger import get_logger
@@ -31,8 +31,8 @@ try:
 except Exception as e:
     logger.error(f"Failed to load vector store: {str(e)}")
 
-# Initialize orchestrator
-orchestrator = ChatOrchestrator()
+# Initialize LLM Response Manager (replaces ChatOrchestrator)
+orchestrator = LLMResponseManager()
 
 # Custom CSS for professional look
 custom_css = """

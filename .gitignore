@@ -11,3 +11,4 @@ vectorstore/
 .claude/
 cache/
 chat_orchestrator.py
+app/null

@@ -3,14 +3,14 @@ import json
 import datetime
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-from app.components.chat_orchestrator import ChatOrchestrator
+from app.components.llm_response_manager import LLMResponseManager
 from app.components.hybrid_retriever import init_retriever
 from app.components.vector_store import load_vector_store
 from app.common.logger import get_logger
 from app.config.config import (
-    DEBUG, 
-    PORT, 
-    CORS_ORIGINS, 
+    DEBUG,
+    PORT,
+    CORS_ORIGINS,
     MAX_CONTENT_LENGTH,
     FLASK_SECRET_KEY,
     DB_FAISS_PATH,
@@ -67,8 +67,8 @@ except Exception as e:
 # Store global flag for health checks
 app.config['VECTOR_STORE_AVAILABLE'] = vector_store_available
 
-# Initialize chat orchestrator (works with or without vector store)
-chat_orchestrator = ChatOrchestrator()
+# Initialize LLM Response Manager (replaces ChatOrchestrator, works with or without vector store)
+chat_orchestrator = LLMResponseManager()
 
 # Error handler for 404
 @app.errorhandler(404)

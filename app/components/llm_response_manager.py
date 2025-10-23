@@ -12,10 +12,18 @@ Depends on available components:
 - app.components.nutrient_calculator (optimize_diet, convert_fct_rows_to_foods) for meal plans
 
 Stateful per-session slot store is included to avoid requiring SlotManager at this stage.
+
+Enhanced with:
+- Thread-safe session management (from session_manager.py)
+- Session timeout and cleanup
+- Schema-based slot validation (from ambiguity_gate.py + slot_schema.py)
 """
 from typing import Dict, Any, List, Optional, Tuple
 import logging
 import math
+import threading
+from datetime import datetime, timedelta
+from dataclasses import dataclass
 
 from app.components.query_classifier import NutritionQueryClassifier
 from app.components.followup_question_generator import FollowUpQuestionGenerator
@@ -23,6 +31,20 @@ from app.components.hybrid_retriever import filtered_retrieval, retriever
 from app.components.computation_manager import ComputationManager
 
 logger = logging.getLogger(__name__)
+
+# -------------------------
+# Slot Validation Schema (from slot_schema.py)
+# -------------------------
+@dataclass
+class SlotSpec:
+    """Slot specification for validation"""
+    name: str
+    type: str  # "string","enum","number","list","dict","bool"
+    required: bool
+    enum: Optional[List[str]] = None
+    min: Optional[float] = None
+    max: Optional[float] = None
+    hint: Optional[str] = None
 
 # Supported therapy conditions (strict list)
 SUPPORTED_THERAPY_CONDITIONS = {
@@ -47,28 +69,84 @@ SUPPORTED_THERAPY_CONDITIONS = {
 }
 
 class LLMResponseManager:
-    def _init_(self, dri_table_path: str = "data/dri_table.csv"):
+    def __init__(self, dri_table_path: str = "data/dri_table.csv"):
         # Core components
         self.classifier = NutritionQueryClassifier()
         self.followup_gen = FollowUpQuestionGenerator()
         self.computation = ComputationManager(dri_table_path)
 
-        # Per-session state (simple dict). Keys: slots, profile, clarifications, conversation metadata
+        # Per-session state with thread safety
         self.sessions: Dict[str, Dict[str, Any]] = {}
+        self._session_lock = threading.RLock()  # Thread-safe
+        self._session_timeout = timedelta(hours=24)  # Session expires after 24 hours
+
+        # Default session ID for single-session use (backward compatibility)
+        self.default_session_id = "default"
+
+        # Slot schemas for validation (from slot_schema.py)
+        self.slot_schemas = {
+            "therapy": [
+                SlotSpec("diagnosis", "string", True, hint="Medical condition"),
+                SlotSpec("age", "number", True, min=0, max=120, hint="Age in years"),
+                SlotSpec("medications", "list", True, hint="List of medications"),
+                SlotSpec("biomarkers", "dict", True, hint="Lab results with values"),
+                SlotSpec("weight_kg", "number", True, min=2, max=400),
+                SlotSpec("height_cm", "number", True, min=30, max=250),
+                SlotSpec("country", "string", False),
+                SlotSpec("allergies", "list", False),
+            ],
+            "recommendation": [
+                SlotSpec("age", "number", True, min=0, max=120),
+                SlotSpec("diagnosis", "string", False),
+                SlotSpec("weight_kg", "number", False, min=2, max=400),
+                SlotSpec("height_cm", "number", False, min=30, max=250),
+                SlotSpec("country", "string", False),
+                SlotSpec("allergies", "list", False),
+            ],
+            "comparison": [
+                SlotSpec("food_a", "string", True),
+                SlotSpec("food_b", "string", True),
+                SlotSpec("country", "string", False),
+            ],
+            "general": []
+        }
 
     # -------------------------
-    # Session helpers
+    # Session helpers (Thread-safe with timeout)
     # -------------------------
     def _get_session(self, session_id: str) -> Dict[str, Any]:
-        if session_id not in self.sessions:
-            # initialize
-            self.sessions[session_id] = {
-                "slots": {},            # age, sex, weight_kg, height_cm, diagnosis, medications, biomarkers, country, allergies, etc.
-                "lab_results": [],      # parsed labs (if user uploaded)
-                "last_query_info": None,
-                "clarifications": {},   # e.g., {"mode":"step_by_step"}
-            }
-        return self.sessions[session_id]
+        """Get or create session with thread safety and timeout check"""
+        with self._session_lock:  # Thread-safe
+            if session_id not in self.sessions:
+                # Initialize new session
+                self.sessions[session_id] = {
+                    "slots": {},            # age, sex, weight_kg, height_cm, diagnosis, medications, biomarkers, country, allergies, etc.
+                    "lab_results": [],      # parsed labs (if user uploaded)
+                    "last_query_info": None,
+                    "clarifications": {},   # e.g., {"mode":"step_by_step"}
+                    "created_at": datetime.utcnow(),       # Session creation time
+                    "last_accessed": datetime.utcnow(),   # Last access time
+                }
+
+            session = self.sessions[session_id]
+
+            # Check if session expired
+            if datetime.utcnow() - session.get("last_accessed", datetime.utcnow()) > self._session_timeout:
+                logger.info(f"Session {session_id} expired, resetting")
+                self.sessions[session_id] = {
+                    "slots": {},
+                    "lab_results": [],
+                    "last_query_info": None,
+                    "clarifications": {},
+                    "created_at": datetime.utcnow(),
+                    "last_accessed": datetime.utcnow(),
+                }
+                session = self.sessions[session_id]
+
+            # Update last accessed time
+            session["last_accessed"] = datetime.utcnow()
+
+            return session
 
     # -------------------------
     # Step 1: classify query
@@ -571,3 +649,106 @@ class LLMResponseManager:
                                                                  "micros": {}},
                                                    allergies=session["slots"].get("allergies"))
         return {"status": "ok", "meal_plan": plan}
+
+    # -------------------------
+    # Backward Compatibility API (for ChatOrchestrator replacement)
+    # -------------------------
+    def handle_query(self, query: str) -> Dict[str, Any]:
+        """
+        Backward-compatible wrapper for handle_user_query.
+        Uses default session ID for single-session applications.
+
+        This method mimics the old ChatOrchestrator.handle_query() API.
+        """
+        return self.handle_user_query(self.default_session_id, query)
+
+    def reset_session(self, session_id: Optional[str] = None) -> None:
+        """
+        Reset session state for the given session_id.
+        If no session_id provided, resets the default session.
+
+        This method provides backward compatibility with ChatOrchestrator.reset_session().
+        """
+        sid = session_id or self.default_session_id
+        if sid in self.sessions:
+            del self.sessions[sid]
+            logger.info(f"Session {sid} reset successfully")
+        else:
+            logger.warning(f"Attempted to reset non-existent session: {sid}")
+
+    @property
+    def session_slots(self) -> Dict[str, Any]:
+        """
+        Property for backward compatibility with ChatOrchestrator.session_slots.
+        Returns the slots dict for the default session.
+        """
+        session = self._get_session(self.default_session_id)
+        return session.get("slots", {})
+
+    # -------------------------
+    # Session Management Utilities (from session_manager.py)
+    # -------------------------
+    def cleanup_expired_sessions(self) -> int:
+        """
+        Remove expired sessions.
+        Call periodically (e.g., from background task or health check).
+        Returns number of sessions cleaned up.
+        """
+        with self._session_lock:
+            now = datetime.utcnow()
+            expired = [
+                sid for sid, sess in self.sessions.items()
+                if now - sess.get("last_accessed", now) > self._session_timeout
+            ]
+            for sid in expired:
+                del self.sessions[sid]
+                logger.info(f"Cleaned up expired session {sid}")
+            return len(expired)
+
+    def get_session_count(self) -> int:
+        """Get total number of active sessions"""
+        with self._session_lock:
+            return len(self.sessions)
+
+    # -------------------------
+    # Slot Validation (from ambiguity_gate.py)
+    # -------------------------
+    def validate_slots(self, intent: str, slots: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]:
+        """
+        Validate slots against schema.
+        Returns (ok, missing_slots, invalid_reasons)
+        """
+        specs = self.slot_schemas.get(intent, [])
+        missing: List[str] = []
+        invalid: List[str] = []
+
+        for spec in specs:
+            # Check requirement
+            if spec.required:
+                if spec.name not in slots or slots.get(spec.name) in (None, "", [], {}):
+                    missing.append(spec.name)
+                    continue
+
+            # Skip validation if slot not present and not required
+            if spec.name not in slots:
+                continue
+
+            # Enum validation
+            if spec.enum and spec.name in slots:
+                val = str(slots[spec.name])
+                if val not in spec.enum:
+                    invalid.append(f"{spec.name} must be one of {spec.enum} (got '{slots[spec.name]}')")
+
+            # Number range validation
+            if spec.type == "number" and spec.name in slots:
+                try:
+                    n = float(slots[spec.name])
+                    if spec.min is not None and n < spec.min:
+                        invalid.append(f"{spec.name} below minimum {spec.min}")
+                    if spec.max is not None and n > spec.max:
+                        invalid.append(f"{spec.name} above maximum {spec.max}")
+                except Exception:
+                    invalid.append(f"{spec.name} must be numeric")
+
+        ok = (len(missing) == 0 and len(invalid) == 0)
+        return ok, missing, invalid
