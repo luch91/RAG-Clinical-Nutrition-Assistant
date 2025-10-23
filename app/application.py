@@ -1,47 +1,30 @@
+# app/application.py
 import os
+import uuid
 import json
-import datetime
-from flask import Flask, request, jsonify, send_from_directory
-from flask_cors import CORS
-from app.components.llm_response_manager import LLMResponseManager
-from app.components.hybrid_retriever import init_retriever
-from app.components.vector_store import load_vector_store
-from app.common.logger import get_logger
-from app.config.config import (
-    DEBUG,
-    PORT,
-    CORS_ORIGINS,
-    MAX_CONTENT_LENGTH,
-    FLASK_SECRET_KEY,
-    DB_FAISS_PATH,
-    LOG_FILE
-)
 import logging
+import datetime
+from pathlib import Path
+from typing import Dict, Any
+from flask import Flask, request, jsonify, send_from_directory
+
+from app.common.logger import get_logger
+from app.common.custom_exception import CustomException
+from app.components.llm_response_manager import LLMResponseManager
+from app.components.hybrid_retriever import init_retriever, _retriever_manager
+from app.components.vector_store import load_vector_store
 
 logger = get_logger(__name__)
 
+# Flask app
 app = Flask(__name__)
-CORS(app, origins=CORS_ORIGINS, supports_credentials=True)
+app.config["UPLOAD_FOLDER"] = Path("user_uploads")
+app.config["UPLOAD_FOLDER"].mkdir(parents=True, exist_ok=True)
 
-# Configure app security and settings
-app.config.update(
-    DEBUG=DEBUG,
-    MAX_CONTENT_LENGTH=MAX_CONTENT_LENGTH,
-    SECRET_KEY=FLASK_SECRET_KEY,
-    SESSION_COOKIE_SECURE=True,
-    SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SAMESITE='Lax',
-    JSON_SORT_KEYS=False
-)
+# Instantiate core managers
+llm = LLMResponseManager(dri_table_path="data/dri_table.csv")
 
-# Initialize logging
-if LOG_FILE:
-    handler = logging.FileHandler(LOG_FILE)
-    handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-    app.logger.addHandler(handler)
-    logger.addHandler(handler)
-
-# FIXED: Error recovery for missing FAISS index with graceful degradation
+# Try to initialize retrieval (FAISS + BM25). Tolerate failures and continue.
 vector_store_available = False
 try:
     logger.info("Attempting to load vector store...")
@@ -49,161 +32,221 @@ try:
     if vector_store:
         init_retriever(vector_store)
         vector_store_available = True
-        logger.info("✅ Vector store loaded successfully")
+        logger.info("✅ Vector store and retriever initialized successfully")
     else:
-        logger.warning("⚠️ Vector store not found. Running in FALLBACK MODE (no RAG retrieval).")
-        logger.warning("⚠️ System will use LLM-only responses without FCT data.")
+        logger.warning("⚠️ Vector store not found. Running in FALLBACK MODE (no RAG retrieval)")
 except FileNotFoundError as e:
     logger.error(f"❌ Vector store files not found: {str(e)}")
     logger.warning("⚠️ Running in FALLBACK MODE - RAG features disabled")
-    logger.warning(f"⚠️ Expected location: {DB_FAISS_PATH}")
-    logger.warning("⚠️ Run data indexing script to enable RAG features")
 except Exception as e:
     logger.error(f"❌ Failed to load vector store: {str(e)}")
     logger.warning("⚠️ Running in FALLBACK MODE - RAG features disabled")
-    import traceback
-    logger.error(f"Full traceback: {traceback.format_exc()}")
 
-# Store global flag for health checks
-app.config['VECTOR_STORE_AVAILABLE'] = vector_store_available
+# Health and uptime
+START_TIME = datetime.datetime.utcnow()
 
-# Initialize LLM Response Manager (replaces ChatOrchestrator, works with or without vector store)
-chat_orchestrator = LLMResponseManager()
+# -------------------------
+# Utilities
+# -------------------------
+def _get_session(session_id: str) -> Dict[str, Any]:
+    if not session_id:
+        session_id = str(uuid.uuid4())
+    # LLMResponseManager keeps sessions in-memory; expose it
+    return llm._get_session(session_id), session_id
 
-# Error handler for 404
-@app.errorhandler(404)
-def not_found(e):
-    return jsonify({"error": "Not found"}), 404
+def _safe_jsonify(obj):
+    try:
+        return jsonify(obj)
+    except TypeError:
+        return jsonify({"error": "Non-serializable response", "repr": str(obj)})
 
-# Error handler for 400
-@app.errorhandler(400)
-def bad_request(e):
-    return jsonify({"error": "Bad request", "message": str(e)}), 400
-
-# Error handler for 500
-@app.errorhandler(500)
-def internal_error(e):
-    logger.exception("Internal server error")
+# -------------------------
+# Endpoints
+# -------------------------
+@app.route("/health", methods=["GET"])
+def health():
+    uptime = (datetime.datetime.utcnow() - START_TIME).total_seconds()
     return jsonify({
-        "error": "Internal server error",
-        "message": "An unexpected error occurred. Please try again later."
-    }), 500
+        "status": "ok",
+        "uptime_seconds": int(uptime),
+        "vector_store_available": _retriever_manager.is_available(),
+        "timestamp": datetime.datetime.utcnow().isoformat()
+    })
 
-# FIXED: Enhanced health check with external API status
-@app.route('/health', methods=['GET'])
-def health_check():
-    from app.common.circuit_breaker import CircuitBreakers
-
-    # Check external APIs via circuit breakers
-    together_status = "unknown"
-    hf_status = "unknown"
-    rxnorm_status = "unknown"
-
-    try:
-        together_breaker = CircuitBreakers.get_breaker("together_api")
-        together_status = together_breaker.get_status()["state"]
-    except Exception:
-        pass
-
-    try:
-        hf_breaker = CircuitBreakers.get_breaker("huggingface_api")
-        hf_status = hf_breaker.get_status()["state"]
-    except Exception:
-        pass
-
-    try:
-        rxnorm_breaker = CircuitBreakers.get_breaker("rxnorm_api")
-        rxnorm_status = rxnorm_breaker.get_status()["state"]
-    except Exception:
-        pass
-
-    return jsonify({
-        "status": "healthy",
-        "timestamp": datetime.datetime.utcnow().isoformat(),
-        "components": {
-            "vector_store": vector_store_available,
-            "together_api": together_status,
-            "huggingface_api": hf_status,
-            "rxnorm_api": rxnorm_status
-        },
-        "model_used": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free",
-        "degraded_mode": not vector_store_available
-    }), 200
-
-# Main chat endpoint
-@app.route('/chat', methods=['POST'])
+@app.route("/chat", methods=["POST"])
 def chat():
+    """
+    Expects JSON: {"session_id": <str optional>, "query": <str>}
+    Returns: {"response": <LLM manager response dict>, "session_id": <id>, "profile": {...}}
+    """
     try:
-        # Validate request
         if not request.is_json:
-            return jsonify({"error": "Content-Type must be application/json"}), 415
-            
-        data = request.get_json()
-        if not data or 'query' not in data:
-            return jsonify({"error": "Invalid JSON: 'query' field required"}), 400
-            
-        query = data.get('query', '').strip()
+            return jsonify({"error": "request must be application/json"}), 415
+        payload = request.get_json()
+        session_id = payload.get("session_id") or str(uuid.uuid4())
+        query = payload.get("query", "")
         if not query:
-            return jsonify({"error": "Empty query"}), 400
-            
-        # Process the query through the orchestrator
-        response = chat_orchestrator.handle_query(query)
-        
-        # CRITICAL: Ensure medical disclaimer is present
-        disclaimer = "For educational purposes only. Not medical advice. Consult a healthcare provider."
-        if disclaimer not in response.get('answer', ''):
-            if isinstance(response['answer'], str):
-                response['answer'] = f"{disclaimer}\n{response.get('answer', '')}"
-            else:
-                response['answer'] = f"{disclaimer}\n{str(response.get('answer', ''))}"
-        
-        # Ensure model transparency
-        if not response.get('model_note'):
-            model_name = response.get('model_used', 'unknown')
-            response['model_note'] = f"Using {model_name} model"
-        
-        # Add session ID for tracking
-        response['session_id'] = hash(json.dumps(response))
-        
-        # Clean up any sensitive debug info before returning
-        if 'warnings' in response:
-            response['safety_warnings'] = response['warnings']
-            del response['warnings']
-            
-        return jsonify(response)
-    
-    except Exception as e:
-        logger.exception("Chat endpoint error")
-        return jsonify({
-            "error": "Internal server error",
-            "message": "An unexpected error occurred. Please try again later.",
-            "error_type": type(e).__name__
-        }), 500
+            return jsonify({"error": "query field required"}), 400
 
-# Reset session endpoint
-@app.route('/reset', methods=['POST'])
-def reset_session():
+        # Ensure session exists
+        llm._get_session(session_id)
+
+        # Call LLMResponseManager — this performs classification -> retrieval -> generation pipeline
+        response = llm.handle_user_query(session_id, query)
+
+        # Also return a lightweight profile snapshot for UI
+        sess = llm._get_session(session_id)
+        profile = {
+            "name": sess["slots"].get("name"),
+            "age": sess["slots"].get("age"),
+            "height": sess["slots"].get("height_cm"),
+            "weight": sess["slots"].get("weight_kg"),
+            "diagnosis": sess["slots"].get("diagnosis"),
+            "therapy_area": sess["slots"].get("therapy_area"),
+            "biomarkers": sess.get("lab_results") or sess.get("slots", {}).get("biomarkers_detailed", {})
+        }
+
+        out = {"response": response, "session_id": session_id, "profile": profile}
+        return jsonify(out)
+    except Exception as e:
+        logger.exception("Chat endpoint error: %s", e)
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/upload", methods=["POST"])
+def upload():
+    """
+    Multipart upload: form fields: session_id (optional). file under 'file'
+    Saves to user_uploads/ and records path in session slots uploaded_lab_file.
+    """
     try:
-        chat_orchestrator.reset_session()
-        return jsonify({
-            "message": "Session reset successfully",
-            "timestamp": datetime.datetime.utcnow().isoformat()
-        }), 200
+        session_id = request.form.get("session_id") or request.args.get("session_id") or str(uuid.uuid4())
+        if "file" not in request.files:
+            return jsonify({"error": "no file part"}), 400
+        f = request.files["file"]
+        if f.filename == "":
+            return jsonify({"error": "empty filename"}), 400
+
+        # sanitize and save
+        filename = f"{session_id}{uuid.uuid4().hex}{Path(f.filename).name}"
+        save_path = app.config["UPLOAD_FOLDER"] / filename
+        f.save(save_path)
+
+        # record in session slots
+        sess = llm._get_session(session_id)
+        sess["slots"]["uploaded_lab_file"] = str(save_path)
+
+        logger.info("Saved upload %s for session %s", save_path, session_id)
+        return jsonify({"ok": True, "message": f"Uploaded {filename}", "session_id": session_id})
     except Exception as e:
-        logger.exception("Reset session error")
-        return jsonify({
-            "error": "Failed to reset session",
-            "message": str(e)
-        }), 500
+        logger.exception("Upload error: %s", e)
+        return jsonify({"error": str(e)}), 500
 
-# Serve static files (for UI if needed)
-@app.route('/static/<path:path>')
-def serve_static(path):
-    return send_from_directory('static', path)
+@app.route("/parse_labs", methods=["POST"])
+def parse_labs():
+    """
+    Placeholder lab parser. In production replace with OCR + regex mapping.
+    Expects JSON {"session_id": <id>}
+    Returns {"extracted": {biomarker: {"value":..,"unit":..}}, "session_id":...}
+    """
+    try:
+        payload = request.get_json() or {}
+        session_id = payload.get("session_id") or request.args.get("session_id")
+        if not session_id:
+            return jsonify({"error": "session_id required"}), 400
 
-# Start the server
-if __name__ == '__main__':
-    logger.info(f"Starting Clinical Nutrition Assistant on port {PORT}")
-    logger.info(f"Vector store path: {DB_FAISS_PATH}")
-    logger.info(f"Model strategy: {os.getenv('DEFAULT_MODEL_STRATEGY', 'therapy')}")
-    app.run(host='0.0.0.0', port=PORT, debug=DEBUG)
+        sess = llm._get_session(session_id)
+
+        # find uploaded file
+        uploaded = sess["slots"].get("uploaded_lab_file")
+        if not uploaded:
+            return jsonify({"error": "no uploaded lab file for session"}), 400
+
+        # === Placeholder extraction: simulate parsing ===
+        # Replace this block with your OCR pipeline (eg. Tesseract or Vision API) + regex extraction
+        # We'll pretend we extracted HbA1c and glucose for demonstration
+        extracted = {
+            "HbA1c": {"value": 8.5, "unit": "%"},
+            "glucose": {"value": 150, "unit": "mg/dL"}
+        }
+
+        # update session slots
+        sess.setdefault("slots", {})
+        sess.setdefault("slots", {}).setdefault("biomarkers_detailed", {})
+        for k, v in extracted.items():
+            sess["slots"]["biomarkers_detailed"][k.lower()] = {"value": v["value"], "unit": v["unit"], "raw": f"{k} {v['value']}{v['unit']}"}
+
+        # Also append to parsed lab_results for LLMResponseManager convenience
+        sess.setdefault("lab_results", [])
+        sess["lab_results"].append(extracted)
+
+        logger.info("Parsed labs for session %s -> %s", session_id, list(extracted.keys()))
+        return jsonify({"extracted": extracted, "session_id": session_id})
+    except Exception as e:
+        logger.exception("parse_labs error: %s", e)
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/mealplan", methods=["POST"])
+def mealplan():
+    """
+    Generate 3-day meal plan.
+    Accepts JSON {session_id, accept: bool}
+    Returns {"result": <manager result>}
+    """
+    try:
+        payload = request.get_json() or {}
+        session_id = payload.get("session_id")
+        if not session_id:
+            return jsonify({"error": "session_id required"}), 400
+        accept = bool(payload.get("accept", False))
+
+        # call into LLMResponseManager
+        result = llm.request_3day_meal_plan(session_id, accept=accept)
+        return jsonify({"result": result, "session_id": session_id})
+    except Exception as e:
+        logger.exception("mealplan error: %s", e)
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/profile", methods=["GET"])
+def profile():
+    """
+    Return a lightweight profile summary for a session: ?session_id=...
+    """
+    try:
+        session_id = request.args.get("session_id")
+        if not session_id:
+            return jsonify({"error": "session_id required"}), 400
+        sess = llm._get_session(session_id)
+        profile = {
+            "name": sess["slots"].get("name"),
+            "age": sess["slots"].get("age"),
+            "height": sess["slots"].get("height_cm"),
+            "weight": sess["slots"].get("weight_kg"),
+            "diagnosis": sess["slots"].get("diagnosis"),
+            "therapy_area": sess["slots"].get("therapy_area"),
+            "biomarkers": sess.get("lab_results") or sess.get("slots", {}).get("biomarkers_detailed", {})
+        }
+        return jsonify({"profile": profile, "session_id": session_id})
+    except Exception as e:
+        logger.exception("profile error: %s", e)
+        return jsonify({"error": str(e)}), 500
+
+# Static file serving helper (optional) for uploads
+@app.route("/uploads/<path:filename>", methods=["GET"])
+def serve_upload(filename):
+    try:
+        return send_from_directory(str(app.config["UPLOAD_FOLDER"]), filename, as_attachment=False)
+    except Exception as e:
+        logger.exception("serve_upload error: %s", e)
+        return jsonify({"error": str(e)}), 404
+
+# -------------------------
+# Run as script
+# -------------------------
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 5000))
+    logger.info(f"Starting Clinical Nutrition Assistant Flask Backend on port {port}")
+    logger.info(f"Vector store available: {vector_store_available}")
+    logger.info(f"Retriever available: {_retriever_manager.is_available()}")
+    logger.info(f"Access the API at: http://127.0.0.1:{port}")
+    logger.info(f"Health check: http://127.0.0.1:{port}/health")
+    app.run(host="127.0.0.1", port=port, debug=False)

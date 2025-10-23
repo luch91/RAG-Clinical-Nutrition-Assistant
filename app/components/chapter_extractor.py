@@ -231,7 +231,7 @@ def extract_chapters_from_pdf(file_path: str, doc_type: str) -> List[Document]:
     }
 
     if doc_type not in toc_map:
-        logger.warning(f"⚠️ Unknown doc_type: {doc_type}")
+        logger.warning(f"Unknown doc_type: {doc_type}")
         return []
 
     source_id, book_title, toc = toc_map[doc_type]
@@ -241,14 +241,14 @@ def extract_chapters_from_pdf(file_path: str, doc_type: str) -> List[Document]:
         loader = PyPDFLoader(file_path)
         all_pages = loader.load()
     except Exception as e:
-        logger.error(f"❌ Failed to load PDF {file_path}: {str(e)}")
+        logger.error(f"Failed to load PDF {file_path}: {str(e)}")
         return []
 
     if not all_pages:
-        logger.warning(f"⚠️ No pages extracted from {file_path}")
+        logger.warning(f"No pages extracted from {file_path}")
         return []
 
-    logger.info(f"📄 Loaded {len(all_pages)} pages from {os.path.basename(file_path)}")
+    logger.info(f"Loaded {len(all_pages)} pages from {os.path.basename(file_path)}")
 
     # Extract chapters based on TOC
     chapter_docs = []
@@ -259,21 +259,21 @@ def extract_chapters_from_pdf(file_path: str, doc_type: str) -> List[Document]:
 
         # Validate page range
         if page_start < 1 or page_end > len(all_pages):
-            logger.warning(f"⚠️ Invalid page range for chapter {chapter_num}: ({page_start}, {page_end}) vs {len(all_pages)} pages")
+            logger.warning(f"Invalid page range for chapter {chapter_num}: ({page_start}, {page_end}) vs {len(all_pages)} pages")
             continue
 
         # Extract pages for this chapter (0-indexed)
         chapter_pages = all_pages[page_start-1:page_end]
 
         if not chapter_pages:
-            logger.warning(f"⚠️ No pages found for chapter {chapter_num} ({page_start}-{page_end})")
+            logger.warning(f"No pages found for chapter {chapter_num} ({page_start}-{page_end})")
             continue
 
         # Combine page content
         chapter_text = "\n\n".join([p.page_content for p in chapter_pages if p.page_content.strip()])
 
         if not chapter_text.strip():
-            logger.warning(f"⚠️ Empty content for chapter {chapter_num}")
+            logger.warning(f"Empty content for chapter {chapter_num}")
             continue
 
         # Determine chunk type (chapter vs section vs protocol)
@@ -305,7 +305,7 @@ def extract_chapters_from_pdf(file_path: str, doc_type: str) -> List[Document]:
         chapter_docs.append(chapter_doc)
         logger.info(f"✅ Extracted {chunk_type.capitalize()} {chapter_num}: {chapter_info['title']} ({page_end - page_start + 1} pages, {len(chapter_text)} chars)")
 
-    logger.info(f"📊 Total chapters extracted from {os.path.basename(file_path)}: {len(chapter_docs)}")
+    logger.info(f"Total chapters extracted from {os.path.basename(file_path)}: {len(chapter_docs)}")
     return chapter_docs
 
 
