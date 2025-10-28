@@ -263,3 +263,145 @@ class FollowUpQuestionGenerator:
         elif slot == "age":
             return "What is the patient's age in years?"
         return f"Please provide {slot.replace('_',' ')}."
+
+    # ============================================================================
+    # NEW METHODS FOR THERAPY FLOW
+    # ============================================================================
+
+    def validate_diagnosis_for_therapy(self, diagnosis: Optional[str]) -> Dict[str, Any]:
+        """
+        Validate if diagnosis is supported for therapy flow.
+
+        Uses SUPPORTED_THERAPY_CONDITIONS from query_classifier.
+
+        Args:
+            diagnosis: Diagnosis to validate
+
+        Returns:
+            Dict with keys:
+            - valid: bool (True if in supported therapy list)
+            - diagnosis_normalized: str (canonical name if valid)
+            - message: str (explanation if not valid)
+        """
+        if not diagnosis:
+            return {
+                "valid": False,
+                "diagnosis_normalized": None,
+                "message": "No diagnosis provided"
+            }
+
+        # Import here to avoid circular dependency
+        from app.components.query_classifier import SUPPORTED_THERAPY_CONDITIONS
+
+        diagnosis_lower = diagnosis.lower().strip()
+
+        # Check if in supported list
+        if diagnosis_lower in SUPPORTED_THERAPY_CONDITIONS:
+            return {
+                "valid": True,
+                "diagnosis_normalized": SUPPORTED_THERAPY_CONDITIONS[diagnosis_lower],
+                "message": f"Diagnosis '{diagnosis}' is supported for therapy planning"
+            }
+
+        # Partial match
+        for key, canonical in SUPPORTED_THERAPY_CONDITIONS.items():
+            if key in diagnosis_lower or diagnosis_lower in key:
+                return {
+                    "valid": True,
+                    "diagnosis_normalized": canonical,
+                    "message": f"Diagnosis '{diagnosis}' mapped to '{canonical}' for therapy planning"
+                }
+
+        # Not in supported list
+        return {
+            "valid": False,
+            "diagnosis_normalized": None,
+            "message": f"Diagnosis '{diagnosis}' is not in the supported therapy list. Supported conditions: {', '.join(set(SUPPORTED_THERAPY_CONDITIONS.values()))}"
+        }
+
+    def generate_3_option_nudge(
+        self,
+        missing_critical_data: List[str]
+    ) -> Dict[str, Any]:
+        """
+        Generate 3-option nudge when therapy requires data but it's missing.
+
+        Options:
+        A. Upload medical records (extract meds + biomarkers)
+        B. Step-by-step Q&A (guided slot filling)
+        C. General info only (downgrade to recommendation)
+
+        Args:
+            missing_critical_data: List of missing slots (e.g., ["medications", "biomarkers"])
+
+        Returns:
+            Dict with question, options list, slot name
+        """
+        missing_str = " and ".join(missing_critical_data)
+
+        question = (
+            f"To create a personalized therapeutic meal plan, I need {missing_str}. "
+            f"How would you like to proceed?\n\n"
+            f"🅰️ **Upload medical records** - I'll extract the information automatically\n"
+            f"🅱️ **Step-by-step questions** - I'll ask for each piece of information\n"
+            f"🅲️ **General dietary info only** - Skip personalized therapy planning\n\n"
+            f"Please reply with A, B, or C."
+        )
+
+        options = [
+            {
+                "id": "upload",
+                "label": "🅰️ Upload medical records",
+                "text": "Upload",
+                "action": "upload_file"
+            },
+            {
+                "id": "step_by_step",
+                "label": "🅱️ Step-by-step questions",
+                "text": "Step by step",
+                "action": "guided_qa"
+            },
+            {
+                "id": "general_info",
+                "label": "🅲️ General dietary info only",
+                "text": "General info",
+                "action": "downgrade_to_recommendation"
+            }
+        ]
+
+        return {
+            "question": question,
+            "slot": "nudge_choice",
+            "options": options,
+            "missing_data": missing_critical_data,
+            "composer_placeholder": "Reply 'A', 'B', or 'C'"
+        }
+
+    def should_trigger_nudge(
+        self,
+        intent: str,
+        profile: Dict[str, Any]
+    ) -> bool:
+        """
+        Determine if 3-option nudge should be triggered.
+
+        Trigger when:
+        - Intent is therapy
+        - Missing medications OR biomarkers
+
+        Args:
+            intent: Query intent
+            profile: User profile with slots
+
+        Returns:
+            True if nudge should be triggered
+        """
+        if intent != "therapy":
+            return False
+
+        # Check if critical slots are missing
+        has_meds = self._is_slot_actually_filled(profile, "medications")
+        has_biomarkers = self._is_slot_actually_filled(profile, "biomarkers")
+
+        # Trigger nudge if either is missing
+        return not (has_meds and has_biomarkers)

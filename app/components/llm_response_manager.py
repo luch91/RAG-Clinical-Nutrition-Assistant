@@ -29,6 +29,11 @@ from app.components.query_classifier import NutritionQueryClassifier
 from app.components.followup_question_generator import FollowUpQuestionGenerator
 from app.components.hybrid_retriever import filtered_retrieval, retriever
 from app.components.computation_manager import ComputationManager
+from app.components.therapy_generator import TherapyGenerator
+from app.components.fct_manager import FCTManager
+from app.components.meal_plan_generator import MealPlanGenerator
+from app.components.citation_manager import CitationManager
+from app.components.profile_summary_card import ProfileSummaryCard
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +79,11 @@ class LLMResponseManager:
         self.classifier = NutritionQueryClassifier()
         self.followup_gen = FollowUpQuestionGenerator()
         self.computation = ComputationManager(dri_table_path)
+
+        # Therapy flow components (Phase 7)
+        self.therapy_gen = TherapyGenerator()
+        self.fct_mgr = FCTManager()
+        self.meal_plan_gen = MealPlanGenerator()
 
         # Per-session state with thread safety
         self.sessions: Dict[str, Dict[str, Any]] = {}
@@ -639,7 +649,9 @@ class LLMResponseManager:
             msg["recommendation_payload"] = rec
             return msg
 
-        # All required slots present -> compute therapeutic targets
+        # ============================================================================
+        # ALL REQUIRED SLOTS PRESENT -> START 7-STEP THERAPY FLOW
+        # ============================================================================
         slots = session["slots"]
         age = int(slots.get("age")) if slots.get("age") is not None else None
         sex = slots.get("sex", "F")[0].upper()
@@ -647,61 +659,270 @@ class LLMResponseManager:
         height = slots.get("height_cm")
         meds = slots.get("medications", [])
         biomarkers = session.get("lab_results") or slots.get("biomarkers_detailed", {})
+        country = slots.get("country", "Kenya")  # Default to Kenya
+        allergies = slots.get("allergies", [])
+        activity_level = slots.get("activity_level", "moderate")
 
-        # 1) compute macros & energy
-        energy_macros = self.computation.estimate_energy_macros(age, sex, weight, height, slots.get("activity_level", "light"))
-
-        # 2) retrieve therapeutic nutrient guidance: prefer chapter-aware retrieval for condition
-        # Build retrieval filters: therapy_area based on diagnosis
+        # Normalize diagnosis to canonical name
         therapy_area = None
-        for k,v in SUPPORTED_THERAPY_CONDITIONS.items():
+        for k, v in SUPPORTED_THERAPY_CONDITIONS.items():
             if k in diagnosis.lower():
                 therapy_area = v
+                diagnosis = v  # Use canonical name
                 break
 
-        # Query clinical texts for therapeutic nutrient constraints for this therapy_area
-        filter_candidates = [{"therapy_area": therapy_area}, {"doc_type": "shaw_2020"}, {"doc_type": "dri"}]
-        clinical_docs = []
-        for f in filter_candidates:
-            try:
-                docs = filtered_retrieval(f"therapeutic {diagnosis} nutrition", f, k=5)
-            except Exception:
-                docs = []
-            if docs:
-                clinical_docs = docs
-                break
+        logger.info(f"Starting 7-step therapy flow for {diagnosis} (age={age}, sex={sex}, weight={weight}kg, height={height}cm)")
 
-        # 3) For each key nutrient relevant to the condition, fetch matching foods from FCT
-        # We'll decide a short list of condition-relevant nutrients via metadata_enricher mapping if present in docs.
-        condition_nutrients = ["protein", "energy", "fat", "carbohydrate", "sodium", "potassium", "calcium", "iron"]
-        food_matches = {}
-        for nut in condition_nutrients:
-            try:
-                docs = filtered_retrieval(f"food sources of {nut}", {"doc_type": "FCT", "country": slots.get("country")}, k=6)
-            except Exception:
-                docs = []
-            food_matches[nut] = [{"title": getattr(d, "metadata", {}).get("food") or getattr(d, "metadata", {}).get("chapter_title",""),
-                                   "snippet": (d.page_content[:200] if getattr(d, "page_content", None) else "")} for d in docs or []]
+        # Initialize Citation Manager for this therapy flow
+        citations = CitationManager()
 
-        payload = {
-            "status": "therapy_ready",
-            "diagnosis": diagnosis.title() if diagnosis else None,
-            "therapy_area": therapy_area,
-            "energy_macros": energy_macros,
-            "clinical_docs_count": len(clinical_docs),
-            "food_matches": food_matches,
-            "message": "Therapeutic targets and food sources prepared. Offer: generate 3-day therapeutic meal plan?"
+        # Initialize Profile Summary Card
+        patient_info = {
+            "age": age,
+            "sex": sex,
+            "weight_kg": weight,
+            "height_cm": height,
+            "diagnosis": diagnosis,
+            "medications": meds,
+            "biomarkers": biomarkers,
+            "country": country,
+            "allergies": allergies
         }
-        # Attach clinical snippets if available
-        payload["clinical_snippets"] = []
-        for d in clinical_docs[:3]:
-            payload["clinical_snippets"].append({
-                "title": getattr(d, "metadata", {}).get("chapter_title", ""),
-                "source": getattr(d, "metadata", {}).get("book_title", ""),
-                "snippet": (d.page_content[:300] if getattr(d, "page_content", None) else "")
-            })
+        card = ProfileSummaryCard.initialize_card(patient_info)
 
-        return {"status": "ok", "payload": payload}
+        # ============================================================================
+        # STEP 1: GET BASELINE DRI REQUIREMENTS
+        # ============================================================================
+        logger.info("STEP 1: Getting baseline DRI requirements")
+        try:
+            baseline_dri = self.computation.get_dri_baseline_with_energy(
+                age, sex, weight, height, activity_level
+            )
+            card.update_step(1, baseline_dri)
+            citations.add_citation(
+                source="WHO/FAO DRI",
+                context=f"Baseline requirements for age {age}, sex {sex}",
+                source_type="dri"
+            )
+            logger.info(f"STEP 1 complete: {len(baseline_dri)} baseline nutrients retrieved")
+        except Exception as e:
+            logger.error(f"STEP 1 failed: {e}")
+            return {
+                "status": "error",
+                "message": f"Failed to retrieve baseline DRI requirements: {str(e)}"
+            }
+
+        # ============================================================================
+        # STEP 2: GET THERAPEUTIC ADJUSTMENTS
+        # ============================================================================
+        logger.info("STEP 2: Getting therapeutic adjustments from Clinical Paediatric Dietetics")
+        try:
+            therapeutic_adjustments = self.therapy_gen.get_therapeutic_adjustments(
+                diagnosis=diagnosis,
+                baseline_dri=baseline_dri,
+                age=age,
+                weight=weight
+            )
+            card.update_step(2, therapeutic_adjustments)
+
+            # Extract citations from adjustments
+            for nutrient, details in therapeutic_adjustments.items():
+                if details.get("source"):
+                    citations.add_citation(
+                        source=details["source"],
+                        context=f"{nutrient} adjustment for {diagnosis}",
+                        source_type="clinical"
+                    )
+
+            logger.info(f"STEP 2 complete: {len(therapeutic_adjustments)} nutrients adjusted")
+        except Exception as e:
+            logger.error(f"STEP 2 failed: {e}")
+            # Continue with baseline if adjustments fail
+            therapeutic_adjustments = baseline_dri
+            logger.warning("Using baseline DRI as fallback for therapeutic adjustments")
+
+        # ============================================================================
+        # STEP 3: GET BIOCHEMICAL CONTEXT
+        # ============================================================================
+        logger.info("STEP 3: Getting biochemical context from Integrative Human Biochemistry")
+        try:
+            affected_nutrients = list(therapeutic_adjustments.keys())
+            biochemical_context = self.therapy_gen.get_biochemical_context(
+                diagnosis=diagnosis,
+                affected_nutrients=affected_nutrients
+            )
+            card.update_step(3, biochemical_context)
+            citations.add_citation(
+                source="Integrative Human Biochemistry",
+                context=f"Metabolic pathways for {diagnosis}",
+                source_type="biochemical"
+            )
+            logger.info(f"STEP 3 complete: Biochemical context retrieved")
+        except Exception as e:
+            logger.error(f"STEP 3 failed: {e}")
+            biochemical_context = f"Biochemical context for {diagnosis} could not be retrieved."
+
+        # ============================================================================
+        # STEP 4: CALCULATE DRUG-NUTRIENT INTERACTIONS
+        # ============================================================================
+        logger.info("STEP 4: Calculating drug-nutrient interactions")
+        try:
+            drug_nutrient_interactions = self.therapy_gen.calculate_drug_nutrient_interactions(
+                medications=meds,
+                adjusted_requirements=therapeutic_adjustments
+            )
+            card.update_step(4, drug_nutrient_interactions)
+            citations.add_citation(
+                source="Drug-Nutrient Interactions Handbook",
+                context=f"Interactions for {len(meds)} medications",
+                source_type="drug_nutrient"
+            )
+            logger.info(f"STEP 4 complete: {len(drug_nutrient_interactions)} interactions found")
+        except Exception as e:
+            logger.error(f"STEP 4 failed: {e}")
+            drug_nutrient_interactions = []
+            logger.warning("No drug-nutrient interactions found")
+
+        # ============================================================================
+        # STEP 5: GET FOOD SOURCES FOR REQUIREMENTS
+        # ============================================================================
+        logger.info(f"STEP 5: Getting food sources from FCT for country: {country}")
+        try:
+            food_sources = self.fct_mgr.get_food_sources_for_requirements(
+                therapeutic_requirements=therapeutic_adjustments,
+                country=country,
+                diagnosis=diagnosis,
+                allergies=allergies,
+                k=5
+            )
+            card.update_step(5, food_sources)
+
+            # Add FCT citation
+            fct_path = self.fct_mgr.get_fct_for_country(country)
+            if fct_path:
+                citations.add_citation(
+                    source=fct_path,
+                    context=f"Food sources for {country}",
+                    source_type="fct"
+                )
+
+            logger.info(f"STEP 5 complete: Food sources for {len(food_sources)} nutrients")
+        except Exception as e:
+            logger.error(f"STEP 5 failed: {e}")
+            food_sources = {}
+            logger.warning("No food sources retrieved")
+
+        # ============================================================================
+        # DISPLAY PROFILE SUMMARY CARD (Steps 1-5 complete)
+        # ============================================================================
+        card_display = card.format_for_display()
+
+        # ============================================================================
+        # STEP 6: ASK ABOUT MEAL PLAN GENERATION
+        # ============================================================================
+        # Check if user has already indicated they want a meal plan
+        wants_meal_plan = session.get("clarifications", {}).get("wants_meal_plan")
+
+        if wants_meal_plan is None:
+            # Ask user if they want a 3-day meal plan
+            payload = {
+                "status": "therapy_steps_1_to_5_complete",
+                "diagnosis": diagnosis,
+                "therapy_area": therapy_area,
+                "profile_card": card_display,
+                "baseline_dri": baseline_dri,
+                "therapeutic_adjustments": therapeutic_adjustments,
+                "biochemical_context": biochemical_context,
+                "drug_nutrient_interactions": drug_nutrient_interactions,
+                "food_sources": food_sources,
+                "citations": citations.get_grouped_citations(),
+                "message": (
+                    "Therapeutic nutrient targets and food sources prepared. "
+                    "Would you like me to generate a 3-day therapeutic meal plan? (Yes/No)"
+                ),
+                "awaiting_meal_plan_confirmation": True
+            }
+            # Store in session for next turn
+            session["therapy_flow_state"] = {
+                "card": card,
+                "citations": citations,
+                "baseline_dri": baseline_dri,
+                "therapeutic_adjustments": therapeutic_adjustments,
+                "biochemical_context": biochemical_context,
+                "drug_nutrient_interactions": drug_nutrient_interactions,
+                "food_sources": food_sources
+            }
+            return {"status": "ok", "payload": payload}
+
+        elif wants_meal_plan:
+            # ============================================================================
+            # STEP 7: GENERATE 3-DAY MEAL PLAN
+            # ============================================================================
+            logger.info("STEP 7: Generating 3-day therapeutic meal plan")
+            try:
+                meal_plan = self.meal_plan_gen.generate_3day_plan(
+                    therapeutic_requirements=therapeutic_adjustments,
+                    food_sources=food_sources,
+                    diagnosis=diagnosis,
+                    medications=meds,
+                    country=country
+                )
+                card.update_step(7, {"generated": True, "summary": meal_plan.get("summary")})
+                meal_plan_display = self.meal_plan_gen.format_meal_plan_for_display(meal_plan)
+
+                logger.info(f"STEP 7 complete: 3-day meal plan generated ({meal_plan['summary']['total_meals']} meals)")
+
+                payload = {
+                    "status": "therapy_complete",
+                    "diagnosis": diagnosis,
+                    "therapy_area": therapy_area,
+                    "profile_card": card.format_for_display(),  # Updated with Step 7
+                    "baseline_dri": baseline_dri,
+                    "therapeutic_adjustments": therapeutic_adjustments,
+                    "biochemical_context": biochemical_context,
+                    "drug_nutrient_interactions": drug_nutrient_interactions,
+                    "food_sources": food_sources,
+                    "meal_plan": meal_plan,
+                    "meal_plan_display": meal_plan_display,
+                    "citations": citations.get_grouped_citations(),
+                    "message": "7-step therapy flow complete. 3-day meal plan generated."
+                }
+                return {"status": "ok", "payload": payload}
+
+            except Exception as e:
+                logger.error(f"STEP 7 failed: {e}")
+                payload = {
+                    "status": "therapy_steps_1_to_5_complete",
+                    "diagnosis": diagnosis,
+                    "therapy_area": therapy_area,
+                    "profile_card": card_display,
+                    "baseline_dri": baseline_dri,
+                    "therapeutic_adjustments": therapeutic_adjustments,
+                    "biochemical_context": biochemical_context,
+                    "drug_nutrient_interactions": drug_nutrient_interactions,
+                    "food_sources": food_sources,
+                    "citations": citations.get_grouped_citations(),
+                    "message": f"Failed to generate meal plan: {str(e)}. Therapy flow steps 1-5 complete.",
+                    "error": str(e)
+                }
+                return {"status": "ok", "payload": payload}
+
+        else:
+            # User declined meal plan - return Steps 1-5 results
+            payload = {
+                "status": "therapy_complete_no_meal_plan",
+                "diagnosis": diagnosis,
+                "therapy_area": therapy_area,
+                "profile_card": card_display,
+                "baseline_dri": baseline_dri,
+                "therapeutic_adjustments": therapeutic_adjustments,
+                "biochemical_context": biochemical_context,
+                "drug_nutrient_interactions": drug_nutrient_interactions,
+                "food_sources": food_sources,
+                "citations": citations.get_grouped_citations(),
+                "message": "Therapy flow complete (Steps 1-5). Meal plan not requested."
+            }
+            return {"status": "ok", "payload": payload}
 
     # -------------------------
     # General handler

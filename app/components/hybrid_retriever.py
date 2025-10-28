@@ -469,3 +469,168 @@ def init_retriever(vector_store: FAISS):
 @property
 def retriever() -> Optional[FAISS]:
     return _retriever_manager.get_retriever()
+
+
+# ============================================================================
+# NEW: DOCUMENT PRIORITY ROUTING FOR THERAPY FLOW
+# ============================================================================
+
+def filtered_retrieval_by_priority(
+    query: str,
+    intent: str,
+    step: str,
+    k: int = 5,
+    additional_filters: Optional[Dict[str, Any]] = None
+) -> List[Document]:
+    """
+    Intelligent retrieval with document type prioritization for therapy flow.
+
+    Uses metadata_enricher.get_document_priority_for_intent() to determine
+    which document types to prioritize for each step.
+
+    Args:
+        query: User query
+        intent: Query intent ("therapy", "recommendation", "comparison", "general")
+        step: Therapy flow step ("step1_baseline", "step2_adjustments", etc.)
+        k: Number of results to return
+        additional_filters: Additional filters to apply (e.g., diagnosis, age_relevance)
+
+    Returns:
+        List of Document objects prioritized by document type
+
+    Example:
+        # For therapy Step 2 (therapeutic adjustments)
+        docs = filtered_retrieval_by_priority(
+            query="T1D carbohydrate requirements",
+            intent="therapy",
+            step="step2_adjustments",
+            k=5
+        )
+        # Will prioritize "therapy_primary" documents (Clinical Paediatric Dietetics)
+    """
+    from app.components.metadata_enricher import get_document_priority_for_intent
+
+    # Get document type priorities for this intent
+    priority_map = get_document_priority_for_intent(intent)
+
+    # Get prioritized document types for this step
+    priority_doc_types = priority_map.get(step, priority_map.get("primary", []))
+
+    logger.info(f"Retrieval for {intent}/{step}: prioritizing {priority_doc_types}")
+
+    # Build progressive filters - try each document type in priority order
+    filter_candidates = []
+
+    for doc_type in priority_doc_types:
+        filter_dict = {"document_type": doc_type}
+
+        # Merge additional filters
+        if additional_filters:
+            filter_dict.update(additional_filters)
+
+        filter_candidates.append(filter_dict)
+
+    # If no priority types, use base filters
+    if not filter_candidates:
+        filter_candidates = [additional_filters or {}]
+
+    # Use existing filtered_retrieval with progressive filters
+    results = filtered_retrieval(
+        query=query,
+        filter_candidates=filter_candidates,
+        k=k,
+        use_bm25_fallback=True
+    )
+
+    return results
+
+
+def retrieve_for_therapy_step(
+    query: str,
+    step_number: int,
+    diagnosis: Optional[str] = None,
+    k: int = 5
+) -> List[Document]:
+    """
+    Convenience method for therapy flow retrieval by step number.
+
+    Maps step numbers to step names and retrieves appropriate documents.
+
+    Args:
+        query: User query
+        step_number: Therapy step (1-7)
+        diagnosis: Diagnosis for filtering (optional)
+        k: Number of results
+
+    Returns:
+        List of Document objects
+
+    Example:
+        # Step 2: Therapeutic adjustments for T1D
+        docs = retrieve_for_therapy_step(
+            query="Type 1 Diabetes carbohydrate protein requirements",
+            step_number=2,
+            diagnosis="Type 1 Diabetes",
+            k=5
+        )
+    """
+    step_map = {
+        1: "step1_baseline",       # DRI tables
+        2: "step2_adjustments",     # Clinical Paediatric Dietetics
+        3: "step3_biochemical",     # Integrative Human Biochemistry
+        4: "step4_drug_nutrient",   # Drug-Nutrient Interactions
+        5: "step5_food_sources",    # FCT + Clinical guidelines
+        6: "step5_food_sources",    # Same as step 5 (ask about meal plan)
+        7: "step5_food_sources"     # Same as step 5 (generate meal plan)
+    }
+
+    step_name = step_map.get(step_number, "primary")
+
+    # Build additional filters
+    filters = {}
+    if diagnosis:
+        # Could add diagnosis-based filtering if metadata supports it
+        filters["condition_tags"] = diagnosis.lower()
+
+    return filtered_retrieval_by_priority(
+        query=query,
+        intent="therapy",
+        step=step_name,
+        k=k,
+        additional_filters=filters if filters else None
+    )
+
+
+def get_retrieval_statistics(documents: List[Document]) -> Dict[str, Any]:
+    """
+    Get statistics about retrieved documents for debugging/logging.
+
+    Args:
+        documents: List of retrieved documents
+
+    Returns:
+        Dict with document type counts, sources, etc.
+    """
+    if not documents:
+        return {"total": 0, "document_types": {}, "sources": {}}
+
+    doc_types = {}
+    sources = {}
+
+    for doc in documents:
+        metadata = doc.metadata if hasattr(doc, "metadata") else {}
+
+        # Count document types
+        doc_type = metadata.get("document_type", "unknown")
+        doc_types[doc_type] = doc_types.get(doc_type, 0) + 1
+
+        # Count sources
+        source = metadata.get("source", metadata.get("title", "unknown"))
+        sources[source] = sources.get(source, 0) + 1
+
+    return {
+        "total": len(documents),
+        "document_types": doc_types,
+        "sources": sources,
+        "avg_length": sum(len(d.page_content) for d in documents) / len(documents) if documents else 0
+    }

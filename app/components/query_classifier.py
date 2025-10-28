@@ -4,10 +4,34 @@ import os
 import re
 from app.config.config import DISTILBERT_CLASSIFIER_PATH
 import logging
-from typing import Optional
+from typing import Optional, Dict, Any, List
 from app.common.custom_exception import CustomException
 
 logger = logging.getLogger(__name__)
+
+# Supported therapy conditions (from llm_response_manager.py)
+SUPPORTED_THERAPY_CONDITIONS = {
+    "preterm nutrition": "Preterm Nutrition",
+    "type 1 diabetes": "Type 1 Diabetes",
+    "t1d": "Type 1 Diabetes",
+    "food allergy": "Food Allergy",
+    "cystic fibrosis": "Cystic Fibrosis",
+    "cf": "Cystic Fibrosis",
+    "pku": "PKU",
+    "phenylketonuria": "PKU",
+    "msud": "MSUD",
+    "maple syrup urine disease": "MSUD",
+    "galactosemia": "Galactosemia",
+    "epilepsy": "Epilepsy",
+    "ketogenic therapy": "Epilepsy / Ketogenic Therapy",
+    "chronic kidney disease": "Chronic Kidney Disease",
+    "ckd": "Chronic Kidney Disease",
+    "gi disorders": "GI Disorders",
+    "ibd": "GI Disorders",
+    "inflammatory bowel disease": "GI Disorders",
+    "gerd": "GI Disorders",
+    "gastroesophageal reflux": "GI Disorders"
+}
 
 # Ensure Windows path compatibility
 MODEL_PATH = os.path.normpath(DISTILBERT_CLASSIFIER_PATH)
@@ -739,5 +763,161 @@ class NutritionQueryClassifier:
         # Additional safety checks for complexity
         if "emergency" in query.lower() or "urgent" in query.lower():
             complexity = 5
-        
+
         return complexity
+
+    # ============================================================================
+    # NEW METHODS FOR THERAPY FLOW
+    # ============================================================================
+
+    def normalize_diagnosis(self, diagnosis: Optional[str]) -> Optional[str]:
+        """
+        Normalize diagnosis to match supported therapy conditions.
+
+        Maps user input/extracted diagnosis to canonical names from SUPPORTED_THERAPY_CONDITIONS.
+
+        Args:
+            diagnosis: Extracted or user-provided diagnosis
+
+        Returns:
+            Normalized diagnosis if in supported list, otherwise original diagnosis
+        """
+        if not diagnosis:
+            return None
+
+        diagnosis_lower = diagnosis.lower().strip()
+
+        # Direct match with supported therapy conditions
+        if diagnosis_lower in SUPPORTED_THERAPY_CONDITIONS:
+            return SUPPORTED_THERAPY_CONDITIONS[diagnosis_lower]
+
+        # Partial match (for longer diagnoses containing keywords)
+        for key, canonical in SUPPORTED_THERAPY_CONDITIONS.items():
+            if key in diagnosis_lower or diagnosis_lower in key:
+                return canonical
+
+        # Return original if no match (might be valid but not in therapy list)
+        return diagnosis
+
+    def is_diagnosis_supported_for_therapy(self, diagnosis: Optional[str]) -> bool:
+        """
+        Check if diagnosis is in the supported therapy list.
+
+        Args:
+            diagnosis: Diagnosis to check
+
+        Returns:
+            True if diagnosis is supported for therapy flow, False otherwise
+        """
+        if not diagnosis:
+            return False
+
+        normalized = self.normalize_diagnosis(diagnosis)
+        return normalized in SUPPORTED_THERAPY_CONDITIONS.values()
+
+    def extract_medications_with_dosage(self, query: str) -> List[Dict[str, Any]]:
+        """
+        Extract medications with dosage information.
+
+        Patterns:
+        - "insulin 20 units"
+        - "metformin 500mg"
+        - "phenytoin 100 mg twice daily"
+
+        Args:
+            query: User query
+
+        Returns:
+            List of dicts with keys: name, dose, frequency
+        """
+        medications_with_dosage = []
+        query_lower = query.lower()
+
+        # Pattern for medication + dosage
+        # Matches: "insulin 20 units", "metformin 500mg", "phenytoin 100 mg"
+        dosage_pattern = r'(\w+)\s+(\d+\.?\d*)\s*(mg|g|units?|ml|mcg|μg|iu)(?:\s+(daily|twice daily|tds|bd|qd|bid|tid))?'
+
+        matches = re.finditer(dosage_pattern, query_lower)
+
+        for match in matches:
+            med_name = match.group(1)
+            dose_value = match.group(2)
+            dose_unit = match.group(3)
+            frequency = match.group(4) if match.group(4) else None
+
+            # Check if this is a known medication
+            if med_name in [m.lower() for m in MEDICATIONS]:
+                medications_with_dosage.append({
+                    "name": med_name.capitalize(),
+                    "dose": f"{dose_value} {dose_unit}",
+                    "frequency": frequency
+                })
+
+        # If no dosages found, fallback to simple medication extraction
+        if not medications_with_dosage:
+            simple_meds = self.extract_medications(query)
+            for med in simple_meds:
+                medications_with_dosage.append({
+                    "name": med,
+                    "dose": None,
+                    "frequency": None
+                })
+
+        return medications_with_dosage
+
+    def extract_entities_enhanced(self, query: str) -> Dict[str, Any]:
+        """
+        Enhanced entity extraction with normalization and validation.
+
+        This method combines all extraction logic with:
+        - Diagnosis normalization
+        - Medication dosage extraction
+        - Biomarker validation (already implemented)
+        - Age/weight/height extraction
+
+        Args:
+            query: User query
+
+        Returns:
+            Dict with all extracted entities including normalized diagnosis
+        """
+        entities = {}
+
+        # Extract and normalize diagnosis
+        raw_diagnosis = self._extract_diagnosis(query)
+        if raw_diagnosis:
+            entities["diagnosis"] = raw_diagnosis
+            entities["diagnosis_normalized"] = self.normalize_diagnosis(raw_diagnosis)
+            entities["diagnosis_supported"] = self.is_diagnosis_supported_for_therapy(raw_diagnosis)
+
+        # Extract medications with dosage
+        meds_with_dosage = self.extract_medications_with_dosage(query)
+        if meds_with_dosage:
+            entities["medications"] = [m["name"] for m in meds_with_dosage]
+            entities["medications_detailed"] = meds_with_dosage
+
+        # Extract biomarkers (already has validation)
+        biomarkers_detailed = self.extract_biomarkers_with_values(query)
+        if biomarkers_detailed:
+            entities["biomarkers"] = list(biomarkers_detailed.keys())
+            entities["biomarkers_detailed"] = biomarkers_detailed
+
+        # Extract age, weight, height (already implemented in extract_from_followup_response)
+        age_match = re.search(r'\b(\d+)\s*(?:years?|yrs?|y\.o\.|year old)\b', query.lower())
+        if age_match:
+            entities["age"] = int(age_match.group(1))
+
+        weight_match = re.search(r'\b(\d+(?:\.\d+)?)\s*(?:kg|kilograms?)\b', query.lower())
+        if weight_match:
+            entities["weight_kg"] = float(weight_match.group(1))
+
+        height_match = re.search(r'\b(\d+(?:\.\d+)?)\s*(?:cm|centimeters?)\b', query.lower())
+        if height_match:
+            entities["height_cm"] = float(height_match.group(1))
+
+        # Extract country
+        country = self._extract_country(query)
+        if country:
+            entities["country"] = country
+
+        return entities

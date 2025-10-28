@@ -30,7 +30,12 @@
       "Bash(timeout 30 python:*)",
       "Bash(echo \"EXIT_CODE: $?\")",
       "Bash(timeout 90 python:*)",
-      "Bash(timeout 45 python:*)"
+      "Bash(timeout 45 python:*)",
+      "Bash(mkdir:*)",
+      "Bash(if [ -d \"data/fct\" ])",
+      "Bash(then echo \"✅ FCT directory exists\")",
+      "Bash(else echo \"❌ FCT directory NOT FOUND\")",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,0 +1,142 @@
+{
+  "macronutrients": [
+    {
+      "name": "carbohydrate",
+      "abbrev": "CHO",
+      "unit": "g",
+      "dri_column": "Carbohydrate",
+      "priority": 1
+    },
+    {
+      "name": "protein",
+      "abbrev": "Protein",
+      "unit": "g",
+      "dri_column": "Protein",
+      "priority": 1
+    },
+    {
+      "name": "fat",
+      "abbrev": "Fat",
+      "unit": "g",
+      "dri_column": "Total fat",
+      "priority": 1
+    },
+    {
+      "name": "fiber",
+      "abbrev": "Fiber",
+      "unit": "g",
+      "dri_column": "Dietary fibre",
+      "priority": 1
+    }
+  ],
+  "micronutrients": [
+    {
+      "name": "thiamin",
+      "abbrev": "B1",
+      "unit": "mg",
+      "dri_column": "Thiamin",
+      "priority": 2
+    },
+    {
+      "name": "riboflavin",
+      "abbrev": "B2",
+      "unit": "mg",
+      "dri_column": "Riboflavin",
+      "priority": 2
+    },
+    {
+      "name": "vitamin_c",
+      "abbrev": "VitC",
+      "unit": "mg",
+      "dri_column": "Vitamin C",
+      "priority": 2
+    },
+    {
+      "name": "vitamin_d",
+      "abbrev": "VitD",
+      "unit": "μg",
+      "dri_column": "Vitamin D",
+      "priority": 2
+    },
+    {
+      "name": "vitamin_a",
+      "abbrev": "VitA",
+      "unit": "μg",
+      "dri_column": "Vitamin A",
+      "priority": 2
+    },
+    {
+      "name": "vitamin_e",
+      "abbrev": "VitE",
+      "unit": "mg",
+      "dri_column": "Vitamin E",
+      "priority": 2
+    },
+    {
+      "name": "calcium",
+      "abbrev": "Ca",
+      "unit": "mg",
+      "dri_column": "Calcium",
+      "priority": 2
+    },
+    {
+      "name": "iron",
+      "abbrev": "Fe",
+      "unit": "mg",
+      "dri_column": "Iron",
+      "priority": 2
+    },
+    {
+      "name": "copper",
+      "abbrev": "Cu",
+      "unit": "mg",
+      "dri_column": "Copper",
+      "priority": 3
+    },
+    {
+      "name": "zinc",
+      "abbrev": "Zn",
+      "unit": "mg",
+      "dri_column": "Zinc",
+      "priority": 2
+    },
+    {
+      "name": "selenium",
+      "abbrev": "Se",
+      "unit": "μg",
+      "dri_column": "Selenium",
+      "priority": 3
+    },
+    {
+      "name": "potassium",
+      "abbrev": "K",
+      "unit": "mg",
+      "dri_column": "Potassium",
+      "priority": 2
+    },
+    {
+      "name": "phosphorus",
+      "abbrev": "P",
+      "unit": "mg",
+      "dri_column": "Phosphorus",
+      "priority": 3
+    },
+    {
+      "name": "sodium",
+      "abbrev": "Na",
+      "unit": "mg",
+      "dri_column": "Sodium",
+      "priority": 2
+    },
+    {
+      "name": "magnesium",
+      "abbrev": "Mg",
+      "unit": "mg",
+      "dri_column": "Magnesium",
+      "priority": 3
+    }
+  ],
+  "total_count": 20,
+  "description": "20 therapeutic nutrients for clinical pediatric nutrition therapy",
+  "source": "WHO/FAO DRI Guidelines + Clinical Paediatric Dietetics"
+}

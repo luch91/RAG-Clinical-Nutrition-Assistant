@@ -397,6 +397,9 @@ def enrich_chapter_metadata(doc: Document, doc_type: str) -> Document:
     chapter_num = doc.metadata.get("chapter_num")
     section_num = doc.metadata.get("section_num")
 
+    # NEW: Add document_type for therapy flow priority routing
+    doc.metadata["document_type"] = _classify_document_type(doc_type, chapter_num, section_num)
+
     # Default empty tags
     condition_tags: List[str] = []
     age_relevance: List[str] = []
@@ -530,3 +533,129 @@ def get_drug_interaction_chapters(medication: str) -> List[int]:
             relevant_chapters.append(chapter_num)
 
     return relevant_chapters
+
+
+# ============================================================================
+# NEW: DOCUMENT TYPE CLASSIFICATION FOR THERAPY FLOW
+# ============================================================================
+
+def _classify_document_type(doc_type: str, chapter_num: any, section_num: any) -> str:
+    """
+    Classify document into therapy flow categories for priority routing.
+
+    Categories:
+    - therapy_primary: Core therapeutic guidance (Clinical Paediatric Dietetics, Preterm)
+    - biochemical: Metabolic/biochemical context (Integrative Human Biochemistry)
+    - drug_nutrient: Drug-nutrient interactions (Drug-Nutrient Handbook)
+    - dri: Baseline requirements (DRI tables)
+    - fct: Food composition tables
+    - other: Other reference materials
+
+    Args:
+        doc_type: Document type string
+        chapter_num: Chapter number
+        section_num: Section number
+
+    Returns:
+        Document type category for therapy flow routing
+    """
+    if doc_type in ["shaw_2020", "preterm_2013"]:
+        return "therapy_primary"
+
+    elif doc_type == "biochemistry":
+        return "biochemical"
+
+    elif doc_type == "drug_nutrient":
+        return "drug_nutrient"
+
+    elif doc_type == "dri":
+        return "dri"
+
+    elif "fct" in doc_type.lower() or "food composition" in doc_type.lower():
+        return "fct"
+
+    else:
+        return "other"
+
+
+def get_document_priority_for_intent(intent: str) -> Dict[str, List[str]]:
+    """
+    Get document type priorities for different query intents.
+
+    This mapping is used by hybrid_retriever for intelligent routing.
+
+    Args:
+        intent: Query intent ("therapy", "recommendation", "comparison", "general")
+
+    Returns:
+        Dict mapping step name to list of document types in priority order
+    """
+    if intent == "therapy":
+        return {
+            "step1_baseline": ["dri"],
+            "step2_adjustments": ["therapy_primary"],
+            "step3_biochemical": ["biochemical"],
+            "step4_drug_nutrient": ["drug_nutrient"],
+            "step5_food_sources": ["fct", "therapy_primary"]
+        }
+
+    elif intent == "recommendation":
+        return {
+            "requirements": ["therapy_primary", "dri"],
+            "food_sources": ["fct"]
+        }
+
+    elif intent == "comparison":
+        return {
+            "primary": ["therapy_primary", "dri", "biochemical"]
+        }
+
+    else:  # general
+        return {
+            "primary": ["therapy_primary", "biochemical", "dri", "other"]
+        }
+
+
+def get_citation_metadata(doc: Document) -> Dict[str, str]:
+    """
+    Extract citation-friendly metadata from document.
+
+    Args:
+        doc: Document object with enriched metadata
+
+    Returns:
+        Dict with source, chapter, page for citation manager
+    """
+    metadata = doc.metadata
+
+    citation = {
+        "source": metadata.get("source", metadata.get("title", "Unknown Source")),
+        "chapter": None,
+        "page": None,
+        "context": None
+    }
+
+    # Extract chapter info
+    chapter_num = metadata.get("chapter_num")
+    chapter_title = metadata.get("chapter_title")
+
+    if chapter_num:
+        if chapter_title:
+            citation["chapter"] = f"{chapter_num}: {chapter_title}"
+        else:
+            citation["chapter"] = str(chapter_num)
+
+    # Extract page info
+    page_num = metadata.get("page", metadata.get("page_num"))
+    if page_num:
+        citation["page"] = str(page_num)
+
+    # Extract context (therapy area, condition tags)
+    therapy_area = metadata.get("therapy_area")
+    if therapy_area:
+        if isinstance(therapy_area, list):
+            citation["context"] = ", ".join(therapy_area)
+        else:
+            citation["context"] = therapy_area
+
+    return citation

@@ -1,6 +1,8 @@
 import pandas as pd
 import re
+import json
 from pathlib import Path
+from typing import Dict, List, Any, Optional
 
 
 class DRILoader:
@@ -19,6 +21,10 @@ class DRILoader:
     def __init__(self, data_path: str | Path):
         self.data_path = Path(data_path)
         self.dri_data = self._load_data()
+
+        # Load therapeutic nutrients configuration
+        config_path = Path(__file__).parent.parent / "config" / "therapeutic_nutrients.json"
+        self.therapeutic_nutrients = self._load_therapeutic_nutrients(config_path)
 
     # ------------------------------------------------------------
     # Load & normalize the DRI table
@@ -170,3 +176,163 @@ class DRILoader:
             }
 
         return results
+
+    # ------------------------------------------------------------
+    # NEW METHODS FOR THERAPY FLOW
+    # ------------------------------------------------------------
+    def _load_therapeutic_nutrients(self, config_path: Path) -> Dict[str, Any]:
+        """
+        Load therapeutic nutrients configuration from JSON.
+
+        Args:
+            config_path: Path to therapeutic_nutrients.json
+
+        Returns:
+            Dict with macronutrients and micronutrients lists
+        """
+        try:
+            with open(config_path, 'r') as f:
+                config = json.load(f)
+            return config
+        except Exception as e:
+            print(f"Warning: Could not load therapeutic nutrients config: {e}")
+            return {"macronutrients": [], "micronutrients": [], "total_count": 0}
+
+    def get_all_therapeutic_nutrients(self) -> List[Dict[str, str]]:
+        """
+        Get list of all 20 therapeutic nutrients with metadata.
+
+        Returns:
+            List of dicts with keys: name, abbrev, unit, dri_column, priority
+        """
+        all_nutrients = []
+
+        if self.therapeutic_nutrients:
+            all_nutrients.extend(self.therapeutic_nutrients.get("macronutrients", []))
+            all_nutrients.extend(self.therapeutic_nutrients.get("micronutrients", []))
+
+        return all_nutrients
+
+    def get_nutrient_unit(self, nutrient: str) -> Optional[str]:
+        """
+        Get the unit for a specific nutrient.
+
+        Args:
+            nutrient: Nutrient name (can be name or abbrev)
+
+        Returns:
+            Unit string (e.g., "g", "mg", "μg") or None if not found
+        """
+        nutrient_lower = nutrient.lower().strip()
+
+        for nut in self.get_all_therapeutic_nutrients():
+            if (nut.get("name", "").lower() == nutrient_lower or
+                nut.get("abbrev", "").lower() == nutrient_lower):
+                return nut.get("unit")
+
+        return None
+
+    def normalize_nutrient_name(self, nutrient: str) -> Optional[str]:
+        """
+        Normalize nutrient name to match DRI table column.
+
+        Args:
+            nutrient: Nutrient name or abbreviation
+
+        Returns:
+            Normalized name matching DRI table, or None if not found
+        """
+        nutrient_lower = nutrient.lower().strip()
+
+        # Direct mapping for therapeutic nutrients
+        for nut in self.get_all_therapeutic_nutrients():
+            if (nut.get("name", "").lower() == nutrient_lower or
+                nut.get("abbrev", "").lower() == nutrient_lower):
+                return nut.get("dri_column")
+
+        # Check if it's already in DRI table
+        if nutrient_lower in self.dri_data["Nutrient / Category"].values:
+            return nutrient_lower
+
+        return None
+
+    def get_dri_baseline_for_therapy(self, age: int, sex: str) -> Dict[str, Dict[str, Any]]:
+        """
+        Get baseline DRI values for all 20 therapeutic nutrients.
+
+        This is STEP 1 of the therapy flow.
+
+        Args:
+            age: Age in years
+            sex: "M" or "F"
+
+        Returns:
+            Dict mapping nutrient name to:
+            {
+                "value": float (approx_value from parsed DRI),
+                "unit": str,
+                "raw": str (original DRI string),
+                "type": str (range, eq, lt, etc.),
+                "source": "WHO/FAO DRI"
+            }
+        """
+        baseline = {}
+        therapeutic_nutrients = self.get_all_therapeutic_nutrients()
+
+        for nut_config in therapeutic_nutrients:
+            nutrient_name = nut_config.get("name")
+            dri_column = nut_config.get("dri_column")
+            unit = nut_config.get("unit")
+
+            if not dri_column:
+                continue
+
+            # Get DRI value for this nutrient
+            dri_result = self.get_dri_value(dri_column, age, sex)
+
+            if dri_result and dri_result.get("recommended_intake"):
+                intake = dri_result["recommended_intake"]
+
+                baseline[nutrient_name] = {
+                    "value": intake.get("approx_value"),
+                    "unit": unit or dri_result.get("unit"),
+                    "raw": intake.get("raw"),
+                    "type": intake.get("type"),
+                    "min": intake.get("min"),
+                    "max": intake.get("max"),
+                    "source": "WHO/FAO DRI",
+                    "citation": f"WHO/FAO DRI (age {age}, sex {sex})"
+                }
+
+        return baseline
+
+    def get_nutrient_aliases(self) -> Dict[str, List[str]]:
+        """
+        Get common aliases for nutrients (for entity extraction).
+
+        Returns:
+            Dict mapping canonical name to list of aliases
+        """
+        aliases = {
+            "vitamin_c": ["vit c", "ascorbic acid", "vitamin c"],
+            "vitamin_d": ["vit d", "vitamin d", "cholecalciferol"],
+            "vitamin_a": ["vit a", "vitamin a", "retinol"],
+            "vitamin_e": ["vit e", "vitamin e", "tocopherol"],
+            "thiamin": ["thiamine", "vitamin b1", "b1"],
+            "riboflavin": ["vitamin b2", "b2"],
+            "calcium": ["ca"],
+            "iron": ["fe"],
+            "zinc": ["zn"],
+            "copper": ["cu"],
+            "selenium": ["se"],
+            "potassium": ["k"],
+            "phosphorus": ["p"],
+            "sodium": ["na"],
+            "magnesium": ["mg"],
+            "carbohydrate": ["cho", "carbs"],
+            "protein": ["pro"],
+            "fat": ["total fat", "lipid"],
+            "fiber": ["dietary fiber", "fibre"]
+        }
+
+        return aliases

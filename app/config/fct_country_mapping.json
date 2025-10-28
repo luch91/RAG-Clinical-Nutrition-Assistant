@@ -1,0 +1,34 @@
+{
+  "country_to_fct": {
+    "Kenya": "data/Kenya Food Composition Table.pdf",
+    "Tanzania": "data/tanzania_food composition table.pdf",
+    "Uganda": "data/East and Central Uganda Food Composition Table.pdf",
+    "Mozambique": "data/Food_composition_tables_for_Mozambique.pdf",
+    "Malawi": "data/Malawian Food Composition Table.pdf",
+    "Zimbabwe": "data/Zimbambwe Food composition table.pdf",
+    "Lesotho": "data/LESOTHO Food Composition Table.pdf",
+    "Gambia": "data/Gambia Food Composition table.pdf",
+    "Ghana": "data/Food Composition Table for West Africa(Ghana, Senegal, Mali, Burkina Faso, Nigeria, Cote d'Ivoire) 2019.PDF",
+    "Senegal": "data/Food Composition Table for West Africa(Ghana, Senegal, Mali, Burkina Faso, Nigeria, Cote d'Ivoire) 2019.PDF",
+    "Mali": "data/Food Composition Table for West Africa(Ghana, Senegal, Mali, Burkina Faso, Nigeria, Cote d'Ivoire) 2019.PDF",
+    "Burkina Faso": "data/Food Composition Table for West Africa(Ghana, Senegal, Mali, Burkina Faso, Nigeria, Cote d'Ivoire) 2019.PDF",
+    "Nigeria": "data/Food Composition Table for West Africa(Ghana, Senegal, Mali, Burkina Faso, Nigeria, Cote d'Ivoire) 2019.PDF",
+    "Cote d'Ivoire": "data/Food Composition Table for West Africa(Ghana, Senegal, Mali, Burkina Faso, Nigeria, Cote d'Ivoire) 2019.PDF",
+    "Ivory Coast": "data/Food Composition Table for West Africa(Ghana, Senegal, Mali, Burkina Faso, Nigeria, Cote d'Ivoire) 2019.PDF",
+    "Congo": "data/Congo basin Food Composition Table.pdf",
+    "DRC": "data/Congo basin Food Composition Table.pdf",
+    "Democratic Republic of Congo": "data/Congo basin Food Composition Table.pdf",
+    "India": "data/Indian Food Composition Table.pdf",
+    "Korea": "data/Korean_food_compositon_table_vol.27_2006_.pdf",
+    "South Korea": "data/Korean_food_compositon_table_vol.27_2006_.pdf"
+  },
+  "regional_mapping": {
+    "East Africa": ["Kenya", "Tanzania", "Uganda", "Malawi"],
+    "West Africa": ["Ghana", "Senegal", "Mali", "Burkina Faso", "Nigeria", "Cote d'Ivoire"],
+    "Central Africa": ["Congo", "DRC"],
+    "Southern Africa": ["Zimbabwe", "Lesotho", "Mozambique"]
+  },
+  "default_fct": "data/Food Composition Table for West Africa(Ghana, Senegal, Mali, Burkina Faso, Nigeria, Cote d'Ivoire) 2019.PDF",
+  "description": "Maps countries to their respective Food Composition Table documents",
+  "note": "All FCT files are in PDF format and need to be chunked/indexed in vector store for retrieval"
+}
